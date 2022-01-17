@@ -30,10 +30,7 @@ public class Frame extends JFrame {
             @Override
             public void componentResized(ComponentEvent e) {
                 for (ColorButton b : colorButtons) {
-                    float fontSize = (float)(Math.min(getWidth()*0.07, getHeight()*0.07));
-                    b.setPreferredSize(new Dimension((int)(Math.round(getWidth()*0.35)),
-                            (int)(Math.round(getHeight()*0.25))));
-                    b.setFont(b.getFont().deriveFont(fontSize));
+                    b.resizeButton();
                 }
             }
 
@@ -64,6 +61,7 @@ public class Frame extends JFrame {
         add(blueB);
         add(grayB);
         add(whiteB);
+
     }
 
     public class ColorButton extends JButton {
@@ -75,6 +73,14 @@ public class Frame extends JFrame {
             setPreferredSize(new Dimension(80, 50));
             setBackground(this.color);
             colorButtons.add(this);
+        }
+
+        public void resizeButton() {
+            Container c = getContentPane();
+            float fontSize = (float)(Math.min(c.getWidth()*0.07, c.getHeight()*0.07));
+            setPreferredSize(new Dimension((int)(Math.round(c.getWidth()*0.35)),
+                    (int)(Math.round(c.getHeight()*0.25))));
+            setFont(getFont().deriveFont(fontSize));
         }
     }
 }
