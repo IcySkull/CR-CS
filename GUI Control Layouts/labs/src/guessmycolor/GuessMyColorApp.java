@@ -1,6 +1,7 @@
 package guessmycolor;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,12 +20,13 @@ public class GuessMyColorApp extends JFrame {
 
     Color win;
     Color current;
+    JDialog dialog;
 
     GuessMyColorApp() {
         setTitle("Guess My Color Game");
         setLayout(new GridBagLayout());
         setVisible(true);
-        setPreferredSize(new Dimension(500, 500));
+        setPreferredSize(new Dimension(700, 500));
         pack();
 
         // Grid configuration
@@ -34,12 +36,23 @@ public class GuessMyColorApp extends JFrame {
         // Tittle of the Game
         c.gridy = 0;
         TitleContainer top = new TitleContainer();
+        add(top, c);
+
+        // Draw panel of the Game
+        c.gridy = 1;
+        DrawingContainer middle = new DrawingContainer();
+        add(middle, c);
+
+        // RGB changer buttons of the Game
+        c.gridy = 2;
+        ColorChangeContainer bottom = new ColorChangeContainer();
+        add(bottom, c);
 
         // Event Listeners
         addComponentListener(new ComponentListener() {
             @Override
             public void componentResized(ComponentEvent e) {
-                for (Component c: getContentPane().getComponents()) {
+                for (Component c : getContentPane().getComponents()) {
                     if (c instanceof Resizable) {
                         ((Resizable) c).resize();
                     }
@@ -61,29 +74,25 @@ public class GuessMyColorApp extends JFrame {
 
             }
         });
-        add(top);
     }
 
     public class TitleContainer extends Container implements Resizable {
-        final public   double HEIGHT_FACTOR = 0.1;
+        final public double HEIGHT_FACTOR = 0.2;
         TitleButton title = new TitleButton("Guess My Color");
 
         TitleContainer() {
             setLayout(new FlowLayout());
             setVisible(true);
-            setPreferredSize(new Dimension(getContentPane().getWidth(), getContentPane().getHeight()));
-            resize();
-            pack();
-
+            setBackground(Color.BLACK);
             add(title);
         }
 
         public void resize() {
             Component c = getContentPane();
-            setPreferredSize(new Dimension(c.getWidth(), (int)(c.getHeight()*HEIGHT_FACTOR)));
+            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
             for (Component part : getComponents()) {
-                if (part instanceof TitleButton) {
-                    ((TitleButton) part).resize();
+                if (part instanceof Resizable) {
+                    ((Resizable) part).resize();
                 }
             }
         }
@@ -91,17 +100,17 @@ public class GuessMyColorApp extends JFrame {
         public class TitleButton extends JLabel implements Resizable {
             TitleButton(String str) {
                 super(str, SwingConstants.CENTER);
-                setFont(new Font("TimesRoman", Font.BOLD+Font.ITALIC, (int)(getContentPane().getWidth()*0.07)));
+                setFont(new Font("TimesRoman", Font.BOLD+Font.ITALIC,
+                        (int)(getContentPane().getWidth()*0.07)));
                 setForeground(Color.white);
                 setBackground(Color.BLACK);
                 setOpaque(true);
-                resize();
             }
 
             public void resize() {
-                Container c = getContentPane();
+                Component c = getContentPane();
                 float fontSize = (float) (Math.min(c.getWidth() * 0.07, c.getHeight() * 0.2));
-                setPreferredSize(new Dimension(c.getWidth(), (int)(c.getHeight()*HEIGHT_FACTOR)));
+                setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
                 setFont(getFont().deriveFont(fontSize));
             }
 
@@ -111,25 +120,90 @@ public class GuessMyColorApp extends JFrame {
     // END OF THE TitleContainer CLASS
 
     /*
-        The container that will be used to draw the rects.
+        The container that will be used to draw the rectangles of the game.
      */
+    public class DrawingContainer extends Container implements Resizable {
+        public final double HEIGHT_FACTOR = 0.4;
+
+        DrawingContainer() {
+            setLayout(new FlowLayout());
+            setVisible(true);
+
+            DrawingPanel panel = new DrawingPanel();
+            panel.setBackground(Color.BLACK);
+
+//            add(panel);
+        }
+
+        // Resize method for the container of the DrawingPanel
+        @Override
+        public void resize() {
+            Component c = getContentPane();
+            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+            for (Component part : getComponents()) {
+                if (part instanceof Resizable) {
+                    ((Resizable) part).resize();
+                }
+            }
+        }
+
+        /*
+            The Panel where the Rects for the game will be created.
+         */
+        public class DrawingPanel extends JPanel implements Resizable {
+            public void paintComponent(Graphics g) {
+
+            }
+
+            // Resize method for the DrawingPanel
+            @Override
+            public void resize() {
+                Component c = getContentPane();
+                setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+            }
+        }
+        // END OF THE DrawingPanel CLASS
+    }
+    // END OF THE DrawingContainer CLASS
 
     /**
      *  Container for the RGB buttons that will change the color of the rects.
      */
-    public class ColorChangeContainer extends Container {
-        public final double HEIGHT_FACTOR = 0.4;
+    public class ColorChangeContainer extends Container implements Resizable {
+        public final double HEIGHT_FACTOR = 0.2;
         RGBChangerButton redIncrement = new RGBChangerButton(Color.red, true);
         RGBChangerButton redDecrement = new RGBChangerButton(Color.red, false);
         RGBChangerButton greenIncrement = new RGBChangerButton(Color.green, true);
         RGBChangerButton greenDecrement = new RGBChangerButton(Color.green, false);
-        RGBChangerButton blueIncrement = new RGBChangerButton(Color.red, true);
-        RGBChangerButton blueDecrement = new RGBChangerButton(Color.red, false);
+        RGBChangerButton blueIncrement = new RGBChangerButton(Color.blue, true);
+        RGBChangerButton blueDecrement = new RGBChangerButton(Color.blue, false);
 
+        // default constructor
         ColorChangeContainer() {
             setLayout(new FlowLayout());
             setVisible(true);
 
+            add(redIncrement);
+            add(redDecrement);
+            add(greenIncrement);
+            add(greenDecrement);
+            add(blueIncrement);
+            add(blueDecrement);
+
+        }
+
+        /**
+         * The resize method for the Container of the RGB changer buttons
+         */
+        @Override
+        public void resize() {
+            Component c = getContentPane();
+            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getWidth()*HEIGHT_FACTOR)));
+            for (Component parts : getComponents()) {
+                if (parts instanceof Resizable) {
+                    ((Resizable) parts).resize();
+                }
+            }
         }
 
         /**
@@ -159,9 +233,9 @@ public class GuessMyColorApp extends JFrame {
              */
             public void resize() {
                 Component c = getContentPane();
-                float fontSize = (float) (Math.min(c.getWidth() * 0.07, c.getHeight() * 0.07));
-                setPreferredSize(new Dimension((int) (Math.round(c.getWidth() * 0.35)),
-                        (int) (Math.round(c.getHeight() * 0.25))));
+                float fontSize = (float) (Math.min(c.getWidth() * 0.15, c.getHeight() * 0.07));
+                setPreferredSize(new Dimension((int)(c.getWidth() * 0.15),
+                        (int)Math.round(c.getHeight() * HEIGHT_FACTOR)));
                 setFont(getFont().deriveFont(fontSize));
             }
         }
@@ -180,10 +254,9 @@ public class GuessMyColorApp extends JFrame {
              */
             RGBChangerButton(Color color, boolean increment) {
                 super(color, Character.toString(increment ? INCREMENT : DECREMENT));
-                if (color.toString().equalsIgnoreCase("red") ||
-                        color.toString().equalsIgnoreCase("green") ||
-                        color.toString().equalsIgnoreCase("blue")) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid RGB color :)",
+
+                if (!(color.equals(Color.red) || color.equals(Color.green) || color.equals(Color.blue))) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid RGB color for the buttons :)",
                             "Error Message", JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
                 }
