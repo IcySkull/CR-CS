@@ -3,7 +3,7 @@ package colorbuttons;
 import javax.swing.*;
 import java.awt.*;
 
-/*
+    /*
             Resizable buttons that create a JButton used to modify the background of its container
             by the color established.
      */

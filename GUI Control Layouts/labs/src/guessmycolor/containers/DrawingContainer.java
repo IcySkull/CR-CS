@@ -1,4 +1,4 @@
-package guessmycolor.components;
+package guessmycolor.containers;
 
 public class DrawingContainer {
 }

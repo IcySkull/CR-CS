@@ -2,17 +2,15 @@ package guessmycolor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /*
         BASE FRAME OF THE APP
  */
-public class Game extends JFrame {
+public class GuessMyColorApp extends JFrame {
     Color win;
     Color current;
 
-    Game() {
+    GuessMyColorApp() {
         setTitle("Guess My Color Game");
         setLayout(new GridBagLayout());
         setVisible(true);

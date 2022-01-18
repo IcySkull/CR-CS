@@ -1,7 +1,5 @@
 package guessmycolor.buttons;
 
-import guessmycolor.Game;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -40,7 +38,7 @@ public class ColorButton extends JButton {
         The inner class of ColorButton to provide the sources for the functionalities of the
         ActionListener
      */
-    public class RGBChangerButton extends ColorButton implements ActionListener {
+    public static class RGBChangerButton extends ColorButton implements ActionListener {
         static final char INCREMENT = '+';
         static final char DECREMENT = '-';
         private boolean increment;
@@ -48,7 +46,7 @@ public class ColorButton extends JButton {
         /*
             The base constructor to provide a functional RGBChangerButton
          */
-        RGBChangerButton(Color color, boolean increment) {
+        public RGBChangerButton(Color color, boolean increment) {
             super(color, Character.toString(increment ? INCREMENT : DECREMENT));
             if (color.toString().equalsIgnoreCase("red") ||
                     color.toString().equalsIgnoreCase("green") ||

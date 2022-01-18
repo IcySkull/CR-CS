@@ -4,16 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /*
         BASE FRAME FOR THE APP
  */
-public class Frame extends JFrame {
+public class BackgroundColorApp extends JFrame {
     public static void main(String args[]) {
-        new Frame();
+        new BackgroundColorApp();
     }
 
     ColorButton redB = new ColorButton(Color.red, "RED");
@@ -22,7 +19,7 @@ public class Frame extends JFrame {
     ColorButton grayB = new ColorButton(Color.gray, "GRAY");
     ColorButton whiteB = new ColorButton(Color.white, "WHITE");
 
-    Frame() {
+    BackgroundColorApp() {
         setTitle("Color Buttons Background");
         setLayout(new FlowLayout());
         setVisible(true);
