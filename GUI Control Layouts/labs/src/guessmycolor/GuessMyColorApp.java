@@ -1,13 +1,8 @@
 package guessmycolor;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.image.TileObserver;
+import java.awt.event.*;
 import java.util.Arrays;
 
 /*
@@ -19,8 +14,12 @@ public class GuessMyColorApp extends JFrame {
     }
 
     Color win;
-    Color current;
-    JDialog dialog;
+    Color guess;
+    final int step = 15;
+
+    TitleContainer top = new TitleContainer();
+    DrawingContainer middle = new DrawingContainer();
+    ColorChangeContainer bottom = new ColorChangeContainer();
 
     GuessMyColorApp() {
         setTitle("Guess My Color Game");
@@ -29,23 +28,22 @@ public class GuessMyColorApp extends JFrame {
         setPreferredSize(new Dimension(700, 500));
         pack();
 
+        startGame();
+
         // Grid configuration
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
 
         // Tittle of the Game
         c.gridy = 0;
-        TitleContainer top = new TitleContainer();
         add(top, c);
 
         // Draw panel of the Game
         c.gridy = 1;
-        DrawingContainer middle = new DrawingContainer();
         add(middle, c);
 
         // RGB changer buttons of the Game
         c.gridy = 2;
-        ColorChangeContainer bottom = new ColorChangeContainer();
         add(bottom, c);
 
         // Event Listeners
@@ -75,6 +73,32 @@ public class GuessMyColorApp extends JFrame {
             }
         });
     }
+    // End of constructor
+
+    /**
+     * A helper method generate new colors for the game
+     */
+    public void startGame() {
+        guess = new Color(createRGB(), createRGB(), createRGB());
+        win = new Color(createRGB(), createRGB(), createRGB());
+        while (guess.equals(win)) {
+            guess = new Color(createRGB(), createRGB(), createRGB());
+        }
+    }
+
+    /**
+     * A method to create a random int within the range [0, 255] and reachable by the steps.
+     * Reachable by the steps is a value that is divisible by the steps
+     * @return the new int in a range within [0, 255] and reachable
+     */
+    public int createRGB() {
+        int rgb;
+        do {
+            rgb = (int) (Math.random()*256);
+        }
+        while (!(rgb % step == 0));
+        return rgb;
+    }
 
     public class TitleContainer extends Container implements Resizable {
         final public double HEIGHT_FACTOR = 0.2;
@@ -85,11 +109,13 @@ public class GuessMyColorApp extends JFrame {
             setVisible(true);
             setBackground(Color.BLACK);
             add(title);
+
+            resize();
         }
 
         public void resize() {
             Component c = getContentPane();
-            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+            setPreferredSize(new Dimension(c.getWidth(), (int)(Math.round(c.getHeight()*HEIGHT_FACTOR))));
             for (Component part : getComponents()) {
                 if (part instanceof Resizable) {
                     ((Resizable) part).resize();
@@ -110,7 +136,7 @@ public class GuessMyColorApp extends JFrame {
             public void resize() {
                 Component c = getContentPane();
                 float fontSize = (float) (Math.min(c.getWidth() * 0.07, c.getHeight() * 0.2));
-                setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+                setPreferredSize(new Dimension(c.getWidth(), (int)(Math.round(c.getHeight()*HEIGHT_FACTOR))));
                 setFont(getFont().deriveFont(fontSize));
             }
 
@@ -130,16 +156,16 @@ public class GuessMyColorApp extends JFrame {
             setVisible(true);
 
             DrawingPanel panel = new DrawingPanel();
-            panel.setBackground(Color.BLACK);
 
-//            add(panel);
+            add(panel);
+            resize();
         }
 
         // Resize method for the container of the DrawingPanel
         @Override
         public void resize() {
             Component c = getContentPane();
-            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+            setPreferredSize(new Dimension(c.getWidth(), (int)(Math.round(c.getHeight()*HEIGHT_FACTOR))));
             for (Component part : getComponents()) {
                 if (part instanceof Resizable) {
                     ((Resizable) part).resize();
@@ -151,15 +177,23 @@ public class GuessMyColorApp extends JFrame {
             The Panel where the Rects for the game will be created.
          */
         public class DrawingPanel extends JPanel implements Resizable {
-            public void paintComponent(Graphics g) {
-
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                Component c = getContentPane();
+                int xStep = (int)(Math.round(c.getWidth()/5.0));
+                int yStep = (int)(Math.round(c.getHeight()/22.0));
+                g.setColor(guess);
+                g.fillRect(xStep, yStep, xStep, (int)(c.getHeight()*0.3));
+                g.setColor(win);
+                g.fillRect(xStep*3, yStep, xStep, (int) (c.getHeight()*0.3));
             }
 
             // Resize method for the DrawingPanel
             @Override
             public void resize() {
                 Component c = getContentPane();
-                setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getHeight()*HEIGHT_FACTOR)));
+                setPreferredSize(new Dimension(c.getWidth(), (int)(Math.round(c.getHeight()*HEIGHT_FACTOR))));
             }
         }
         // END OF THE DrawingPanel CLASS
@@ -190,6 +224,16 @@ public class GuessMyColorApp extends JFrame {
             add(blueIncrement);
             add(blueDecrement);
 
+            resize();
+
+            // Event Listeners
+            redIncrement.addActionListener(redIncrement);
+            redDecrement.addActionListener(redDecrement);
+            greenIncrement.addActionListener(greenIncrement);
+            greenDecrement.addActionListener(greenDecrement);
+            blueIncrement.addActionListener(blueIncrement);
+            blueDecrement.addActionListener(blueDecrement);
+
         }
 
         /**
@@ -198,7 +242,7 @@ public class GuessMyColorApp extends JFrame {
         @Override
         public void resize() {
             Component c = getContentPane();
-            setPreferredSize(new Dimension(c.getWidth(), (int)Math.round(c.getWidth()*HEIGHT_FACTOR)));
+            setPreferredSize(new Dimension(c.getWidth(), (int)(Math.round(c.getWidth()*HEIGHT_FACTOR))));
             for (Component parts : getComponents()) {
                 if (parts instanceof Resizable) {
                     ((Resizable) parts).resize();
@@ -235,7 +279,7 @@ public class GuessMyColorApp extends JFrame {
                 Component c = getContentPane();
                 float fontSize = (float) (Math.min(c.getWidth() * 0.15, c.getHeight() * 0.07));
                 setPreferredSize(new Dimension((int)(c.getWidth() * 0.15),
-                        (int)Math.round(c.getHeight() * HEIGHT_FACTOR)));
+                        (int)(Math.round(c.getHeight() * HEIGHT_FACTOR))));
                 setFont(getFont().deriveFont(fontSize));
             }
         }
@@ -247,14 +291,14 @@ public class GuessMyColorApp extends JFrame {
         public class RGBChangerButton extends ColorButton implements ActionListener {
             static final char INCREMENT = '+';
             static final char DECREMENT = '-';
-            private boolean increment;
+            private final boolean increment;
 
             /*
                 The base constructor to provide a functional RGBChangerButton
              */
             RGBChangerButton(Color color, boolean increment) {
                 super(color, Character.toString(increment ? INCREMENT : DECREMENT));
-
+                this.increment = increment;
                 if (!(color.equals(Color.red) || color.equals(Color.green) || color.equals(Color.blue))) {
                     JOptionPane.showMessageDialog(null, "Please enter a valid RGB color for the buttons :)",
                             "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -262,10 +306,62 @@ public class GuessMyColorApp extends JFrame {
                 }
             }
 
+            /**
+             * This method is called when the RGB changer buttons are clicked. Therefore, a new color is generated to the
+             * create a new rect of the guess of the player.
+             * @param e the event of the RGB changer button when clicked
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (increment) {
-//                        color = new Color(color., , );
+                int sign = increment ? 1 : -1;
+
+                if (getColor().equals(Color.red)) {
+                    int col = guess.getRed();
+                    int newCol = col + step*sign;
+                    if (newCol < 0 || newCol > 255) {
+                    } else
+                    guess = new Color(newCol,
+                            guess.getGreen(), guess.getBlue());
+                }
+
+                else if (getColor().equals(Color.green)) {
+                    int col = guess.getGreen();
+                    int newCol = col + step*sign;
+                    if (newCol < 0 || newCol > 255) {
+                    } else
+                    guess = new Color(guess.getRed(),
+                            newCol, guess.getBlue());
+                }
+
+                else {
+                    int col = guess.getBlue();
+                    int newCol = col + step*sign;
+                    if (newCol < 0 || newCol > 255) {
+                    } else
+                    guess = new Color(guess.getRed(),
+                            guess.getGreen(), newCol);
+                }
+
+                System.out.println(guess + " guess");
+                System.out.println(win + " goal");
+
+                if (guess.equals(win)) {
+                    int response = JOptionPane.showConfirmDialog(null,
+                            "Congratulations! You guessed my Color.\nChoose: Yes, to keep plating. No, to close the program",
+                            "Winner", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        dispose();
+                        new GuessMyColorApp();
+                    }
+
+                    else {
+                        System.exit(0);
+                    }
+                }
+
+                else {
+                    middle.paint(middle.getGraphics());
                 }
             }
             // END OF THE RGBChangerButton CLASS
