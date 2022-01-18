@@ -29,11 +29,10 @@ public class BackgroundColorApp extends JFrame {
         this.addComponentListener(new ComponentListener() {
             @Override
             public void componentResized(ComponentEvent e) {
-                Component[] comps = getContentPane().getComponents();
                 // Resize all the components of the container
-                for (Component c : comps) {
-                    if (c instanceof ColorButton) {
-                        ((ColorButton) c).resizeButton(getContentPane());
+                for (Component c : getContentPane().getComponents()) {
+                    if (c instanceof Resizable) {
+                        ((Resizable) c).resize(getContentPane());
                     }
                 }
             }

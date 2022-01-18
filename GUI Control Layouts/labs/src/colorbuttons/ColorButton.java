@@ -7,7 +7,7 @@ import java.awt.*;
             Resizable buttons that create a JButton used to modify the background of its container
             by the color established.
      */
-public class ColorButton extends JButton {
+public class ColorButton extends JButton implements Resizable {
     Color color;
 
     /**
@@ -26,7 +26,7 @@ public class ColorButton extends JButton {
      * It uses the width and the height of the container to multiply it by a scale factor to
      * resize the button bases on its container.
      */
-    public void resizeButton(Container c) {
+    public void resize(Component c) {
         float fontSize = (float)(Math.min(c.getWidth()*0.07, c.getHeight()*0.07));
         setPreferredSize(new Dimension((int)(Math.round(c.getWidth()*0.35)),
                 (int)(Math.round(c.getHeight()*0.25))));
