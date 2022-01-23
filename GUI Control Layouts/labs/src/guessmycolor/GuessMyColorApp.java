@@ -24,6 +24,7 @@ public class GuessMyColorApp extends JFrame {
     GuessMyColorApp() {
         setTitle("Guess My Color Game");
         setLayout(new GridBagLayout());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setPreferredSize(new Dimension(700, 500));
         pack();

@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ContentPanel extends JPanel {
-    DrawingPanel board = new DrawingPanel();
 
     ContentPanel() {
         setLayout(new GridBagLayout());
@@ -12,7 +11,6 @@ public class ContentPanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(50, 50, 50, 50);
-        add(board);
     }
 
     @Override

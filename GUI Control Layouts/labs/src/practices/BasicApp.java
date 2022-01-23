@@ -7,8 +7,9 @@ public class BasicApp extends JFrame {
      public static void main(String[] args) {
          JFrame frame = new BasicApp();
      }
-
+     
      ContentPanel pane = new ContentPanel();
+     Board board = new Board();
 
      BasicApp() {
          super("test");
@@ -28,6 +29,7 @@ public class BasicApp extends JFrame {
          gbc.insets = new Insets(50, 50, 50, 50);
 
          setContentPane(pane);
+         add(board, gbc);
          pack();
      }
 }

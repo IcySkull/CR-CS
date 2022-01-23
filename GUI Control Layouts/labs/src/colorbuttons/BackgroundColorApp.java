@@ -21,6 +21,7 @@ public class BackgroundColorApp extends JFrame {
 
     BackgroundColorApp() {
         setTitle("Color Buttons Background");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
         setVisible(true);
         setPreferredSize(new Dimension(500, 500));
