@@ -6,11 +6,8 @@ import java.awt.*;
 public class ContentPanel extends JPanel {
 
     ContentPanel() {
-        setLayout(new GridBagLayout());
-        setBackground(Color.gray);
+        setBackground(new Color(38, 38, 38));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(50, 50, 50, 50);
     }
 
     @Override

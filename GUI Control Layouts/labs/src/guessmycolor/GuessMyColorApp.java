@@ -33,7 +33,9 @@ public class GuessMyColorApp extends JFrame {
 
         // Grid configuration
         GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
+        c.weighty = 0.2;
+        c.weightx = 0.2;
 
         // Tittle of the Game
         c.gridy = 0;
@@ -155,7 +157,6 @@ public class GuessMyColorApp extends JFrame {
         DrawingContainer() {
             setLayout(new FlowLayout());
             setVisible(true);
-
             DrawingPanel panel = new DrawingPanel();
 
             add(panel);
@@ -217,6 +218,7 @@ public class GuessMyColorApp extends JFrame {
         ColorChangeContainer() {
             setLayout(new FlowLayout());
             setVisible(true);
+            setBackground(Color.BLACK);
 
             add(redIncrement);
             add(redDecrement);
