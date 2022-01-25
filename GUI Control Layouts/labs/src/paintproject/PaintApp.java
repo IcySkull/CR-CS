@@ -205,6 +205,7 @@ public class PaintApp extends JFrame {
                     int i = pane.indexOfTabComponent(ButtonTabComponent.this);
                     if (i != -1) {
                         pane.remove(i);
+                        index--;
                     }
                 }
 
@@ -313,6 +314,13 @@ public class PaintApp extends JFrame {
                 setBackground(Color.WHITE);
                 width = table.width;
                 height = table.height;
+                addLayer();
+            }
+
+            public void addLayer() {
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.BOTH;
+                add(new Layers(), gbc);
             }
 
             public void setGridBagLayout(GridBagLayout gbl) {
@@ -331,6 +339,7 @@ public class PaintApp extends JFrame {
                 Layers() {
                     setGridBagLayout(new GridBagLayout());
                     setVisible(true);
+                    addDraw(new Draw());
                 }
 
                 public void setGridBagLayout(GridBagLayout gbl) {
@@ -339,15 +348,25 @@ public class PaintApp extends JFrame {
                     gbl.columnWeights = new double[]{1};
                 }
 
-                public void addNewLayer() {
-
+                public void addDraw(Draw draw) {
+                    GridBagConstraints gbc = new GridBagConstraints();
+                    gbc.fill = GridBagConstraints.BOTH;
+                    add(draw, gbc);
                 }
 
                 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                     The JPanel where the user will create every draw
                  */
                 public class Draw extends JPanel {
+                    Draw() {
+                        setVisible(true);
+                    }
 
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        g.fillRect(50, 50, 50, 50);
+                    }
                 }
             }
             /*
