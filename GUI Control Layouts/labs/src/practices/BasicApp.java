@@ -13,7 +13,6 @@ public class BasicApp extends JFrame {
      ContentPanel pane = new ContentPanel();
      Container panel = new Container();
      Board board = new Board();
-     JInternalFrame tools = new JInternalFrame("Tools", true, true, true, true);
 
      BasicApp() throws PropertyVetoException {
          super("test");
@@ -47,11 +46,6 @@ public class BasicApp extends JFrame {
          add(panel, gbc);
 
          gbc.gridx = 1;
-         tools.setVisible(true);
-         tools.setPreferredSize(new Dimension(100, 100));
-         tools.add(new JButton());
-         tools.setSelected(true);
-         add(tools, gbc);
          add(board, gbc);
 
      }

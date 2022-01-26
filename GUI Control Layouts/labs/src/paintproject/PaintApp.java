@@ -1,11 +1,15 @@
 package paintproject;
 
 import javax.swing.*;
+import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.basic.BasicButtonUI;
-import javax.tools.Tool;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
+
+import static paintproject.PaintApp.PaintUser.rotate;
 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +71,8 @@ public class PaintApp extends JFrame {
         // add tab tables
         gbc.gridx = 1;
         add(tables, gbc);
+
+        tables.initTable("first", new Table());
     }
 
     /**
@@ -103,16 +109,21 @@ public class PaintApp extends JFrame {
         });
 
         // menuView items
-        JRadioButtonMenuItem tools = new JRadioButtonMenuItem("Editor");
-        tools.addChangeListener(e -> {
-
+        JRadioButtonMenuItem editorTool = new JRadioButtonMenuItem("Editor");
+        editorTool.addItemListener(e -> {
+            if (editorTool.isSelected())
+                toolsPanel.addTool(toolsPanel.editorTool);
+            else
+                toolsPanel.removeTool(toolsPanel.editorTool);
+            toolsPanel.repaint();
         });
+        editorTool.setSelected(true);
 
         // Add menuFile items
         menuFile.add(addFile);
 
         // Add menuView items
-        menuView.add(tools);
+        menuView.add(editorTool);
 
         menuBar.add(menuFile);
         menuBar.add(menuView);
@@ -138,10 +149,12 @@ public class PaintApp extends JFrame {
         //Instance variables
         Color color;
         int stroke;
+        int tool;
 
         PaintUser() {
-        color = Color.white;
-        stroke = 12;
+            color = Color.darkGray;
+            stroke = 12;
+            tool = 0;
         }
 
         public void setColor(Color color) {
@@ -152,12 +165,42 @@ public class PaintApp extends JFrame {
             this.stroke = stroke;
         }
 
+        public void setTool(int tool) {
+            this.tool = tool;
+        }
+
         public Color getColor() {
             return color;
         }
 
         public int getStroke() {
             return stroke;
+        }
+
+        public int getTool() {
+            return tool;
+        }
+
+        /**
+         * The following method rotates the provided BufferedImage with the angles introduced
+         * @param bimg the BufferedImage to be rotated
+         * @param angle the angle desired to rotate the BufferedImage
+         * @return the rotated Buffered Image
+         */
+        public static BufferedImage rotate(BufferedImage bimg, Double angle) {
+            double sin = Math.abs(Math.sin(Math.toRadians(angle))),
+                    cos = Math.abs(Math.cos(Math.toRadians(angle)));
+            int w = bimg.getWidth();
+            int h = bimg.getHeight();
+            int neww = (int) Math.floor(w*cos + h*sin),
+                    newh = (int) Math.floor(h*cos + w*sin);
+            BufferedImage rotated = new BufferedImage(neww, newh, bimg.getType());
+            Graphics2D graphic = rotated.createGraphics();
+            graphic.translate((neww-w)/4, (newh-h)/4);
+            graphic.rotate(Math.toRadians(angle), 0, 0);
+            graphic.drawRenderedImage(bimg, null);
+            graphic.dispose();
+            return rotated;
         }
 
         @Override
@@ -264,20 +307,20 @@ public class PaintApp extends JFrame {
                 //paint the cross
                 protected void paintComponent(Graphics g) {
                     super.paintComponent(g);
-                    Graphics2D g2 = (Graphics2D) g.create();
+                    Graphics2D g3 = (Graphics2D) g.create();
                     //shift the image for pressed buttons
                     if (getModel().isPressed()) {
-                        g2.translate(1, 1);
+                        g3.translate(1, 1);
                     }
-                    g2.setStroke(new BasicStroke(2));
-                    g2.setColor(Color.BLACK);
+                    g3.setStroke(new BasicStroke(2));
+                    g3.setColor(Color.BLACK);
                     if (getModel().isRollover()) {
-                        g2.setColor(Color.MAGENTA);
+                        g3.setColor(Color.MAGENTA);
                     }
                     int delta = 6;
-                    g2.drawLine(delta, delta, getWidth() - delta - 1, getHeight() - delta - 1);
-                    g2.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
-                    g2.dispose();
+                    g3.drawLine(delta, delta, getWidth() - delta - 1, getHeight() - delta - 1);
+                    g3.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
+                    g3.dispose();
                 }
             }
 
@@ -313,15 +356,16 @@ public class PaintApp extends JFrame {
      */
     public class Table extends JPanel {
         // Instance Variables
-        int width, height; // note that these are the dimensions of the Board
-        Color userColor;
-        int userStroke;
+        int widthT, heightT; // note that these are the dimensions of the Board
+        GridBagLayout gbl;
+        GridBagConstraints gbc;
 
         // Default constructor of Table class
         Table() {
-            width = 800;
-            height = 400;
+            widthT = 800;
+            heightT = 400;
             setGridBagLayout(new GridBagLayout());
+            setConstrains();
             addBoard();
             setVisible(true);
             setBackground(new Color(150, 150, 150));
@@ -329,50 +373,60 @@ public class PaintApp extends JFrame {
 
         // Construct a table with the specific width and height for the Board object
         Table(int width, int height) {
-            this.width = width;
-            this.height = height;
+            this.widthT = width;
+            this.heightT = height;
             setGridBagLayout(new GridBagLayout());
-            addBoard();
-            setVisible(true);
+            setConstrains();
             setBackground(new Color(150, 150, 150));
+            setVisible(true);
+            addBoard();
         }
 
         /**
          * Helper method to add the board where the user will draw
          */
         public void addBoard() {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.fill = GridBagConstraints.BOTH;
             add(new Board(this), gbc);
+        }
+
+        public void setConstrains() {
+            gbc = new GridBagConstraints();
+            gbc.fill = GridBagConstraints.BOTH;
         }
 
         public void setGridBagLayout(GridBagLayout gbl) {
             setLayout(gbl);
-            gbl.columnWidths = new int[]{width};
-            gbl.rowHeights = new int[]{height};
+            gbl.rowHeights = new int[]{heightT};
+            gbl.columnWidths = new int[]{widthT};
         }
 
         /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Inner class of Table. The Board class will provide the base layout for the drawings.
          */
-        public class Board extends JLayeredPane {
+        public class Board extends JPanel implements MouseInputListener {
             int index; // index to keep track of the layers created
+            ArrayList<Integer> xPts = new ArrayList<>();
+            ArrayList<Integer> yPts = new ArrayList<>();
+            Layer board;
+            GridBagLayout gbl;
             GridBagConstraints gbc;
 
             Board(Table table) { // there must be a Table object to create a board
                 setGridBagLayout(new GridBagLayout());
                 setConstrains();
                 setVisible(true);
-                width = table.width;
-                height = table.height;
-                addLayer(); // base layer of the initialization of a board
+                board = new Layer();
+                index = 0;
+                add(board, gbc); // base layer of the initialization of a board
+                addMouseListener(this);
+                addMouseMotionListener(this);
             }
 
             /**
              * Add a new layer at the current index to this Board object.
              */
             public void addLayer() {
-                add(new Layer(index), index++);
+                board.add(new Layer(index++), index);
             }
 
             public void setConstrains() {
@@ -382,10 +436,56 @@ public class PaintApp extends JFrame {
 
             public void setGridBagLayout(GridBagLayout gbl) {
                 setLayout(gbl);
+
                 gbl.rowWeights = new double[]{1};
                 gbl.columnWeights = new double[]{1};
+                gbl.rowHeights = new int[]{heightT};
+                gbl.columnWidths = new int[]{widthT};
+
+                this.gbl = gbl;
             }
 
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                xPts.add(e.getX());
+                yPts.add(e.getY());
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                board.addDraw();
+                xPts.clear();
+                yPts.clear();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                xPts.add(e.getX());
+                yPts.add(e.getY());
+                Component[] components = board.getComponentsInLayer(board.highestLayer());
+                System.out.println(Arrays.toString(components));
+                for (Component draw : components) {
+                    System.out.println("asd");
+                }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+            }
 
 
             /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -393,54 +493,71 @@ public class PaintApp extends JFrame {
                 layers
              */
             public class Layer extends JLayeredPane {
-                GridBagConstraints gbc;
                 int index;
                 String identifier;
 
-                Layer(int index) {
-                    setGridBagLayout(new GridBagLayout());
+                Layer() {
                     setVisible(true);
-                    setConstrains();
+                    index = 0;
                     addDraw();
+                    identifier = "board";
+                }
+
+                Layer(int index) {
+                    setVisible(true);
                     this.index = index;
+                    addDraw();
                     identifier = Integer.toString(index);
                 }
 
                 Layer(int index, String identifier) {
-                    setGridBagLayout(new GridBagLayout());
                     setVisible(true);
-                    addDraw();
                     this.index = index;
+                    addDraw();
                     this.identifier = identifier;
                 }
 
-                public void setConstrains() {
-                    gbc = new GridBagConstraints();
-                    gbc.fill = GridBagConstraints.BOTH;
-                }
-
-                public void setGridBagLayout(GridBagLayout gbl) {
-                    setLayout(gbl);
-                    gbl.rowWeights = new double[]{1};
-                    gbl.columnWeights = new double[]{1};
-                }
-
                 public void addDraw() {
-                    add(new Draw(), index++);
+                    Draw d = new Draw();
+                    add(d, ++index);
+                }
+
+                @Override
+                public String toString() {
+                    return "Layer{" +
+                            "index=" + index +
+                            ", identifier='" + identifier + '\'' +
+                            '}';
                 }
 
                 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    The JPanel where the user will create every draw
-                 */
+                                    The JPanel where the user will create every draw
+                                 */
                 public class Draw extends JPanel {
+                    BufferedImage image;
+
                     Draw() {
+                        setVisible(true);
                         setOpaque(false);
+                        System.out.println(this);
+                        image = new BufferedImage(widthT, heightT, BufferedImage.TYPE_INT_ARGB);
                     }
 
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
-                        g.fillRect(50, 50, 50, 50);
+                        Graphics2D g2 = image.createGraphics();
+                        g2.setColor(user.color);
+                        if (user.tool == 1) {
+                            for (int i = 0; i < xPts.size() - 1; i++) {
+                                g2.drawLine(xPts.get(i), yPts.get(i), xPts.get(i+1), yPts.get(i+1));
+                            }
+                        }g.drawImage(image, 0, 0, this);
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "Draw{" + index + "}";
                     }
                 }
             }
@@ -463,6 +580,7 @@ public class PaintApp extends JFrame {
     public class ToolsComponent extends JPanel {
         GridBagConstraints gbc;
         GridBagLayout gbl;
+        EditorTool editorTool = new EditorTool();
         int index; // int to keep track of the tools created in the panel
         final int TOOL_HEIGHT = 150;
 
@@ -505,7 +623,6 @@ public class PaintApp extends JFrame {
             this.index += sign;
             int[] rwHeight = new int[this.index];
             Arrays.fill(rwHeight, TOOL_HEIGHT);
-            System.out.println(Arrays.toString(rwHeight));
             gbl.rowHeights = rwHeight;
         }
 
@@ -546,7 +663,7 @@ public class PaintApp extends JFrame {
             public void setConstrains() {
                 gbc = new GridBagConstraints();
                 gbc.fill = GridBagConstraints.BOTH;
-                gbc.insets = new Insets(2, 2, 2, 2);
+                gbc.insets = new Insets(10, 10, 10, 10);
             }
 
             public void setGridBagLayout(GridBagLayout gbl) {
@@ -559,6 +676,73 @@ public class PaintApp extends JFrame {
         /*
             END OF THE INNER CLASS ToolPanel
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        // Tools of the user
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            The editor tool will provide a physical interaction with the board to draw
+            shapes.
+         */
+        public class EditorTool extends ToolPanel {
+            int tool;
+            JButton pincel = new JButton();
+
+            EditorTool() {
+                setVisible(true);
+                setLayout(new FlowLayout(FlowLayout.LEFT));
+                setBorder(BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Editor"));
+                add(new PincelTool());
+            }
+
+            public class PincelTool extends JButton implements ActionListener {
+                BufferedImage icon;
+                boolean activated;
+                int size;
+
+                PincelTool() {
+                    setVisible(true);
+                    setContentAreaFilled(false);
+                    setBorder(BorderFactory.createRaisedBevelBorder());
+                    size = 40;
+                    icon = new BufferedImage(size, size, BufferedImage.TYPE_4BYTE_ABGR);
+                    setPreferredSize(new Dimension(size, size));
+                    setMinimumSize(new Dimension(size, size));
+                    addActionListener(this);
+                }
+
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2 = icon.createGraphics();
+
+                    int delta = 5;
+                    g2.setColor(Color.MAGENTA);
+                    g2.fillRect(delta, 0, delta, delta);
+                    g2.setColor(Color.ORANGE);
+                    g2.fillRect((int) (delta*3 - delta * 0.5), 0, delta*4, delta);
+                    g2.setColor(Color.DARK_GRAY);
+                    g2.fillPolygon(new int[]{delta*7, delta*7, delta*9},
+                            new int[]{0, delta, delta/2}, 3);
+
+                    g.drawImage(rotate(icon, 45.0), 0, 0, this);
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    activated = !activated;
+                    if (activated) {
+                        setBorder(BorderFactory.createLoweredBevelBorder());
+                        user.setTool(1);
+                    }
+                    else {
+                        setBorder(BorderFactory.createRaisedBevelBorder());
+                        user.setTool(0);
+                    }
+                }
+            }
+        }
+        /*
+            END OF THE INNER CLASS EditorTool
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     }
     /*
         END OF INNER CLASS ToolComponent
