@@ -1,6 +1,8 @@
 package paintproject;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
@@ -8,6 +10,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EventListener;
 
 import static paintproject.PaintApp.PaintUser.rotate;
 
@@ -25,6 +28,7 @@ public class PaintApp extends JFrame {
     ToolsComponent toolsPanel = new ToolsComponent();
     TabbedTables tables = new TabbedTables();
     GridBagConstraints gbc;
+    JColorChooser colorPicker = new JColorChooser();
 
     PaintApp() {
         setTitle("Paint");
@@ -82,6 +86,7 @@ public class PaintApp extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu menuFile = new JMenu("File");
         JMenu menuView = new JMenu("View");
+        JMenu refresh = new JMenu("Refresh");
 
         // menuFile items
         JMenuItem addFile = new JMenuItem("New draw");
@@ -110,13 +115,20 @@ public class PaintApp extends JFrame {
 
         // menuView items
         JRadioButtonMenuItem editorTool = new JRadioButtonMenuItem("Editor");
+        JMenuItem colorButton = new JMenuItem("Color Picker");
         editorTool.addItemListener(e -> {
             if (editorTool.isSelected())
                 toolsPanel.addTool(toolsPanel.editorTool);
             else
                 toolsPanel.removeTool(toolsPanel.editorTool);
+
             toolsPanel.repaint();
         });
+
+        colorButton.addActionListener(e -> {
+                user.setColor(JColorChooser.showDialog(colorPicker, "Choose a color for your draw", Color.lightGray));
+        });
+        colorButton.setSelected(true);
         editorTool.setSelected(true);
 
         // Add menuFile items
@@ -124,9 +136,12 @@ public class PaintApp extends JFrame {
 
         // Add menuView items
         menuView.add(editorTool);
+        menuView.add(colorButton);
+        menuView.add(new JSeparator());
 
         menuBar.add(menuFile);
         menuBar.add(menuView);
+        menuBar.add(refresh);
         setJMenuBar(menuBar);
     }
 
@@ -148,37 +163,58 @@ public class PaintApp extends JFrame {
     public class PaintUser {
         //Instance variables
         Color color;
-        int stroke;
+        Stroke stroke;
+        int drawSize;
         int tool;
+        boolean eraser;
 
         PaintUser() {
             color = Color.darkGray;
-            stroke = 12;
+            drawSize = 6;
+            stroke = new BasicStroke(drawSize);
             tool = 0;
+            eraser = false;
         }
 
         public void setColor(Color color) {
             this.color = color;
         }
 
-        public void setStroke(int stroke) {
+        public void setStroke(Stroke stroke) {
             this.stroke = stroke;
+        }
+
+        public void setDrawSize(int drawSize) {
+            this.drawSize = drawSize;
+            stroke = new BasicStroke(drawSize);
         }
 
         public void setTool(int tool) {
             this.tool = tool;
         }
 
+        public void setEraser(boolean eraser) {
+            this.eraser = eraser;
+        }
+
         public Color getColor() {
             return color;
         }
 
-        public int getStroke() {
+        public Stroke getStroke() {
             return stroke;
+        }
+
+        public int getDrawSize() {
+            return drawSize;
         }
 
         public int getTool() {
             return tool;
+        }
+
+        public boolean isEraser() {
+            return eraser;
         }
 
         /**
@@ -366,6 +402,7 @@ public class PaintApp extends JFrame {
             heightT = 400;
             setGridBagLayout(new GridBagLayout());
             setConstrains();
+            limitBounds(this);
             addBoard();
             setVisible(true);
             setBackground(new Color(150, 150, 150));
@@ -377,9 +414,16 @@ public class PaintApp extends JFrame {
             this.heightT = height;
             setGridBagLayout(new GridBagLayout());
             setConstrains();
+            limitBounds(this);
             setBackground(new Color(150, 150, 150));
             setVisible(true);
             addBoard();
+        }
+
+        public void limitBounds(JComponent comp) {
+            Dimension size = new Dimension(widthT, heightT);
+            comp.setPreferredSize(size);
+            comp.setMinimumSize(size);
         }
 
         /**
@@ -403,7 +447,7 @@ public class PaintApp extends JFrame {
         /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Inner class of Table. The Board class will provide the base layout for the drawings.
          */
-        public class Board extends JPanel implements MouseInputListener {
+        private class Board extends JPanel implements MouseInputListener {
             int index; // index to keep track of the layers created
             ArrayList<Integer> xPts = new ArrayList<>();
             ArrayList<Integer> yPts = new ArrayList<>();
@@ -415,8 +459,10 @@ public class PaintApp extends JFrame {
                 setGridBagLayout(new GridBagLayout());
                 setConstrains();
                 setVisible(true);
+                limitBounds(this);
                 board = new Layer();
                 index = 0;
+                setBackground(Color.WHITE);
                 add(board, gbc); // base layer of the initialization of a board
                 addMouseListener(this);
                 addMouseMotionListener(this);
@@ -457,7 +503,6 @@ public class PaintApp extends JFrame {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                board.addDraw();
                 xPts.clear();
                 yPts.clear();
             }
@@ -477,9 +522,8 @@ public class PaintApp extends JFrame {
                 xPts.add(e.getX());
                 yPts.add(e.getY());
                 Component[] components = board.getComponentsInLayer(board.highestLayer());
-                System.out.println(Arrays.toString(components));
                 for (Component draw : components) {
-                    System.out.println("asd");
+                    draw.repaint();
                 }
             }
 
@@ -495,9 +539,14 @@ public class PaintApp extends JFrame {
             public class Layer extends JLayeredPane {
                 int index;
                 String identifier;
+                GridBagLayout gbl;
+                GridBagConstraints gbc;
 
                 Layer() {
                     setVisible(true);
+                    setGridBagLayout(new GridBagLayout());
+                    setConstrains();
+                    limitBounds(this);
                     index = 0;
                     addDraw();
                     identifier = "board";
@@ -505,6 +554,9 @@ public class PaintApp extends JFrame {
 
                 Layer(int index) {
                     setVisible(true);
+                    setGridBagLayout(new GridBagLayout());
+                    setConstrains();
+                    limitBounds(this);
                     this.index = index;
                     addDraw();
                     identifier = Integer.toString(index);
@@ -512,6 +564,9 @@ public class PaintApp extends JFrame {
 
                 Layer(int index, String identifier) {
                     setVisible(true);
+                    setGridBagLayout(new GridBagLayout());
+                    setConstrains();
+                    limitBounds(this);
                     this.index = index;
                     addDraw();
                     this.identifier = identifier;
@@ -519,7 +574,22 @@ public class PaintApp extends JFrame {
 
                 public void addDraw() {
                     Draw d = new Draw();
-                    add(d, ++index);
+                    add(d, gbc);
+                    setLayer(d, index++);
+                }
+
+                public void setConstrains() {
+                    gbc = new GridBagConstraints();
+                    gbc.fill = GridBagConstraints.BOTH;
+                }
+
+                public void setGridBagLayout(GridBagLayout gbl) {
+                    setLayout(gbl);
+                    gbl.rowWeights = new double[]{1};
+                    gbl.columnWeights = new double[]{1};
+                    gbl.rowHeights = new int[]{heightT};
+                    gbl.columnWidths = new int[]{widthT};
+                    this.gbl = gbl;
                 }
 
                 @Override
@@ -539,7 +609,7 @@ public class PaintApp extends JFrame {
                     Draw() {
                         setVisible(true);
                         setOpaque(false);
-                        System.out.println(this);
+                        limitBounds(this);
                         image = new BufferedImage(widthT, heightT, BufferedImage.TYPE_INT_ARGB);
                     }
 
@@ -547,12 +617,34 @@ public class PaintApp extends JFrame {
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
                         Graphics2D g2 = image.createGraphics();
-                        g2.setColor(user.color);
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int stroke = user.getDrawSize();
+                        g2.setColor(user.getColor());
+                        g2.setStroke(user.getStroke());
+
+                        if (user.isEraser())
+                            g2.setColor(Color.WHITE);
+
                         if (user.tool == 1) {
                             for (int i = 0; i < xPts.size() - 1; i++) {
-                                g2.drawLine(xPts.get(i), yPts.get(i), xPts.get(i+1), yPts.get(i+1));
+                                int xMin = Math.min(xPts.get(i), xPts.get(i+1));
+                                int xMax = Math.max(xPts.get(i), xPts.get(i+1));
+                                int yMin = Math.min(yPts.get(i), yPts.get(i+1));
+                                int yMax = Math.min(yPts.get(i), yPts.get(i+1));
+                                if (xMax - xMin < 5 &&
+                                    yMax - yMin < 5)
+                                    g2.fillOval(
+                                            (int) (xPts.get(i+1) - stroke*0.725),
+                                            (int) (yPts.get(i+1) - stroke*0.725),
+                                            (int) (stroke*1.45),
+                                            (int) (stroke*1.45)
+                                    );
+
+                                g2.drawLine(xPts.get(i), yPts.get(i), xPts.get(i + 1), yPts.get(i + 1));
                             }
-                        }g.drawImage(image, 0, 0, this);
+                        }
+
+                        g.drawImage(image, 0, 0, this);
                     }
 
                     @Override
@@ -581,6 +673,7 @@ public class PaintApp extends JFrame {
         GridBagConstraints gbc;
         GridBagLayout gbl;
         EditorTool editorTool = new EditorTool();
+
         int index; // int to keep track of the tools created in the panel
         final int TOOL_HEIGHT = 150;
 
@@ -660,6 +753,18 @@ public class PaintApp extends JFrame {
                 toolsPanel.removeTool(tool);
             }
 
+            public void unSelectComponentsExcept(JButton button) {
+                Component[] components = this.getComponents();
+                for (Component comp : components) {
+                    if (comp instanceof JButton) {
+                        if (button.equals(comp))
+                            return;
+                        else
+                            ((JButton) comp).setSelected(false);
+                    }
+                }
+            }
+
             public void setConstrains() {
                 gbc = new GridBagConstraints();
                 gbc.fill = GridBagConstraints.BOTH;
@@ -684,21 +789,59 @@ public class PaintApp extends JFrame {
          */
         public class EditorTool extends ToolPanel {
             int tool;
-            JButton pincel = new JButton();
+            PincelButton pincel = new PincelButton();
+            EraserButton eraser = new EraserButton();
+            JSlider strokeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 4);
 
             EditorTool() {
-                setVisible(true);
-                setLayout(new FlowLayout(FlowLayout.LEFT));
+                setGridBagLayout(new GridBagLayout());
                 setBorder(BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Editor"));
-                add(new PincelTool());
+                setConstrains();
+                gbc.gridx = 0;
+                add(pincel, gbc);
+                gbc.gridx = 1;
+                add(eraser, gbc);
+
+                addSlider();
             }
 
-            public class PincelTool extends JButton implements ActionListener {
+            public void addSlider() {
+                strokeSlider.addChangeListener(ce -> {
+                    JSlider source = (JSlider) ce.getSource();
+                    user.setDrawSize(source.getValue());
+                });
+
+                gbc.gridy = 1;
+                gbc.gridx = 0;
+                gbc.gridwidth = 3;
+                gbc.insets = new Insets(10, 2, 2, 2);
+                strokeSlider.setBorder(BorderFactory.createTitledBorder(
+                        BorderFactory.createRaisedSoftBevelBorder(),"stroke"));
+                strokeSlider.setBackground(new Color(200, 200, 200));
+                strokeSlider.setName("Stroke Width");
+                add(strokeSlider, gbc);
+            }
+
+            @Override
+            public void setConstrains() {
+                gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.BOTH;
+                gbc.insets = new Insets(2, 2, 2, 2);
+            }
+
+            @Override
+            public void setGridBagLayout(GridBagLayout gbl) {
+                setLayout(gbl);
+                gbl.columnWidths = new int[] {40, 40, 40};
+                gbl.rowHeights = new int[] {40, 40};
+            }
+
+            public class PincelButton extends JButton implements ActionListener {
                 BufferedImage icon;
-                boolean activated;
+                boolean activated = false;
                 int size;
 
-                PincelTool() {
+                PincelButton() {
                     setVisible(true);
                     setContentAreaFilled(false);
                     setBorder(BorderFactory.createRaisedBevelBorder());
@@ -730,6 +873,9 @@ public class PaintApp extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     activated = !activated;
                     if (activated) {
+                        eraser.activated = false;
+                        eraser.setBorder(BorderFactory.createRaisedBevelBorder());
+                        user.setEraser(false);
                         setBorder(BorderFactory.createLoweredBevelBorder());
                         user.setTool(1);
                     }
@@ -739,10 +885,80 @@ public class PaintApp extends JFrame {
                     }
                 }
             }
+
+            public class EraserButton extends JButton implements ActionListener {
+                BufferedImage icon;
+                boolean activated = false;
+                int size;
+
+                EraserButton() {
+                    setVisible(true);
+                    setContentAreaFilled(false);
+                    setBorder(BorderFactory.createRaisedBevelBorder());
+                    size = 40;
+                    icon = new BufferedImage(size, size, BufferedImage.TYPE_4BYTE_ABGR);
+                    setPreferredSize(new Dimension(size, size));
+                    setMinimumSize(new Dimension(size, size));
+                    addActionListener(this);
+                }
+
+                @Override
+                protected void paintComponent(Graphics g) {
+                    unSelectComponentsExcept(this);
+                    Graphics2D g2 = icon.createGraphics();
+                    g2.setColor(Color.MAGENTA);
+                    g2.fillRect( 6, 0, size-10, 5);
+
+                    g.drawImage(rotate(icon, 45.0), 0, 0, this);
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    activated = !activated;
+                    if (activated) {
+                        pincel.activated = false;
+                        pincel.setBorder(BorderFactory.createRaisedBevelBorder());
+                        setBorder(BorderFactory.createLoweredBevelBorder());
+                        user.setTool(1);
+                        user.setEraser(true);
+                    }
+                    else {
+                        setBorder(BorderFactory.createRaisedBevelBorder());
+                        user.setTool(0);
+                        user.setEraser(false);
+                    }
+                }
+            }
+
         }
         /*
             END OF THE INNER CLASS EditorTool
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+//        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//            A tool panel where the user will interact to change the color of its drawings.
+//         */
+//        public class ColorTool extends ToolPanel {
+//            JColorChooser colorPicker = new JColorChooser();
+//
+//            ColorTool() {
+//                modifyJColorChooser();
+//                add(colorPicker, gbc);
+//            }
+//
+//            private void modifyJColorChooser() {
+//                final AbstractColorChooserPanel[] panels = colorPicker.getChooserPanels();
+//                for (final AbstractColorChooserPanel accp : panels) {
+//                    if (!accp.getDisplayName().equals("RGB")) {
+//                        colorPicker.removeChooserPanel(accp);
+//                    }
+//                }
+//            }
+//        }
+        /*
+            END OF THE INNER CLASS ColorTool
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
     }
     /*
         END OF INNER CLASS ToolComponent
