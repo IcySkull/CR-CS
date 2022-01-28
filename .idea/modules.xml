@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Intro Sorting/Intro Sorting.iml" filepath="$PROJECT_DIR$/Intro Sorting/Intro Sorting.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Java CRHS.iml" filepath="$PROJECT_DIR$/.idea/Java CRHS.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loco/Loco.iml" filepath="$PROJECT_DIR$/Loco/Loco.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loco/Sad.iml" filepath="$PROJECT_DIR$/Loco/Sad.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Intro Sorting/lab.iml" filepath="$PROJECT_DIR$/Intro Sorting/lab.iml" />
       <module fileurl="file://$PROJECT_DIR$/Intro Graphics/labs/labs.iml" filepath="$PROJECT_DIR$/Intro Graphics/labs/labs.iml" />
       <module fileurl="file://$PROJECT_DIR$/GUI Control Layouts/labs/labs1.iml" filepath="$PROJECT_DIR$/GUI Control Layouts/labs/labs1.iml" />
       <module fileurl="file://$PROJECT_DIR$/Intro Graphics/labs/resources/resources.iml" filepath="$PROJECT_DIR$/Intro Graphics/labs/resources/resources.iml" />

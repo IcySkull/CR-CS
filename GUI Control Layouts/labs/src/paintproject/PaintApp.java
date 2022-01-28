@@ -170,7 +170,7 @@ public class PaintApp extends JFrame {
 
         PaintUser() {
             color = Color.darkGray;
-            drawSize = 6;
+            drawSize = 15;
             stroke = new BasicStroke(drawSize);
             tool = 0;
             eraser = false;
@@ -627,17 +627,16 @@ public class PaintApp extends JFrame {
 
                         if (user.tool == 1) {
                             for (int i = 0; i < xPts.size() - 1; i++) {
-                                int xMin = Math.min(xPts.get(i), xPts.get(i+1));
+                                double xMin = Math.min(xPts.get(i), xPts.get(i+1));
                                 int xMax = Math.max(xPts.get(i), xPts.get(i+1));
-                                int yMin = Math.min(yPts.get(i), yPts.get(i+1));
+                                double yMin = Math.min(yPts.get(i), yPts.get(i+1));
                                 int yMax = Math.min(yPts.get(i), yPts.get(i+1));
-                                if (xMax - xMin < 5 &&
-                                    yMax - yMin < 5)
-                                    g2.fillOval(
+                                if ((xMax / xMin - yMax / yMin) < 0.6)
+                                    g2.fillRoundRect(
                                             (int) (xPts.get(i+1) - stroke*0.725),
                                             (int) (yPts.get(i+1) - stroke*0.725),
                                             (int) (stroke*1.45),
-                                            (int) (stroke*1.45)
+                                            (int) (stroke*1.45), 100, 100
                                     );
 
                                 g2.drawLine(xPts.get(i), yPts.get(i), xPts.get(i + 1), yPts.get(i + 1));
