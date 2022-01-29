@@ -1,20 +1,28 @@
 package hard8;
 
+import testcases.TestCases;
+
 import java.util.List;
 
-public class Hard8 {
+public class Hard8 extends TestCases {
+    public static void main(String[] args) {
+        new Hard8(10, 10, false);
+    }
 
-    public static <T extends Comparable<? super T>> void selectionSort(List<T> list, T target) {
-        for (int i = 0; i<list.size(); i++) {
-            int targetIndex = i;
-            for (int j = 1 + i; j<list.size(); j++) {
-                if (list.get(j).equals(target)) {
-                    targetIndex = j;
+    Hard8(int range, int cases, boolean negatives) {
+        super(range, cases, negatives);
+        System.out.println(this);
+    }
+
+    public static <T extends Comparable<? super T>> void Hard8(List<T> list, T target) {
+        for (int i = 1; i<list.size(); i++) {
+            if (list.get(i).equals(target)) {
+                for (int j = i-1; j>=0; j--) {
+                    if (!list.get(j).equals(target)) {
+                        swap(list, j, j+1);
+                    }
                 }
             }
-
-
-            swap(list, targetIndex, i);
         }
     }
 
@@ -22,5 +30,10 @@ public class Hard8 {
         T tmp = list.get(a);
         list.set(a, list.get(b));
         list.set(b, tmp);
+    }
+
+    @Override
+    public void sortIntegers(List<Integer> list) {
+        Hard8(list, 8);
     }
 }

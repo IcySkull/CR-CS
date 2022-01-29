@@ -1,24 +1,22 @@
 package selection;
 
-import testcases.SortingCases;
 import testcases.TestCases;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Selection extends SortingCases {
+public class Selection extends TestCases {
     TestCases cases;
-    final int RANGE_INTEGERS = 100;
     final int ARRAYS_SIZE = 20;
-    final boolean NEGATIVE_INCLUDED = true;
 
     public static void main(String[] args) {
         new Selection(10);
     }
 
-    Selection(int cases) {
-        createTestCases(cases);
+    public Selection(int cases) {
+        super();
+        setCases(cases);
+        System.out.println(this);
     }
 
     public static <T extends Comparable<? super T>> void selectionSort(List<T> list) {
@@ -39,33 +37,8 @@ public class Selection extends SortingCases {
         list.set(b, tmp);
     }
 
-    public void createTestCases(int cases) {
-        int[][] tests = new int[cases][];
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~\n\tUnsorted Cases:");
-        for(int i = 0; i < cases; i++) {
-            tests[i] = randomIntArray(20);
-            System.out.println(Arrays.toString(tests[i]));
-        }
-
-        System.out.println("\n~~~~~~~~~~~~~~~~~~~~~\n\tSorted Cases:");
-        for (int i = 0; i < tests.length; i++) {
-            List<Integer> list = intArrayToList(tests[i]);
-            selectionSort(list);
-            System.out.println(Arrays.toString(list.toArray()));
-        }
-    }
-
-
-    private int[] randomIntArray(int size) {
-        int[] intArray = new int[size];
-        for (int i = 0; i < intArray.length; i++) {
-            int sign = 1;
-            if (NEGATIVE_INCLUDED) {
-                sign = Math.random() > 0.4 ? 1 : -1;
-            }
-            int randomNumber = (int)(Math.random()*RANGE_INTEGERS)*sign;
-            intArray[i] = randomNumber;
-        }
-        return intArray;
+    @Override
+    public void sortIntegers(List<Integer> list) {
+        selectionSort(list);
     }
 }
