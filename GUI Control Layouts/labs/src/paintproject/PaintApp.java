@@ -171,7 +171,7 @@ public class PaintApp extends JFrame {
         PaintUser() {
             color = Color.darkGray;
             drawSize = 15;
-            stroke = new BasicStroke(drawSize);
+            stroke = new BasicStroke(drawSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
             tool = 0;
             eraser = false;
         }
@@ -186,7 +186,7 @@ public class PaintApp extends JFrame {
 
         public void setDrawSize(int drawSize) {
             this.drawSize = drawSize;
-            stroke = new BasicStroke(drawSize);
+            stroke = new BasicStroke(drawSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
         }
 
         public void setTool(int tool) {
@@ -627,22 +627,9 @@ public class PaintApp extends JFrame {
 
                         if (user.tool == 1) {
                             for (int i = 0; i < xPts.size() - 1; i++) {
-                                double xMin = Math.min(xPts.get(i), xPts.get(i+1));
-                                int xMax = Math.max(xPts.get(i), xPts.get(i+1));
-                                double yMin = Math.min(yPts.get(i), yPts.get(i+1));
-                                int yMax = Math.min(yPts.get(i), yPts.get(i+1));
-                                if ((xMax / xMin - yMax / yMin) < 0.6)
-                                    g2.fillRoundRect(
-                                            (int) (xPts.get(i+1) - stroke*0.725),
-                                            (int) (yPts.get(i+1) - stroke*0.725),
-                                            (int) (stroke*1.45),
-                                            (int) (stroke*1.45), 100, 100
-                                    );
-
                                 g2.drawLine(xPts.get(i), yPts.get(i), xPts.get(i + 1), yPts.get(i + 1));
                             }
                         }
-
                         g.drawImage(image, 0, 0, this);
                     }
 
