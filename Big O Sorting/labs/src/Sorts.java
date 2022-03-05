@@ -99,7 +99,39 @@ public class Sorts {
     // merge two portions that are sorted respectively by creating an auxilliary
     // array as a place holder then copy it back
     private static void merge(int[] arr, int start, int middle, int end) {
-        int leftLen = middle - start;
-        int rightLen = end - middle - start - 1;
+        int leftLen = middle - start + 1;
+        int rightLen = end - middle;
+
+        int[] leftArr = new int[leftLen];
+        int[] rightArr = new int[rightLen];
+
+        for (int i = 0; i < leftLen; i++)
+            leftArr[i] = arr[start + i];
+        for (int j = 0; j < rightLen; j++)
+            rightArr[j] = arr[middle + j + 1];
+
+        int i = 0, j = 0, k = start;
+        while (i < leftLen && j < rightLen) {
+            if (leftArr[i] < rightArr[j]) {
+                arr[k] = leftArr[i];
+                i++;
+            } else {
+                arr[k] = rightArr[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < leftLen) {
+            arr[k] = leftArr[i];
+            i++;
+            k++;
+        }
+
+        while (j < rightLen) {
+            arr[k] = rightArr[j];
+            j++;
+            k++;
+        }
     }
 }

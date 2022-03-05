@@ -3,7 +3,7 @@ import java.util.*;
 
 public class SortsRunner
 {
-    public static final int RANGE = 100000;
+    public static final int RANGE = 10000;
     
     /**
      * Randomly fill up the given array with integers from 0 to 100000
