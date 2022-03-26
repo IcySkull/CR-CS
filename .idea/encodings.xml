@@ -2,6 +2,8 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/GridWorld/labs/src/actorbox/ActorBox.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/GridWorld/labs/src/actortriangle/ActorTriangle.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/GridWorld/labs/src/spinningactor/SpinningActor.java" charset="windows-1252" />
     <file url="file://$PROJECT_DIR$/GridWorld/slides/src/BugOne.java" charset="windows-1252" />
     <file url="file://$PROJECT_DIR$/GridWorld/slides/src/LocationOne.java" charset="windows-1252" />
   </component>
