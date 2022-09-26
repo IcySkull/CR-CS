@@ -48,6 +48,5 @@ public class SpanishToEnglishTest {
     @Test
     public void testTranslate() {
         SpanishToEnglish dictionary = new SpanishToEnglish();
-        String[] expected = new String[] {};
     }
 }
