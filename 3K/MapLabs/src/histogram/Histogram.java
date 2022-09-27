@@ -5,9 +5,7 @@ package histogram;
 //Class -
 //Lab  -
 
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Scanner;
+import java.util.*;
 import static java.lang.System.*;
 
 public class Histogram
@@ -19,9 +17,10 @@ public class Histogram
 
 	}
 
-	public Histogram(String sent)
+	public Histogram(File data)
 	{
-
+		BufferedReader bf = new BufferedReader(new FileReader(data));
+		histogram = new HashMap();
 	}
 
 	public void setSentence(String sent)
