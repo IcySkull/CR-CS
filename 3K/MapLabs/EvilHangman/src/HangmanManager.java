@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javafx.css.Size;
@@ -40,7 +41,7 @@ public class HangmanManager {
      * @return
      */
     private Set<String> getGreatestWordSet(char character) {
-        Set<String> greatestSet = new TreeSet<>();
+        Set<String> greatestSet = dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet());
         // the guess of the player is assumed to be small so is safe to copy the collapsed guess
         Character[] collapsedCopy = collapsedGuess.clone();
         for (int i = 0; i < collapsedGuess.length; i++) {
@@ -56,13 +57,9 @@ public class HangmanManager {
             else if (greatestSet.size() != 0 && currentSet.size() == greatestSet.size())
                 collapsedCopy[i] = character;
         }
-        collapsedGuess = collapsedCopy; // notice that collapsedGuess remains the same if a greater set is found
+        collapsedGuess = collapsedCopy; // notice that collapsedGuess remains the same if a greater set with the given character is NOT found
         return greatestSet;
     }
-
-    private void emptyGuessArray() {
-        if
-    }`
 
     public Set<String> words() {
         return this.dictionary;
@@ -88,6 +85,13 @@ public class HangmanManager {
     }
 
     public int record(char guess) {
-        return 0;
+        max--; // one guess made
+        dictionary = getGreatestWordSet(guess);
+        int occurrence = 0;
+        for (Character character : collapsedGuess) {
+            if (Character.valueOf(guess).equals(character))
+                occurrence++;
+        }
+        return occurrence;
     }
 }
