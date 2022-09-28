@@ -39,12 +39,15 @@ public class HangmanManager {
      */
     private Set<String> getGreatestWordSet(char character) {
         Set<String> greatestSet = new TreeSet<>();
+        int greatestIndex = -1;
         for (int i = 0; i < collapsedGuess.length; i++) {
             // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
             // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
             Set<String> currentSet = getWordsWithCharAt(character, i);
-            if (currentSet.size() > greatestSet.size())
+            if (currentSet.size() > greatestSet.size()) {
                 greatestSet = currentSet;
+                greatestIndex = i;
+            }
         }
         return greatestSet;
     }
