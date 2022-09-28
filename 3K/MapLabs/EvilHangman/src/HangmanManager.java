@@ -41,24 +41,19 @@ public class HangmanManager {
      * @return
      */
     private Set<String> getGreatestWordSet(char character) {
-        Set<String> greatestSet = dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet());
         // the guess of the player is assumed to be small so is safe to copy the collapsed guess
         Character[] collapsedCopy = collapsedGuess.clone();
+    }
+
+    protected List<Set<String>> getWordSets(char character) {
+        List<Set<String>> collectedSets = new ArrayList();
+        collectedSets.add(dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet()));
+        // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
+        // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
         for (int i = 0; i < collapsedGuess.length; i++) {
-            // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
-            // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
-            Set<String> currentSet = getWordsWithCharAt(character, i);
-            if (currentSet.size() > greatestSet.size()) {
-                collapsedCopy = collapsedGuess.clone(); // clear the guess
-                greatestSet = currentSet;
-                collapsedCopy[i] = character;
-            }
-            // greatestSet.size() != 0 must be checked for the greatest set being different than unity
-            else if (greatestSet.size() != 0 && currentSet.size() == greatestSet.size())
-                collapsedCopy[i] = character;
+            collectedSets.add(getWordsWithCharAt(character, i));
         }
-        collapsedGuess = collapsedCopy; // notice that collapsedGuess remains the same if a greater set with the given character is NOT found
-        return greatestSet;
+        return collectedSets;
     }
 
     public Set<String> words() {
