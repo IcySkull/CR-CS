@@ -34,20 +34,52 @@ public class HangmanManager {
         return dictionary.stream().filter(str -> str.charAt(index) == character).collect(Collectors.toSet());
     }
 
+    private Set<String> getGreatestWordSet(char character) {
+        Set<String> greatestSet = this.dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet());
+        Character[] collapsedCopy = this.collapsedGuess.clone();
+        // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
+        // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
+        for (int i = 0; i < collapsedCopy.length; i++) {
+            Set<String> currSet = getWordsWithCharAt(character, i);
+            if (currSet.size() > greatestSet.size()) {
+                greatestSet = currSet;
+                collapsedCopy = this.collapsedGuess;
+                collapsedCopy[i] = character;
+            }
+            else if (currSet.size() < greatestSet.size())
+                continue;
+            else { //curr set must be equal in size to the greatest set
+                String firstCurr = currSet.iterator().next();
+                String firstGreatest = greatestSet.iterator().next();
+                int occurCurrSet = getCharOcurrenceInWord(character, firstCurr);
+                int occurGreatestSet = getCharOcurrenceInWord(character, firstGreatest);
+                if (occurGreatestSet > occurCurrSet) {
+                    collapsedCopy[i] = character;
+                }
+
+            }
+        }
+
+        return greatestSet;
+    }
+
+    protected int getCharOcurrenceInWord(char character, String word) {
+        int occur = 0;
+        for(int i = 0; i < word.length(); i++) {
+            if (word.charAt(i) == character)
+                occur++;
+        }
+        return occur;
+    }
+
     /**
-     * From all sets with the character at different indexes, returns the greatest set in size
-     * and collapsedGuess is updated in respect to the greatest set found
+     * From the given character, return all the sets of words that contain the given character.
+     * Each set is different in the index where the character is placed.
      * @param character
      * @return
      */
-    private Set<String> getGreatestWordSet(char character) {
-        // the guess of the player is assumed to be small so is safe to copy the collapsed guess
-        Character[] collapsedCopy = collapsedGuess.clone();
-    }
-
     protected List<Set<String>> getWordSets(char character) {
         List<Set<String>> collectedSets = new ArrayList();
-        collectedSets.add(dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet()));
         // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
         // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
         for (int i = 0; i < collapsedGuess.length; i++) {
