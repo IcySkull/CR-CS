@@ -1,6 +1,7 @@
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import javafx.css.Size;
 
 public class HangmanManager {
     private int max;
@@ -34,23 +35,34 @@ public class HangmanManager {
 
     /**
      * From all sets with the character at different indexes, returns the greatest set in size
+     * and collapsedGuess is updated in respect to the greatest set found
      * @param character
      * @return
      */
     private Set<String> getGreatestWordSet(char character) {
         Set<String> greatestSet = new TreeSet<>();
-        int greatestIndex = -1;
+        // the guess of the player is assumed to be small so is safe to copy the collapsed guess
+        Character[] collapsedCopy = collapsedGuess.clone();
         for (int i = 0; i < collapsedGuess.length; i++) {
             // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
             // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
             Set<String> currentSet = getWordsWithCharAt(character, i);
             if (currentSet.size() > greatestSet.size()) {
+                collapsedCopy = collapsedGuess.clone(); // clear the guess
                 greatestSet = currentSet;
-                greatestIndex = i;
+                collapsedCopy[i] = character;
             }
+            // greatestSet.size() != 0 must be checked for the greatest set being different than unity
+            else if (greatestSet.size() != 0 && currentSet.size() == greatestSet.size())
+                collapsedCopy[i] = character;
         }
+        collapsedGuess = collapsedCopy; // notice that collapsedGuess remains the same if a greater set is found
         return greatestSet;
     }
+
+    private void emptyGuessArray() {
+        if
+    }`
 
     public Set<String> words() {
         return this.dictionary;
