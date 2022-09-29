@@ -1,12 +1,9 @@
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import javafx.css.Size;
 
 public class HangmanManager {
     private int max;
-    private Character[] collapsedGuess;
+    private char[] collapsedGuess;
     private Set<String> dictionary;
     private Set<Character> charGuess;
 
@@ -14,7 +11,7 @@ public class HangmanManager {
         if (length < 1 || max < 0) 
             throw new IllegalArgumentException();
         this.max = max;
-        this.collapsedGuess = new Character[length];
+        this.collapsedGuess = new char[length];
         this.dictionary = new TreeSet<String>(dictionary);
         this.charGuess = new TreeSet<Character>();
         retainAllLengthWords();
@@ -36,7 +33,7 @@ public class HangmanManager {
 
     private Set<String> getGreatestWordSet(char character) {
         Set<String> greatestSet = this.dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet());
-        Character[] collapsedCopy = this.collapsedGuess.clone();
+        char[] collapsedCopy = this.collapsedGuess.clone();
         // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
         // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
         for (int i = 0; i < collapsedCopy.length; i++) {
@@ -49,14 +46,8 @@ public class HangmanManager {
             else if (currSet.size() < greatestSet.size())
                 continue;
             else { //curr set must be equal in size to the greatest set
-                String firstCurr = currSet.iterator().next();
-                String firstGreatest = greatestSet.iterator().next();
-                int occurCurrSet = getCharOcurrenceInWord(character, firstCurr);
-                int occurGreatestSet = getCharOcurrenceInWord(character, firstGreatest);
-                if (occurGreatestSet > occurCurrSet) {
+                if (greatestSet.size() != 0 && greatestSet.iterator().next().indexOf(character) > 0)
                     collapsedCopy[i] = character;
-                }
-
             }
         }
 
@@ -102,11 +93,11 @@ public class HangmanManager {
 
     public String pattern() {
         String out = "";
-        for (Character character : collapsedGuess) {
-            if (character == null)
+        for (char character : collapsedGuess) {
+            if (character == 0)
                 out += '-';
             else
-                out += String.valueOf(character);
+                out += character;
         }
         return out;
     }
@@ -115,10 +106,14 @@ public class HangmanManager {
         max--; // one guess made
         dictionary = getGreatestWordSet(guess);
         int occurrence = 0;
+        boolean flag = false;
         for (Character character : collapsedGuess) {
-            if (Character.valueOf(guess).equals(character))
+            if (Character.valueOf(guess).equals(character)) {
+                flag = true;
                 occurrence++;
+            }
         }
+        if (flag) max++;
         return occurrence;
     }
 }
