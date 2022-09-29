@@ -10,7 +10,16 @@ public class CharPattern {
         indexes.add(index);
     }
 
-    public CharPattern(String word, char character)
+    public CharPattern(String word, char character) {
+        String out = ""
+        for (int i = 0; i < word.length(); i++) {
+            char charAt = word.charAt(i);
+            if (charAt == character)
+                out += character;
+            else
+                out += "";
+        } 
+    }
 
     public void addIndex(int index){
         indexes.add(index);
