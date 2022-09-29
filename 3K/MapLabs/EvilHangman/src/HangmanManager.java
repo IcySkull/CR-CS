@@ -27,7 +27,7 @@ public class HangmanManager {
     /**
      * Uses a collection stream to return a set that filters all the words that do NOT have the given character at the given index
      */
-    private Set<String> getWordsWithCharAt(char character, int index) {
+    private Set<String> getPatternSet(char character, int index) {
         return dictionary.stream().filter(str -> str.charAt(index) == character).collect(Collectors.toSet());
     }
 
