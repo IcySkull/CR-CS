@@ -3,7 +3,7 @@ import java.util.stream.Collectors;
 
 public class HangmanManager {
     private int max;
-    private int length;
+    private final int length;
     private char[] collapsedGuess;
     private Set<String> dictionary;
     private Set<Character> charGuess;
@@ -26,7 +26,7 @@ public class HangmanManager {
         dictionary = dictionary.stream().filter(str -> str.length() == this.length).collect(Collectors.toSet());
     }
 
-    public String getGreatestPatternSet(Map<String, Set<String>> patternMap, char guess) {
+    public String getGreatestPatternSet(Map<String, Set<String>> patternMap) {
         String greatestPattern = getEmptyPattern();
         for (String patternSet : patternMap.keySet()) {
             Set<String> wordSet = patternMap.get(patternSet);
@@ -71,6 +71,8 @@ public class HangmanManager {
     }
 
     public int collapseGuess(String pattern, char guess) {
+        max--; // bias of bad guess
+        charGuess.add(guess);
         if (pattern.equals(getEmptyPattern()))
             return 0;
         int occurrences = 0;
@@ -80,6 +82,8 @@ public class HangmanManager {
                 collapsedGuess[i] = guess;
             }
         }
+        if (occurrences > 0) // correct guess
+            max++;
         return occurrences;
     }
 
@@ -107,13 +111,11 @@ public class HangmanManager {
     }
 
     public int record(char guess) {
-        charGuess.add(guess);
+        if (max < 1 || dictionary.isEmpty() || charGuess.contains(guess))
+            throw new IllegalArgumentException();
         Map<String, Set<String>> patternMap = getPatternMap(guess);
-        String pattern = getGreatestPatternSet(patternMap, guess);
+        String pattern = getGreatestPatternSet(patternMap);
         dictionary = patternMap.get(pattern);
-        int o = collapseGuess(pattern, guess);
-        if (o ==  0)
-            max--;
         return collapseGuess(pattern, guess);
     }
 }

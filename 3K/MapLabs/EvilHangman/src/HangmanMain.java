@@ -8,7 +8,7 @@ import java.util.*;
 import java.io.*;
 
 public class HangmanMain {
-	public static final String DICTIONARY_FILE = "dictionary-tiny.txt";
+	public static final String DICTIONARY_FILE = "dictionary.txt";
 	public static final boolean SHOW_COUNT = true; // show words left
 
 	public static void main(String[] args) throws FileNotFoundException {
