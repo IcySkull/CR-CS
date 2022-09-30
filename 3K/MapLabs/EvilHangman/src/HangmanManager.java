@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class HangmanManager {
@@ -27,10 +26,22 @@ public class HangmanManager {
         dictionary = dictionary.stream().filter(str -> str.length() == this.length).collect(Collectors.toSet());
     }
 
-    public Set<String> getGreatestWordSet(char guess) {
-        Map<CharPattern, Set<String>> patternMap = dictionary.stream().collect(
+    public String getGreatestPatternSet(Map<String, Set<String>> patternMap, char guess) {
+        String greatestPattern = getEmptyPattern();
+        for (String patternSet : patternMap.keySet()) {
+            Set<String> wordSet = patternMap.get(patternSet);
+            if (patternMap.get(greatestPattern) == null)
+                greatestPattern = patternSet;
+            if (wordSet.size() > patternMap.get(greatestPattern).size())
+                greatestPattern = patternSet;
+        }
+        return greatestPattern;
+    }
+
+    public Map<String, Set<String>> getPatternMap(char guess) {
+        return dictionary.stream().collect(
                 Collectors.toMap(
-                        word -> new CharPattern(word, guess),
+                        word -> getPatternWord(word, guess),
                         word -> {
                             HashSet<String> initWordSet = new HashSet<>();
                             initWordSet.add(word);
@@ -42,7 +53,34 @@ public class HangmanManager {
                         }
                 )
         );
-        return null;
+    }
+
+    public String getEmptyPattern() {
+        return "-".repeat(length);
+    }
+
+    public String getPatternWord(String word, char character) {
+        StringBuilder pattern = new StringBuilder();
+        for (int i = 0; i < word.length(); i++) {
+            if (word.charAt(i) == character)
+                pattern.append(character);
+            else
+                pattern.append('-');
+        }
+        return pattern.toString();
+    }
+
+    public int collapseGuess(String pattern, char guess) {
+        if (pattern.equals(getEmptyPattern()))
+            return 0;
+        int occurrences = 0;
+        for(int i = 0; i < pattern.length(); i++) {
+            if (pattern.charAt(i) == guess) {
+                occurrences++;
+                collapsedGuess[i] = guess;
+            }
+        }
+        return occurrences;
     }
 
     public Set<String> words() {
@@ -69,17 +107,13 @@ public class HangmanManager {
     }
 
     public int record(char guess) {
-        max--; // one guess made
-        dictionary = getGreatestWordSet(guess);
-        int occurrence = 0;
-        boolean flag = false;
-        for (Character character : collapsedGuess) {
-            if (Character.valueOf(guess).equals(character)) {
-                flag = true;
-                occurrence++;
-            }
-        }
-        if (flag) max++;
-        return occurrence;
+        charGuess.add(guess);
+        Map<String, Set<String>> patternMap = getPatternMap(guess);
+        String pattern = getGreatestPatternSet(patternMap, guess);
+        dictionary = patternMap.get(pattern);
+        int o = collapseGuess(pattern, guess);
+        if (o ==  0)
+            max--;
+        return collapseGuess(pattern, guess);
     }
 }
