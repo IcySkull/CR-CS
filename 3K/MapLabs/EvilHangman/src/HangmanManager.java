@@ -10,13 +10,13 @@ public class HangmanManager {
     private Set<Character> charGuess;
 
     public HangmanManager(List<String> dictionary, int length, int max) {
-        if (length < 1 || max < 0) 
+        if (length < 1 || max < 0)
             throw new IllegalArgumentException();
         this.max = max;
         this.length = length;
         this.collapsedGuess = new char[length];
-        this.dictionary = new HashSet<String>(dictionary);
-        this.charGuess = new HashSet<Character>();
+        this.dictionary = new HashSet<>(dictionary);
+        this.charGuess = new HashSet<>();
         retainAllLengthWords();
     }
 
@@ -29,11 +29,20 @@ public class HangmanManager {
 
     public Set<String> getGreatestWordSet(char guess) {
         Map<CharPattern, Set<String>> patternMap = dictionary.stream().collect(
-            Collectors.toMap(
-                word -> new CharPattern((String)word, guess),
-                new HashSet<String>()
-            )
+                Collectors.toMap(
+                        word -> new CharPattern(word, guess),
+                        word -> {
+                            HashSet<String> initWordSet = new HashSet<>();
+                            initWordSet.add(word);
+                            return initWordSet;
+                        },
+                        (a, b) -> {
+                            a.addAll(b);
+                            return a;
+                        }
+                )
         );
+        return null;
     }
 
     public Set<String> words() {
@@ -49,14 +58,14 @@ public class HangmanManager {
     }
 
     public String pattern() {
-        String out = "";
+        StringBuilder out = new StringBuilder();
         for (char character : collapsedGuess) {
             if (character == 0)
-                out += '-';
+                out.append('-');
             else
-                out += character;
+                out.append(character);
         }
-        return out;
+        return out.toString();
     }
 
     public int record(char guess) {
