@@ -4,35 +4,42 @@ public class CharPattern {
     private List<Integer> indexes;
     private char character;
 
-    public CharPattern(char character, int index) {
+    public CharPattern(int index, char character) {
         this.character = character;
-        indexes = new ArrayList();
+        indexes = new ArrayList<>();
         indexes.add(index);
     }
 
     public CharPattern(String word, char character) {
-        String out = ""
+        indexes = new ArrayList<>();
+        this.character = character;
         for (int i = 0; i < word.length(); i++) {
-            char charAt = word.charAt(i);
-            if (charAt == character)
-                out += character;
-            else
-                out += "";
-        } 
+            if (word.charAt(i) == this.character)
+                indexes.add(i);
+        }
     }
 
     public void addIndex(int index){
         indexes.add(index);
     }
 
-    public String getPattern(int len) {
-        String out = "";
-        for (int i = 0; i < len; i++) {
-            if (indexes.contains(i))
-                out += character;
-            else
-                out += "-";
+    public boolean containsPattern(String word) {
+        for (Integer index : this.indexes) {
+            if (word.charAt(index) == this.character)
+                return true;
         }
-        return 
+        return false;
+    }
+
+    public String getPattern(int len) {
+        String pattern = "";
+        for (int i = 0; i < len; i++) {
+            if (indexes.contains(i)) {
+                pattern += character;
+            }
+            else
+                pattern += "-";
+        }
+        return pattern;
     }
 }

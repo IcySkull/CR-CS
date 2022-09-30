@@ -1,8 +1,10 @@
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class HangmanManager {
     private int max;
+    private int length;
     private char[] collapsedGuess;
     private Set<String> dictionary;
     private Set<Character> charGuess;
@@ -11,72 +13,27 @@ public class HangmanManager {
         if (length < 1 || max < 0) 
             throw new IllegalArgumentException();
         this.max = max;
+        this.length = length;
         this.collapsedGuess = new char[length];
-        this.dictionary = new TreeSet<String>(dictionary);
-        this.charGuess = new TreeSet<Character>();
+        this.dictionary = new HashSet<String>(dictionary);
+        this.charGuess = new HashSet<Character>();
         retainAllLengthWords();
     }
 
     /**
-     * Remove all the words of the dictionary that are not of the same length of guess
+     * Remove all the words of the dictionary that are not of the same length that the guess
      */
     private void retainAllLengthWords() {
-        dictionary = dictionary.stream().filter(str -> str.length() == collapsedGuess.length).collect(Collectors.toSet());
+        dictionary = dictionary.stream().filter(str -> str.length() == this.length).collect(Collectors.toSet());
     }
 
-    /**
-     * Uses a collection stream to return a set that filters all the words that do NOT have the given character at the given index
-     */
-    private Set<String> getPatternSet(char character, int index) {
-        return dictionary.stream().filter(str -> str.charAt(index) == character).collect(Collectors.toSet());
-    }
-
-    private Set<String> getGreatestWordSet(char character) {
-        Set<String> greatestSet = this.dictionary.stream().filter(str -> str.indexOf(character) == -1).collect(Collectors.toSet());
-        char[] collapsedCopy = this.collapsedGuess.clone();
-        // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
-        // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
-        for (int i = 0; i < collapsedCopy.length; i++) {
-            Set<String> currSet = getWordsWithCharAt(character, i);
-            if (currSet.size() > greatestSet.size()) {
-                greatestSet = currSet;
-                collapsedCopy = this.collapsedGuess;
-                collapsedCopy[i] = character;
-            }
-            else if (currSet.size() < greatestSet.size())
-                continue;
-            else { //curr set must be equal in size to the greatest set
-                if (greatestSet.size() != 0 && greatestSet.iterator().next().indexOf(character) > 0)
-                    collapsedCopy[i] = character;
-            }
-        }
-
-        return greatestSet;
-    }
-
-    protected int getCharOcurrenceInWord(char character, String word) {
-        int occur = 0;
-        for(int i = 0; i < word.length(); i++) {
-            if (word.charAt(i) == character)
-                occur++;
-        }
-        return occur;
-    }
-
-    /**
-     * From the given character, return all the sets of words that contain the given character.
-     * Each set is different in the index where the character is placed.
-     * @param character
-     * @return
-     */
-    protected List<Set<String>> getWordSets(char character) {
-        List<Set<String>> collectedSets = new ArrayList();
-        // this for loop is equivalent to iterating through the size of the guess and returning the greatest set with the occurrence of the character
-        // note that the first greatest set is returned and this is equal to the set of words that have the argument character at the index of the loop variable: i
-        for (int i = 0; i < collapsedGuess.length; i++) {
-            collectedSets.add(getWordsWithCharAt(character, i));
-        }
-        return collectedSets;
+    public Set<String> getGreatestWordSet(char guess) {
+        Map<CharPattern, Set<String>> patternMap = dictionary.stream().collect(
+            Collectors.toMap(
+                word -> new CharPattern((String)word, guess),
+                new HashSet<String>()
+            )
+        );
     }
 
     public Set<String> words() {
