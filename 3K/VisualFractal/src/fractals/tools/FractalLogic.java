@@ -22,7 +22,7 @@ public class FractalLogic implements PrintableFractal {
 
     public FractalLogic(Graphics g, Dimension winSize) {
         this.setGraphics(g);
-        this.viewOp = new ViewOperator(this.g2d.getTransform(), winSize);
+        this.viewOp = new ViewOperator(winSize);
         this. iterations = 1;
     }
 
@@ -68,7 +68,7 @@ public class FractalLogic implements PrintableFractal {
 
     @Override
     public void translate(double dx, double dy) {
-        viewOp.translation(dx*(1/viewOp.getZoom().getX()), dy*(1/viewOp.getZoom().getY()));
+        viewOp.translation(dx, dy);
     }
 
     public void setGraphics(Graphics g2d) {

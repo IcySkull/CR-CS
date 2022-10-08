@@ -3,6 +3,7 @@ package math;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.GenericArrayType;
 
 public class ViewOperator {
     private Rectangle2D windowSizeScaled;
@@ -10,17 +11,19 @@ public class ViewOperator {
     private Vector2D zoom = new Vector2D(1, 1);
 
     private final double ZOOM = 0.10;
-
-    private Vector2D displacement = new Vector2D();
-
-    public ViewOperator(Dimension windowSize) {
-        this.winSize = windowSize;
-        this.windowSizeScaled = new Rectangle2D.Double(0, 0, this.winSize.width, this.winSize.height);
-    }
+    private Vector2D zoomDx;
+    private Vector2D mouseDx;
 
     public ViewOperator() {
         this.winSize = new Dimension(0,0);
         this.windowSizeScaled = new Rectangle2D.Double(0, 0, this.winSize.width, this.winSize.height);
+        zoomDx = new Vector2D();
+        mouseDx = new Vector2D();
+    }
+
+    public ViewOperator(Dimension windowSize) {
+        this();
+        this.winSize = windowSize;
     }
 
     public void layScaledWindow() {
@@ -33,14 +36,27 @@ public class ViewOperator {
         scaleWindow();
     }
 
+    /**
+     * Zoom method called everytime the user zooms in or out
+     */
     public void zoom(double zoomx, double zoomy) {
-        double xprevZoom = this.zoom.getX();
-        double yprevZoom = this.zoom.getY();
         zoom.scaleX(1+zoomx);
         zoom.scaleY(1+zoomy);
-        double dx = (this.winSize.width + displacement.getX()) * (zoom.getX() - xprevZoom);
-        double dy = (this.winSize.height + displacement.getY()) * (zoom.getY() - yprevZoom);
-        displacement.add(-dx, -dy);
+        zoomDx.add(getZoomDisplacement(zoomx, zoomy));
+    }
+
+    /**
+     * Returns the displacement of the screen due to the zoom passed applied to the current zoom.
+     * @param zoomx
+     * @param zoomy
+     * @return
+     */
+    public Vector2D getZoomDisplacement(double zoomx, double zoomy) {
+        double xscale = this.zoom.getX() * (1 - (1/(1+zoomx)));
+        double yscale = this.zoom.getY() * (1- (1/(1+zoomy)));
+        double dx = (winSize.width/2) * (xscale);
+        double dy = (winSize.height/2) * (yscale);
+        return new Vector2D(-dx, -dy);
     }
 
     public void zoomXUnits(int units) {
@@ -68,7 +84,7 @@ public class ViewOperator {
     }
 
     public void translation(double dx, double dy) {
-        displacement.add(dx, dy);
+        mouseDx.add(dx, dy);
     }
 
     public Dimension getWinSize() {
@@ -81,8 +97,8 @@ public class ViewOperator {
 
     public Rectangle2D getViewBox() {
         return new Rectangle2D.Double(
-                displacement.getX(),
-                displacement.getY(),
+                mouseDx.getX(),
+                mouseDx.getY(),
                 winSize.width,
                 winSize.height
         );
@@ -95,7 +111,7 @@ public class ViewOperator {
     }
 
     public Vector2D getDisplacement() {
-        return displacement;
+        return zoomDx.addR(mouseDx);
     }
 
     public Vector2D getZoom() {
@@ -108,7 +124,7 @@ public class ViewOperator {
                 "windowSizeScaled=" + windowSizeScaled +
                 ", winSize=" + winSize +
                 ", zoom=" + zoom +
-                ", displacement=" + displacement +
+                ", displacement=" + mouseDx +
                 '}';
     }
 }
