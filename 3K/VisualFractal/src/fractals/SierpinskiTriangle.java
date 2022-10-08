@@ -6,18 +6,18 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public class SierpinskiTriangle extends FractalLogic {
-    public void sierpinskiTriangle() {
+    public void sierpinskiTriangle(int x, int y) {
         Rectangle2D scaledWindow = getScaledWindow();
         double w = scaledWindow.getWidth();
         double h = scaledWindow.getHeight();
         double wh = w*0.5;
         double hh = h*0.5;
         getGraphics().drawPolygon(
-                new int[]{0, round(w), round(wh)},
-                new int[]{round(h), round(h), 0},
+                new int[]{x, round(w) + x, round(wh) + x},
+                new int[]{round(h) + y, round(h) + y, y},
                 3
         );
-        sierpinskiTriangle(wh*0.5, hh, wh, hh, getIterations()-1);
+        sierpinskiTriangle(wh*0.5 + x, hh + y, wh, hh, getIterations()-1);
     }
 
     public void sierpinskiTriangle(double x, double y, double w, double h, int it) {
@@ -26,7 +26,7 @@ public class SierpinskiTriangle extends FractalLogic {
             double hh = h*0.5;
             double whh = wh*0.5;
             getGraphics().drawPolygon(
-                    new int[]{round(x), round(x+w), round(x+wh),},
+                    new int[]{round(x), round(x+w), round(x+wh)},
                     new int[]{round(y), round(y), round(y+h)},
                     3
             );
@@ -40,7 +40,7 @@ public class SierpinskiTriangle extends FractalLogic {
     @Override
     public void paint(Graphics g, Dimension size) {
         super.paint(g, size);
-        sierpinskiTriangle();
+        sierpinskiTriangle(getDx(), getDy());
     }
 
 }

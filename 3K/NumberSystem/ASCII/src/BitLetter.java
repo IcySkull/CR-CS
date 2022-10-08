@@ -3,21 +3,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BitLetter {
-    
-    static public String wordToBits(String word) {
-        List<String> bytes = new ArrayList<>();
+    public static void main(String[] args) {
+        String bitMax = "1111111111111111111111111111111";
+        System.out.println(Integer.toBinaryString(Integer.MAX_VALUE-1));
+        System.out.println(Integer.toBinaryString(~1));
+        System.out.println(Integer.MAX_VALUE-1);
     }
 
-    public int charToBits(char character) {
-
+    static public List<String> getBytesFromWord(String word) {
+        return word.chars().mapToObj(c -> Integer.toBinaryString(c)).collect(Collectors.toList());
     }
-
-    public List<String> getBytesFromWord(String word) {
-        return word.chars().map(c -> Integer.toBinaryString(c)).collect(Collectors.toList());
-    }
-
-    protected String charToBbyte(char character) {
-        return Integer.to
-    }
-
 }

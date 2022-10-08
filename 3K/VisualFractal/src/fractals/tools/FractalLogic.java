@@ -68,7 +68,7 @@ public class FractalLogic implements PrintableFractal {
 
     @Override
     public void translate(double dx, double dy) {
-        viewOp.translation(dx*(viewOp.getZoom().getX()), dy*(1/viewOp.getZoom().getY()));
+        viewOp.translation(dx*(1/viewOp.getZoom().getX()), dy*(1/viewOp.getZoom().getY()));
     }
 
     public void setGraphics(Graphics g2d) {
@@ -89,6 +89,14 @@ public class FractalLogic implements PrintableFractal {
 
     public ViewOperator getViewOperator() {
         return viewOp;
+    }
+
+    public int getDx() {
+        return viewOp.getDisplacement().getXR();
+    }
+
+    public int getDy() {
+        return viewOp.getDisplacement().getYR();
     }
 
     @Override

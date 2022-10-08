@@ -13,18 +13,14 @@ public class ViewOperator {
 
     private Vector2D displacement = new Vector2D();
 
-    public ViewOperator(Graphics2D g, Dimension windowSize) {
-        this.winSize = windowSize;
-        this.windowSizeScaled = new Rectangle2D.Double(0, 0, this.winSize.width, this.winSize.height);
-    }
-
-    public ViewOperator(AffineTransform original, Dimension windowSize) {
+    public ViewOperator(Dimension windowSize) {
         this.winSize = windowSize;
         this.windowSizeScaled = new Rectangle2D.Double(0, 0, this.winSize.width, this.winSize.height);
     }
 
     public ViewOperator() {
         this.winSize = new Dimension(0,0);
+        this.windowSizeScaled = new Rectangle2D.Double(0, 0, this.winSize.width, this.winSize.height);
     }
 
     public void layScaledWindow() {
@@ -38,11 +34,13 @@ public class ViewOperator {
     }
 
     public void zoom(double zoomx, double zoomy) {
-        zoom.add(new Vector2D(zoomx, zoomy));
-        double dx = (this.winSize.width + displacement.getX()) * (zoomx);
-        double dy = (this.winSize.height + displacement.getY()) * (zoomy);
-        displacement.add(dx, dy);
-
+        double xprevZoom = this.zoom.getX();
+        double yprevZoom = this.zoom.getY();
+        zoom.scaleX(1+zoomx);
+        zoom.scaleY(1+zoomy);
+        double dx = (this.winSize.width + displacement.getX()) * (zoom.getX() - xprevZoom);
+        double dy = (this.winSize.height + displacement.getY()) * (zoom.getY() - yprevZoom);
+        displacement.add(-dx, -dy);
     }
 
     public void zoomXUnits(int units) {
@@ -96,7 +94,21 @@ public class ViewOperator {
         return viewBox.createIntersection(windowBox);
     }
 
+    public Vector2D getDisplacement() {
+        return displacement;
+    }
+
     public Vector2D getZoom() {
         return zoom;
+    }
+
+    @Override
+    public String toString() {
+        return "ViewOperator{" +
+                "windowSizeScaled=" + windowSizeScaled +
+                ", winSize=" + winSize +
+                ", zoom=" + zoom +
+                ", displacement=" + displacement +
+                '}';
     }
 }
