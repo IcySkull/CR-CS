@@ -54,8 +54,8 @@ public class ViewOperator {
     public Vector2D getZoomDisplacement(double zoomx, double zoomy) {
         double xscale = this.zoom.getX() * (1 - (1/(1+zoomx)));
         double yscale = this.zoom.getY() * (1- (1/(1+zoomy)));
-        double dx = (winSize.width/2) * (xscale);
-        double dy = (winSize.height/2) * (yscale);
+        double dx = (winSize.width/2) * (xscale) + mouseDx.getX()*zoomx;
+        double dy = (winSize.height/2) * (yscale) + mouseDx.getY()*zoomy;
         return new Vector2D(-dx, -dy);
     }
 
