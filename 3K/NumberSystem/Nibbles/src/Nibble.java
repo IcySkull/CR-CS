@@ -1,6 +1,6 @@
 public class Nibble {
-    static private final int RIGHT = 15;
-    static private final int LEFT = 240;
+    static private final int RIGHT = 0B0000_1111;
+    static private final int LEFT = 0B1111_0000;
 
     public static void main(String[] args) throws Exception {
         Integer[] n = {100, 59, 33, 122};
