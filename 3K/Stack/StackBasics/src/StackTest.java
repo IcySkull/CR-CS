@@ -1,9 +1,13 @@
-//© A+ Computer Science  -  www.apluscompsci.com
+//ï¿½ A+ Computer Science  -  www.apluscompsci.com
 //Name -
 //Date -  
 //Class -
 //Lab  -
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 import static java.lang.System.*;
 
@@ -11,21 +15,36 @@ public class StackTest
 {
 	private Stack<String> stack;
 
-	public StackTester()
+	public StackTest()
 	{
-		setStack("");
+		stack = new Stack();
 	}
 
-	public StackTester(String line)
+	public StackTest(String line)
 	{
+		this();
+		setStack(line);
 	}
 	
 	public void setStack(String line)
 	{
+		stack.addAll(Arrays.asList(line.split(" ")));
 	}
 
-	public void popEmAll()
+	public static String collectItr(Iterator<String> itr) {
+		String out = "";
+		while (itr.hasNext())
+			out += itr.next() + " ";
+		return out.trim();
+	}
+
+	public Iterator<String> popEmAll()
 	{
+		List<String> out = new ArrayList<>();
+		while (!stack.isEmpty()) {
+			out.add(stack.pop());
+		}
+		return out.iterator();
 	}
 
 	//add a toString
