@@ -4,12 +4,7 @@
 //Class -
 //Lab  -
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
-import static java.lang.System.*;
+import java.util.*;
 
 public class StackTest
 {
@@ -17,7 +12,7 @@ public class StackTest
 
 	public StackTest()
 	{
-		stack = new Stack();
+		stack = new Stack<String>();
 	}
 
 	public StackTest(String line)
@@ -46,6 +41,4 @@ public class StackTest
 		}
 		return out.iterator();
 	}
-
-	//add a toString
 }
