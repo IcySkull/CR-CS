@@ -12,7 +12,8 @@ import static java.lang.System.*;
 public class SyntaxChecker
 {
 	private String exp;
-	private Stack<char> symbols;
+	private Stack<Character> symbols;
+	private String state;
 	private final Set<BoundedSymbol> boundedSymbols = new TreeSet<>(List.of(
 		new BoundedSymbol('(', ')'),
 		new BoundedSymbol('[', ']'),
@@ -28,11 +29,18 @@ public class SyntaxChecker
 	public SyntaxChecker(String s)
 	{
 		this();
+		this.exp = s;
+		setExpression();
+		state = checkExpression() ? "valid" : "invalidad";
 	}
 	
-	public void setExpression(String s)
+	private void setExpression()
 	{
-		s.chars().forEach( c -> symbols.add());
+		exp.chars().forEach( c -> {
+			Character ch = 
+				symbols.add(Character.valueOf((char) c));
+			}
+		);
 	}
 
 	public boolean checkExpression()
@@ -42,6 +50,6 @@ public class SyntaxChecker
 
 	@Override
 	public String toString() {
-		return exp;
+		return exp + " is " + state;
 	}
 }
