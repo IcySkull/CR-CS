@@ -32,6 +32,16 @@ public class BufferedImageStack {
         return index+1;
     }
 
+    public BufferedImage get(int gindex) {
+        if (index == -1)
+            throw new IndexOutOfBoundsException();
+        else if (gindex == 0)
+            return ary[index];
+        else if (gindex < 0 || gindex > index)
+            throw new IndexOutOfBoundsException();
+        return ary[gindex];
+    }
+
     public int getArraySize() {
         return ary.length;
     }

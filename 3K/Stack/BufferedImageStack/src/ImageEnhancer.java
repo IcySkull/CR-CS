@@ -98,8 +98,8 @@ public class ImageEnhancer extends Component implements ActionListener {
     menuBar.add(editMenu);
     menuBar.add(imageMenu);
 
-    undoItem.setEnabled(true);
-    redoItem.setEnabled(true);
+    undoItem.setEnabled(false);
+    redoItem.setEnabled(false);
 
   }
 
@@ -217,9 +217,15 @@ public class ImageEnhancer extends Component implements ActionListener {
     // debugging.
     if (e.getSource() == redoItem) {
       redoLastAction();
- }
+      if (redo.isEmpty())
+        redoItem.setEnabled(false);
+      undoItem.setEnabled(true);
+    }
     if (e.getSource() == undoItem) {  
       undoLastAction();
+      if (undo.isEmpty())
+        undoItem.setEnabled(false);
+      redoItem.setEnabled(true);
     }
     if (e.getSource() == exitItem) {
       System.exit(0);
@@ -239,11 +245,17 @@ public class ImageEnhancer extends Component implements ActionListener {
     if (e.getSource() == thresholdItem) {
       threshold();
     }
-    gWorking.drawImage(biFiltered, 0, 0, null); // Draw the pixels from biFiltered into biWorking.
-    if (e.getSource() != redoItem && e.getSource() != undoItem) {
+    if (redo.isEmpty() && undo.isEmpty()) {
+      undo.push(biWorking);
+      undoItem.setEnabled(true);
+    }
+    else if (e.getSource() != redoItem && e.getSource() != undoItem) {
       redo = new BufferedImageStack();
       undo.push(biFiltered);
+      undoItem.setEnabled(true);
+      redoItem.setEnabled(false);
     }
+    gWorking.drawImage(biFiltered, 0, 0, null); // Draw the pixels from biFiltered into biWorking.
     repaint(); // Ask Swing to update the screen.
     printNumbersOfElementsInBothStacks(); // Report on the states of the stacks.
     return;
