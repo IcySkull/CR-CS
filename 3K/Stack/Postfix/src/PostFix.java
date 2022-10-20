@@ -70,6 +70,8 @@ public class PostFix
 		expression.chars().forEach(c -> {
 			Character symbol = Character.valueOf((char) c);
 			MathSymbol s = symbols.get(symbol);
+			if (c != 32 && s == null)
+				throw new IllegalArgumentException();
 			if (s instanceof Number n)
 				numbers.push(n.n);
 			else if (s instanceof Operator op) {

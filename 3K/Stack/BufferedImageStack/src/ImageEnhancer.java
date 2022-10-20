@@ -187,19 +187,6 @@ public class ImageEnhancer extends Component implements ActionListener {
     biFiltered = threshold_op.filter(biWorking, null);
   }
 
-  public void undoLastAction() {
-    if (undo.isEmpty())
-      return;
-    redo.push(biFiltered);
-    biFiltered = undo.pop();
-  }
-      
-  public void redoLastAction() {
-    if (redo.isEmpty())
-      return;
-    biFiltered = redo.pop();
-    undo.push(biFiltered);
-  }
 
   public void actionPerformed() {
     
@@ -221,11 +208,17 @@ public class ImageEnhancer extends Component implements ActionListener {
         redoItem.setEnabled(false);
       undoItem.setEnabled(true);
     }
-    if (e.getSource() == undoItem) {  
+    else if (e.getSource() == undoItem) {  
       undoLastAction();
       if (undo.isEmpty())
         undoItem.setEnabled(false);
       redoItem.setEnabled(true);
+    }
+    else {
+      redo = new BufferedImageStack();
+      undo.push(biFiltered);
+      undoItem.setEnabled(true);
+      redoItem.setEnabled(false);
     }
     if (e.getSource() == exitItem) {
       System.exit(0);
@@ -245,21 +238,27 @@ public class ImageEnhancer extends Component implements ActionListener {
     if (e.getSource() == thresholdItem) {
       threshold();
     }
-    if (redo.isEmpty() && undo.isEmpty()) {
-      undo.push(biWorking);
-      undoItem.setEnabled(true);
-    }
-    else if (e.getSource() != redoItem && e.getSource() != undoItem) {
-      redo = new BufferedImageStack();
-      undo.push(biFiltered);
-      undoItem.setEnabled(true);
-      redoItem.setEnabled(false);
+
+    if (redo.isEmpty() && undo.getSize() == 1) {
+      undo.pop();
+      undo.push(biTemp);
     }
     gWorking.drawImage(biFiltered, 0, 0, null); // Draw the pixels from biFiltered into biWorking.
     repaint(); // Ask Swing to update the screen.
     printNumbersOfElementsInBothStacks(); // Report on the states of the stacks.
     return;
   }
+
+  public void undoLastAction() {
+    this.biFiltered = undo.pop();
+    this.redo.push(biFiltered);
+  }
+      
+  public void redoLastAction() {
+    this.biFiltered = redo.pop();
+    this.undo.push(biFiltered);
+  }
+
 
   private ImageEnhancer image_enhancer_instance;
 
