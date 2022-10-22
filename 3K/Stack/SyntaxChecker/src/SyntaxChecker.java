@@ -25,13 +25,13 @@ public class SyntaxChecker {
 
 	public SyntaxChecker(String s) {
 		this();
-		this.exp = s;
-		setExpression();
+		setExpression(s);
 		state = checkExpression() ? "valid" : "invalidad";
 	}
 
-	private void setExpression() {
+	public void setExpression(String s) {
 		symbols = new Stack<>();
+		this.exp = s;
 		exp.chars().forEach(c -> {
 			Character ch = Character.valueOf((char) c);
 			symbols.add(ch);
