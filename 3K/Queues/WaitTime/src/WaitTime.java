@@ -22,23 +22,25 @@ public class WaitTime {
         List<Integer> listCusto = Arrays.stream(customers).boxed().toList();
         List<Integer> workingTime = listCusto.subList(0, n);
         Queue<Integer> waitTime = new LinkedList<>(listCusto.subList(n, listCusto.size()));
-        int total = 0;
-        while (!workingTime.isEmpty()) {
-            int min = Collections.min(workingTime);
-            total += min;
-            workingTime = workingTime.stream()
+        return waitTime(workingTime, waitTime);
+    }
+
+    public static int waitTime(List<Integer> tellers, Queue<Integer> waiting) {
+        if (waiting.isEmpty()) 
+            return Collections.max(tellers);
+
+        int min = Collections.min(tellers);
+        return min + waitTime(
+            tellers.stream()
                 .map(m -> {
                     if (m == min) {
-                        if (!waitTime.isEmpty())
-                            return waitTime.poll();
-                        return 0;
+                        if (waiting.isEmpty())
+                            return 0;
+                        return waiting.poll();
                     }
                     return m - min;
                 })
-                .filter(m -> m != 0)
-                .collect(Collectors.toList());
-        }
-
-        return total;
+            .collect(Collectors.toList()), 
+            waiting);
     }
 }
