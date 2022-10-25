@@ -21,7 +21,7 @@ public class WaitTime {
     public static int waitTime(int[] customers, int n) {
         List<Integer> listCusto = Arrays.stream(customers).boxed().toList();
         List<Integer> workingTime = listCusto.subList(0, n);
-        Queue<Integer> waitTime = new PriorityQueue<>(listCusto.subList(n, listCusto.size()));
+        Queue<Integer> waitTime = new LinkedList<>(listCusto.subList(n, listCusto.size()));
         int total = 0;
         while (!workingTime.isEmpty()) {
             int min = Collections.min(workingTime);
