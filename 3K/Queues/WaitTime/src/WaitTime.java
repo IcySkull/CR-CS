@@ -19,7 +19,7 @@ public class WaitTime {
     }
 
     public static int waitTime(int[] customers, int n) {
-        List<Integer> listCusto = Arrays.stream(customers).boxed().toList();
+        List<Integer> listCusto = getList(customers);
         List<Integer> workingTime = listCusto.subList(0, n);
         Queue<Integer> waitTime = new LinkedList<>(listCusto.subList(n, listCusto.size()));
         return waitTime(workingTime, waitTime);
@@ -42,5 +42,13 @@ public class WaitTime {
                 })
             .collect(Collectors.toList()), 
             waiting);
+    }
+
+    public static List<Integer> getList(int[] arr) {
+        List<Integer> list = new ArrayList<>(arr.length);
+        for (int i : arr) {
+            list.add(i);
+        }
+        return list;
     }
 }
