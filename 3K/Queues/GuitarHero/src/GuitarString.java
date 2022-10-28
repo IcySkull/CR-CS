@@ -7,7 +7,6 @@ public class GuitarString {
 
     public GuitarString(double frequency) {
         capacity = (int) Math.round(SAMPLE_RATE / frequency);
-        pluck();
     }
 
     public void pluck() {
