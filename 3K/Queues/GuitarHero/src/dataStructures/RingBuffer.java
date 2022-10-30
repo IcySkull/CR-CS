@@ -1,3 +1,4 @@
+package dataStructures;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;

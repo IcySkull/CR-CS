@@ -1,4 +1,4 @@
-// Copyright 2000–2011, Robert Sedgewick and Kevin Wayne.
+// Copyright 2000ï¿½2011, Robert Sedgewick and Kevin Wayne.
 
 /*************************************************************************
  *  Compilation:  javac StdDraw.java
@@ -28,7 +28,9 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.*;
 import java.net.*;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeSet;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -130,8 +132,17 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     private static LinkedList<Character> keysTyped = new LinkedList<Character>();
 
     // set of key codes currently pressed down
-    private static TreeSet<Integer> keysDown = new TreeSet<Integer>();
+    private static HashSet<Integer> keysDown = new HashSet<Integer>();
 
+    private long lastTime = System.currentTimeMillis();
+
+    public static HashSet<Character> getKeysDown() {
+        return keysDown.stream().map(i -> Character.toLowerCase((char) i.intValue())).collect(HashSet::new, HashSet::add, HashSet::addAll);
+    }
+
+    public static LinkedList<Character> getKeysTyped() {
+        return keysTyped;
+    }
 
     // singleton pattern: client can't instantiate
     private StdDraw() { }
@@ -579,7 +590,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
 
-    /**
+    /**key
      * Draw a polygon with the given (x[i], y[i]) coordinates.
      * @param x an array of all the x-coordindates of the polygon
      * @param y an array of all the y-coordindates of the polygon
@@ -1048,6 +1059,9 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     public void keyTyped(KeyEvent e) {
         synchronized (keyLock) {
+            if (getKeysDown().contains(e.getKeyChar())) {
+                return;
+            } 
             keysTyped.addFirst(e.getKeyChar());
         }
     }
@@ -1056,6 +1070,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * This method cannot be called directly.
      */
     public void keyPressed(KeyEvent e) {
+        keyTyped(e);
         synchronized (keyLock) {
             keysDown.add(e.getKeyCode());
         }

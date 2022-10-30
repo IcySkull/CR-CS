@@ -1,3 +1,6 @@
+import musicPrimitives.instruments.InstrumentString;
+import musicPrimitives.instruments.Instruments;
+
 /*****************************************************************************
  *  Compilation:  javac GuitarHeroLite.java
  *  Execution:    java  GuitarHeroLite
@@ -16,8 +19,8 @@ public class GuitarHeroLite {
         // Create two guitar strings, for concert A and C
         double CONCERT_A = 440.0;
         double CONCERT_C = CONCERT_A * Math.pow(2, 3.0/12.0);
-        GuitarString stringA = new GuitarString(CONCERT_A);
-        GuitarString stringC = new GuitarString(CONCERT_C);
+        InstrumentString stringA = new InstrumentString(CONCERT_A, 'a', Instruments.GUITAR);
+        InstrumentString stringC = new InstrumentString(CONCERT_C, 'c', Instruments.STRING);
 
         final double TEXT_POS_X = .2;
         final double TEXT_POS_Y = .5;
@@ -27,7 +30,7 @@ public class GuitarHeroLite {
         play(stringA, stringC);
     }
     
-    private static void play(GuitarString stringA, GuitarString stringC) {        // the main input loop
+    private static void play(InstrumentString stringA, InstrumentString stringC) {        // the main input loop
         while (true) {
             
             // check if the user has typed a key, and, if so, process it
@@ -41,10 +44,11 @@ public class GuitarHeroLite {
                     stringA.pluck();
                 else if (key == 'c') 
                     stringC.pluck();
+                
             }
 
             // compute the superposition of the samples
-            double sample = stringA.sample() + stringC.sample();
+            double sample = InstrumentString.evenSamples(stringA.sample(), stringC.sample());
 
             // send the result to standard audio
             StdAudio.play(sample);
