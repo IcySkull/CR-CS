@@ -1,20 +1,29 @@
 package musicPrimitives;
 
+import java.util.Map;
+
+import music.MusicAdapter;
+import musicPrimitives.instruments.InstrumentString;
+
 public class Note {
-    private int distance;
+    private char key;
     private PulseNote pulses;
 
-    public Note(int distance, PulseNote pulses) {
-        this.distance = distance;
+    public Note(char key, PulseNote pulses) {
+        this.key = key;
         this.pulses = pulses;
     }
 
-    public int getDistanceToOther(Note other) {
-        return distance - other.distance;
+    public void pluck(Map<Character, InstrumentString> instrument) {
+        instrument.get(key).pluck();
     }
 
-    public int getDistance() {
-        return distance;
+    public char getKey() {
+        return key;
+    }
+
+    public void tic(Map<Character, InstrumentString> instrument) {
+        instrument.get(key).tic();
     }
 
     public PulseNote getPulses() {
@@ -23,5 +32,10 @@ public class Note {
 
     public double getDuration() {
         return pulses.getDuration();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(key);
     }
 }

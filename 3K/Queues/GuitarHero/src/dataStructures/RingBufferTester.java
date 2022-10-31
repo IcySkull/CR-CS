@@ -1,5 +1,4 @@
-import dataStructures.RingBuffer;
-
+package dataStructures;
 public class RingBufferTester {
 
     public static void main(String[] args) {

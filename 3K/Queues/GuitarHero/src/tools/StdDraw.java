@@ -1,3 +1,4 @@
+package tools;
 // Copyright 2000�2011, Robert Sedgewick and Kevin Wayne.
 
 /*************************************************************************

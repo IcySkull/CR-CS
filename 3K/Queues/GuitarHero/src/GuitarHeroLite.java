@@ -1,5 +1,7 @@
 import musicPrimitives.instruments.InstrumentString;
 import musicPrimitives.instruments.Instruments;
+import tools.StdAudio;
+import tools.StdDraw;
 
 /*****************************************************************************
  *  Compilation:  javac GuitarHeroLite.java
