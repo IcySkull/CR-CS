@@ -1,4 +1,4 @@
-//© A+ Computer Science  -  www.apluscompsci.com
+//ï¿½ A+ Computer Science  -  www.apluscompsci.com
 //Name -
 //Date -
 //Class - 
@@ -9,16 +9,10 @@ import static java.lang.System.*;
 
 public class ListFunHouseRunner
 {
-	public static void main ( String[] args )
-	{
-		ListNode z = new ListNode("go",
-			 			new ListNode("on",
-		      		new ListNode("at",
-		       		new ListNode("34",
-			 			new ListNode("2.1",
-		      		new ListNode("-a-2-1",
-		       		new ListNode("up",		       		
-			 			new ListNode("over",null))))))));
+	public static void main ( String[] args ) {
+		Comparable[] test = new Comparable[]{"over", "up", "-a-2-1", "2.1", "34", "at", "on", "go"};
+		ListNode z = new ListNode();
+		ListFunHouse.addToList(z, test);
 			 			
 		out.println("Lab15b Test Code\n\n");	
 		
