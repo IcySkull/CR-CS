@@ -48,14 +48,13 @@ public class ListFunHouse
 	//new node to the list.  Once finished, the first node will occur twice.
 	public static void doubleFirst(ListNode list)
 	{
-		list.setNext(new ListNode(list.getValue(), list.getNext()));
+		list.setNext(new ListNode(list.getValue(), list));
 	}
 
 	//this method will create a new node with the same value as the last node and add this
 	//new node at the end.  Once finished, the last node will occur twice.
 	public static void doubleLast(ListNode list) {
-		ListNode last = getLastNode(list);
-		last.setNext(new ListNode(last.getValue(), null));
+		list.setPrev(new ListNode(last.getValue(), null));
 	}
 		
 	//method skipEveryOther will remove every other node
