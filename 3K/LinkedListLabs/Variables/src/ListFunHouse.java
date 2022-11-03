@@ -89,8 +89,10 @@ public class ListFunHouse {
 		} else {
 			if (list.getNext() == list) 
 				list = new ListNode();
-			else 
-				list.getPrev().setNext(list.getNext().getNext());
+			else {
+				list = list.getPrev();
+				list.setNext(list.getNext().getNext());
+			}
 		}
 	}
 
