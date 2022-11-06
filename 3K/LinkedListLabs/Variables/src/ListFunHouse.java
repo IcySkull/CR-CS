@@ -40,7 +40,7 @@ public class ListFunHouse {
 	// add this
 	// new node to the list. Once finished, the first node will occur twice.
 	public static void doubleFirst(ListNode list) {
-		ListFunHouse.addFirst(list, list.getValue());
+		list.setNext(new ListNode(list.getValue(), list, list.getNext()));
 	}
 
 	// this method will create a new node with the same value as the last node and
@@ -118,6 +118,5 @@ public class ListFunHouse {
 
 	public static void addFirst(ListNode list, Comparable value) {
 		ListFunHouse.addEnd(list, value);
-		list = list.getPrev();
 	}
 }
