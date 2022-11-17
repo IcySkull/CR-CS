@@ -207,7 +207,6 @@ public class MyLinkedList<E> extends AbstractList<E> {
 		@Override
 		public void remove() {
 			size--;
-			System.out.println("Removing " + current.data);
 			if (size == 0)
 				current = head = tail = null;
 			else if (current.prev == null) {
@@ -218,7 +217,6 @@ public class MyLinkedList<E> extends AbstractList<E> {
 				current = current.prev;
 				tail = current;
 				current.next = null;
-				System.out.println("Setting tail to " + tail.data);
 			} else {
 				current.prev.next = current.next;
 				current.next.prev = current.prev;
