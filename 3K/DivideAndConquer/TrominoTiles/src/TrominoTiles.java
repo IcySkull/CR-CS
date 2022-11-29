@@ -201,23 +201,23 @@ public class TrominoTiles extends JFrame {
                 case 2:
                     placeTromino(rCenter, cCenter, TrominoTile.PINK);
                     divideAndConquer(rStart, cStart, len / 2, cCenter, rCenter); // top left
-                    divideAndConquer(rStart, cStart + len / 2, len / 2, xHole, yHole); // top right
-                    divideAndConquer(rStart + len / 2, cStart, len / 2, cCenter, rCenter + 1); // bot left
-                    divideAndConquer(rStart + len / 2, cStart + len / 2, len / 2, cCenter + 1, rCenter + 1); // bot right
-                    break;
-                case 3:
-                    placeTromino(rCenter, cCenter, TrominoTile.GREEN);
-                    divideAndConquer(rStart, cStart, len / 2, cCenter, rCenter); // top left
                     divideAndConquer(rStart, cStart + len / 2, len / 2, cCenter + 1, rCenter); // top right
                     divideAndConquer(rStart + len / 2, cStart, len / 2, xHole, yHole); // bot left
                     divideAndConquer(rStart + len / 2, cStart + len / 2, len / 2, cCenter + 1, rCenter + 1); // bot right
                     break;
-                case 4:
+                case 3:
                     placeTromino(rCenter, cCenter, TrominoTile.RED);
                     divideAndConquer(rStart, cStart, len / 2, cCenter, rCenter); // top left
                     divideAndConquer(rStart, cStart + len / 2, len / 2, cCenter + 1, rCenter); // top right
                     divideAndConquer(rStart + len / 2, cStart, len / 2, cCenter, rCenter + 1); // bot left
                     divideAndConquer(rStart + len / 2, cStart + len / 2, len / 2, xHole, yHole); // bot right
+                    break;
+                case 4:
+                    placeTromino(rCenter, cCenter, TrominoTile.GREEN);
+                    divideAndConquer(rStart, cStart, len / 2, cCenter, rCenter); // top left
+                    divideAndConquer(rStart, cStart + len / 2, len / 2, xHole, yHole); // top right
+                    divideAndConquer(rStart + len / 2, cStart, len / 2, cCenter, rCenter + 1); // bot left
+                    divideAndConquer(rStart + len / 2, cStart + len / 2, len / 2, cCenter + 1, rCenter + 1); // bot right
                     break;
             }
         }
