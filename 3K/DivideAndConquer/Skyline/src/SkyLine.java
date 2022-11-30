@@ -126,16 +126,18 @@ public class SkyLine extends JFrame {
         int i = 0, j = 0;
         int hLeft = 0, hRight = 0;
         while (i < a.size() && j < b.size()) {
-            if (a.get(i).x < b.get(j).x) {
-                result.add(new Point(a.get(i).x, Math.max(hLeft, hRight)));
-                hLeft = a.get(i++).y;
-            } else if (a.get(i).x > b.get(j).x) {
-                result.add(new Point(b.get(j).x, Math.max(hLeft, hRight)));
-                hRight = b.get(j++).y;
+            Point pl = a.get(i);
+            Point pr = b.get(j);
+            if (pl.x < pr.x) {
+                hLeft = pl.y;
+                result.add(new Point(pl.x, Math.max(hLeft, hRight)));
+                i++;
+            } else if (pl.x > pr.x) {
+                hRight = pr.y;
+                result.add(new Point(pr.x, Math.max(hLeft, hRight)));
+                j++;
             } else {
-                result.add(new Point(a.get(i).x, Math.max(hLeft, hRight)));
-                hLeft = a.get(i).y;
-                hRight = b.get(j).y;
+                result.add(new Point(pl.x, Math.max(hLeft, hRight)));
                 i++;
                 j++;
             }
@@ -143,6 +145,10 @@ public class SkyLine extends JFrame {
 
         while (i < a.size()) {
             result.add(a.get(i++));
+        }
+
+        while (j < b.size()) {
+            result.add(b.get(j++));
         }
 
         return result;

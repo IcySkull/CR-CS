@@ -68,7 +68,7 @@ public class TrominoTiles extends JFrame {
         pack();	// tell the layout manager to organize the components optimally
         setVisible(true);   // must have this line or you're components will only be in memory and can't be seen
         setDefaultCloseOperation(EXIT_ON_CLOSE);    // closes the application
-        setResizable(false);        // disables resizing the window
+        setResizable(true);        // disables resizing the window
         setLocationRelativeTo(null);    // centers relative to the screen
     }
 
