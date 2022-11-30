@@ -103,23 +103,49 @@ public class SkyLine extends JFrame {
         repaint();
     }
 
+    public List<Point> getPoints(Building building) {
+        List<Point> points = new ArrayList<>();
+        points.add(new Point(building.left, building.height));
+        points.add(new Point(building.right, 0));
+        return points;
+    }
+
     private List<Point> recurSkyline(List<Building> buildings) {
-        return null;
+        if (buildings.size() == 1) {
+            return getPoints(buildings.get(0));
+        }
+        List<Building> left = buildings.subList(0, buildings.size() / 2);
+        List<Building> right = buildings.subList(buildings.size() / 2, buildings.size());
+        List<Point> leftSkyline = recurSkyline(left);
+        List<Point> rightSkyline = recurSkyline(right);
+        return merge(leftSkyline, rightSkyline);
     }
 
     private List<Point> merge(List<Point> a, List<Point> b) {
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        return null;
+        List<Point> result = new ArrayList<>();
+        int i = 0, j = 0;
+        int hLeft = 0, hRight = 0;
+        while (i < a.size() && j < b.size()) {
+            if (a.get(i).x < b.get(j).x) {
+                result.add(new Point(a.get(i).x, Math.max(hLeft, hRight)));
+                hLeft = a.get(i++).y;
+            } else if (a.get(i).x > b.get(j).x) {
+                result.add(new Point(b.get(j).x, Math.max(hLeft, hRight)));
+                hRight = b.get(j++).y;
+            } else {
+                result.add(new Point(a.get(i).x, Math.max(hLeft, hRight)));
+                hLeft = a.get(i).y;
+                hRight = b.get(j).y;
+                i++;
+                j++;
+            }
+        }
+
+        while (i < a.size()) {
+            result.add(a.get(i++));
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {
