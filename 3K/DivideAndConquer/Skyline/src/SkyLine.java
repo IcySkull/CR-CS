@@ -141,6 +141,9 @@ public class SkyLine extends JFrame {
                 i++;
                 j++;
             }
+            if (result.size() > 1 && result.get(result.size()-1).y == result.get(result.size()-2).y) {
+                result.remove(result.size()-1);
+            }
         }
 
         while (i < a.size()) {
