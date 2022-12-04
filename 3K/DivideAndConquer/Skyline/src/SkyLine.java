@@ -12,11 +12,18 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BinaryOperator;
+import java.util.logging.StreamHandler;
+import java.util.stream.Collectors;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.xml.transform.stream.StreamResult;
 
 public class SkyLine extends JFrame {
 
@@ -103,67 +110,104 @@ public class SkyLine extends JFrame {
         repaint();
     }
 
-    public List<Point> getPoints(Building building) {
+    public List<Point> recurSkyline(List<Building> buildings) {
+        int[][] buildingsArray = buildings.stream()
+                .map(building -> new int[]{building.left, building.right, building.height})
+                .toArray(int[][]::new);
+        return getSkyline(buildingsArray).stream()
+                .map(point -> new Point(point.get(0), point.get(1)))
+                .collect(Collectors.toList());
+    }
+
+    public List<List<Integer>> getSkyline(int[][] buildings) {
+        List<List<Point>> points = Arrays.stream(buildings)
+                .map(this::getPoitns)
+                .collect(Collectors.toList());
+
+        List<List<Point>> skyline = divideAndConquer(this::merge, points);
+        
+        return skyline.get(0).stream()
+                .map(point -> Arrays.asList(point.x, point.y))
+                .collect(Collectors.toList());
+    }
+
+    private List<Point> getPoitns(int[] building) {
         List<Point> points = new ArrayList<>();
-        points.add(new Point(building.left, building.height));
-        points.add(new Point(building.right, 0));
+        points.add(new Point(building[0], building[2]));
+        points.add(new Point(building[1], 0));
         return points;
     }
 
-    private List<Point> recurSkyline(List<Building> buildings) {
-        if (buildings.size() == 1) {
-            return getPoints(buildings.get(0));
+    private static <T> List<T> divideAndConquer(BinaryOperator<List<T>> conquer, List<T> list) {
+        if (list.size() == 1) {
+            return list;
         }
-        List<Building> left = buildings.subList(0, buildings.size() / 2);
-        List<Building> right = buildings.subList(buildings.size() / 2, buildings.size());
-        List<Point> leftSkyline = recurSkyline(left);
-        List<Point> rightSkyline = recurSkyline(right);
-        return merge(leftSkyline, rightSkyline);
+        int mid = list.size() / 2;
+        List<T> left = list.subList(0, mid);
+        List<T> right = list.subList(mid, list.size());
+        return conquer.apply(divideAndConquer(conquer, left), divideAndConquer(conquer, right));
     }
 
-    private List<Point> merge(List<Point> a, List<Point> b) {
+    private List<List<Point>> merge(List<List<Point>> leftBuilding, List<List<Point>> rightBuilding) {
         List<Point> result = new ArrayList<>();
-        int i = 0, j = 0;
-        int hLeft = 0, hRight = 0;
-        while (i < a.size() && j < b.size()) {
-            Point pl = a.get(i);
-            Point pr = b.get(j);
-            if (pl.x < pr.x) {
-                hLeft = pl.y;
-                result.add(new Point(pl.x, Math.max(hLeft, hRight)));
-                i++;
-            } else if (pl.x > pr.x) {
-                hRight = pr.y;
-                result.add(new Point(pr.x, Math.max(hLeft, hRight)));
-                j++;
+        List<Point> leftPoints = leftBuilding.stream().flatMap(List::stream).collect(Collectors.toList());
+        List<Point> rightPoints = rightBuilding.stream().flatMap(List::stream).collect(Collectors.toList());
+        int leftBuildingIndex = 0, rightBuildingIndex = 0;
+        int maxLeftHeight = 0, maxRightHeight = 0;
+        while (leftBuildingIndex < leftPoints.size() && rightBuildingIndex < rightPoints.size()) {
+            Point leftBuildingPoint = leftPoints.get(leftBuildingIndex);
+            Point rightBuildingPoint = rightPoints.get(rightBuildingIndex);
+            if (leftBuildingPoint.x < rightBuildingPoint.x) {
+                maxLeftHeight = leftBuildingPoint.y;
+                result.add(new Point(
+                    leftBuildingPoint.x, 
+                    Math.max(maxLeftHeight, maxRightHeight)
+                ));
+                leftBuildingIndex++;
+            } else if (leftBuildingPoint.x > rightBuildingPoint.x) {
+                maxRightHeight = rightBuildingPoint.y;
+                result.add(new Point(
+                    rightBuildingPoint.x,
+                    Math.max(maxLeftHeight, maxRightHeight)
+                ));
+                rightBuildingIndex++;
             } else {
-                result.add(new Point(pl.x, Math.max(hLeft, hRight)));
-                i++;
-                j++;
+                maxLeftHeight = leftBuildingPoint.y;
+                maxRightHeight = rightBuildingPoint.y;
+                result.add(new Point(
+                    leftBuildingPoint.x, 
+                    Math.max(maxLeftHeight, maxRightHeight)
+                ));
+                leftBuildingIndex++;
+                rightBuildingIndex++;
             }
             if (result.size() > 1 && result.get(result.size()-1).y == result.get(result.size()-2).y) {
                 result.remove(result.size()-1);
             }
         }
 
-        while (i < a.size()) {
-            result.add(a.get(i++));
+        while (leftBuildingIndex < leftPoints.size()) {
+            result.add(leftPoints.get(leftBuildingIndex++));
         }
 
-        while (j < b.size()) {
-            result.add(b.get(j++));
+        while (rightBuildingIndex < rightPoints.size()) {
+            result.add(rightPoints.get(rightBuildingIndex++));
         }
 
-        return result;
+        return new ArrayList<>(Arrays.asList(result));
     }
 
     public static void main(String[] args) {
+        SkyLine test = new SkyLine();
+        int[] b1 = {2, 9, 10};
+        int[] b2 = {9, 12, 15};
+        System.out.println(test.getSkyline(new int[][]{b1, b2}));
+
         Building one = new Building(2, 9, 10);
         Building two = new Building(3, 6, 15);
         ArrayList<Building> list = new ArrayList<>();
         list.add(one);
         list.add(two);
-        SkyLine test = new SkyLine();
         System.out.println(test.recurSkyline(list));
         // ans [(2, 10) , (3, 15) , (6, 10) , (9, 0) ]
 
