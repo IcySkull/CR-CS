@@ -19,6 +19,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -188,6 +190,13 @@ public class ConvexHull extends JFrame {
         repaint();
     }
 
+    class Box <T> {
+        public T item;
+        public Box(T item) {
+            this.item = item;
+        }
+    }
+
     /**
      * brute force algorithm from lecture - basically calculate all extreme edges and then sort in
      * counterclockwise order
@@ -200,22 +209,22 @@ public class ConvexHull extends JFrame {
         // 2) then match up all the endpoints to make a polygon
         // 3) lastly return all the points of the convex hull in a counterclockwise order
         Point leftMostPoint = pointsList.get(0);
-        Point mostCCWPoint= leftMostPoint;
+        Point mostCCWPointFound = leftMostPoint;
         ArrayList<Point> convexHull = new ArrayList<>();
         do {
-            convexHull.add(mostCCWPoint);
-            Point mostCCWPointFound = mostCCWPoint; // previus most counterclockwise point
-            for (int indexPointList = 1; indexPointList < pointsList.size(); indexPointList++) {
-                Point itrPoint = pointsList.get(indexPointList);
-                if (ccw(mostCCWPoint, mostCCWPointFound, itrPoint) == 1)
-                    mostCCWPointFound = itrPoint;
-            }
-            mostCCWPoint = mostCCWPointFound;
-        } while (mostCCWPoint != leftMostPoint);
+            convexHull.add(mostCCWPointFound);
+            Point refMCCWPointFound = mostCCWPointFound;
+
+            mostCCWPointFound = pointsList.stream().skip(2)
+                    .reduce(pointsList.get(1), (mostCCWPointFoundIteration, unknownPoint) -> {
+                        if (ccw(refMCCWPointFound, mostCCWPointFoundIteration, unknownPoint) == 1)
+                            return unknownPoint;
+                        return mostCCWPointFoundIteration;
+            });
+
+        } while (mostCCWPointFound != leftMostPoint);
         return convexHull;
     }
-
-    private 
 
     private ArrayList<Point> constructHull(ArrayList<Point> list) {
         // 1) if size is 1 or 2 then the hull is trivial and is a point or a line segment
@@ -224,8 +233,14 @@ public class ConvexHull extends JFrame {
         // a) split the points in half which are already sorted by x values
         // b) recursively construct the left hull then the right hull
         // c) merge the two hulls based on the upper/lower tangent lines - use helper method below
-        if ()
-        return null;
+        if (list.size() < 3)
+            return list;
+        else if (list.size() < 6)
+            return bruteForce(list);
+        int mid = list.size()/2;
+        ArrayList<Point> left = (ArrayList) list.subList(0, mid);
+        ArrayList<Point> right = (ArrayList) list.subList(mid, 0);
+        return merge(constructHull(left), constructHull(right));
     }
 
     /**
@@ -255,6 +270,11 @@ public class ConvexHull extends JFrame {
      * @param r
      * @return
      */
+    public static int ccw(Box<Point> p, Point q, Point r) {
+        double val = (q.y - p.item.y) * (r.x - q.x) - (q.x - p.item.x) * (r.y - q.y);
+        return (val == 0) ? 0 : val > 0 ? 1 : -1; // collinear, clockwise, counterclockwise respectively
+    }
+
     public static int ccw(Point p, Point q, Point r) {
         double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
         return (val == 0) ? 0 : val > 0 ? 1 : -1; // collinear, clockwise, counterclockwise respectively
