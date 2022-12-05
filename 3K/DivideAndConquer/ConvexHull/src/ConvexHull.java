@@ -199,8 +199,23 @@ public class ConvexHull extends JFrame {
         // 1) first add all of the extreme edges to a list
         // 2) then match up all the endpoints to make a polygon
         // 3) lastly return all the points of the convex hull in a counterclockwise order
-        return null;
+        Point leftMostPoint = pointsList.get(0);
+        Point mostCCWPoint= leftMostPoint;
+        ArrayList<Point> convexHull = new ArrayList<>();
+        do {
+            convexHull.add(mostCCWPoint);
+            Point mostCCWPointFound = mostCCWPoint; // previus most counterclockwise point
+            for (int indexPointList = 1; indexPointList < pointsList.size(); indexPointList++) {
+                Point itrPoint = pointsList.get(indexPointList);
+                if (ccw(mostCCWPoint, mostCCWPointFound, itrPoint) == 1)
+                    mostCCWPointFound = itrPoint;
+            }
+            mostCCWPoint = mostCCWPointFound;
+        } while (mostCCWPoint != leftMostPoint);
+        return convexHull;
     }
+
+    private 
 
     private ArrayList<Point> constructHull(ArrayList<Point> list) {
         // 1) if size is 1 or 2 then the hull is trivial and is a point or a line segment
@@ -209,6 +224,7 @@ public class ConvexHull extends JFrame {
         // a) split the points in half which are already sorted by x values
         // b) recursively construct the left hull then the right hull
         // c) merge the two hulls based on the upper/lower tangent lines - use helper method below
+        if ()
         return null;
     }
 

@@ -149,6 +149,7 @@ public class SkyLine extends JFrame {
     }
 
     private List<List<Point>> merge(List<List<Point>> leftBuilding, List<List<Point>> rightBuilding) {
+
         List<Point> result = new ArrayList<>();
         List<Point> leftPoints = leftBuilding.stream().flatMap(List::stream).collect(Collectors.toList());
         List<Point> rightPoints = rightBuilding.stream().flatMap(List::stream).collect(Collectors.toList());
