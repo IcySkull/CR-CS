@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -208,21 +209,32 @@ public class ConvexHull extends JFrame {
         // 1) first add all of the extreme edges to a list
         // 2) then match up all the endpoints to make a polygon
         // 3) lastly return all the points of the convex hull in a counterclockwise order
-        Point leftMostPoint = pointsList.get(0);
-        Point mostCCWPointFound = leftMostPoint;
+        Point leftMostPoint = pointsList.stream()
+                .min((Point t, Point t1) -> Integer.compare(t.x, t1.x)).get();
+        Point mostCCW = leftMostPoint;
+        int len = pointsList.size();
+        int lastIndex = 0;
         ArrayList<Point> convexHull = new ArrayList<>();
+        // This loop is way easier to understand if index % len is replaced with a next() method of a list of nodes.
+        // Basically, the loop goes through all the points and finds the most counterclockwise point for each point.
+        // But because the method uses ArrayLists, then the last index is important to remember so each new iterations
+        // searches for the most CCW point subsequent to the last index. Very analogous to a linked list, but modified to 
+        // work with ArrayLists.
         do {
-            convexHull.add(mostCCWPointFound);
-            Point refMCCWPointFound = mostCCWPointFound;
-
-            mostCCWPointFound = pointsList.stream().skip(2)
-                    .reduce(pointsList.get(1), (mostCCWPointFoundIteration, unknownPoint) -> {
-                        if (ccw(refMCCWPointFound, mostCCWPointFoundIteration, unknownPoint) == 1)
-                            return unknownPoint;
-                        return mostCCWPointFoundIteration;
-            });
-
-        } while (mostCCWPointFound != leftMostPoint);
+            if (convexHull.size() > 0 && mostCCW == convexHull.get(convexHull.size() - 1)) {} // check for duplicates
+            else convexHull.add(mostCCW);
+            int index = ++lastIndex;
+            Point mostCCWFound = pointsList.get( index % len);
+            for (int i = 1; i < len; i++) {
+                Point unknownPoint = pointsList.get((i + index) % len);
+                int ccw = ccw(mostCCW, mostCCWFound, unknownPoint);
+                if (ccw == -1) {
+                    mostCCWFound = unknownPoint;
+                    lastIndex = i;
+                }
+            }
+            mostCCW = mostCCWFound;
+        } while (mostCCW != leftMostPoint);
         return convexHull;
     }
 
@@ -233,14 +245,16 @@ public class ConvexHull extends JFrame {
         // a) split the points in half which are already sorted by x values
         // b) recursively construct the left hull then the right hull
         // c) merge the two hulls based on the upper/lower tangent lines - use helper method below
-        if (list.size() < 3)
+        if (list.size() <= 2)
             return list;
-        else if (list.size() < 6)
+
+        else if (list.size() <= 5)
             return bruteForce(list);
-        int mid = list.size()/2;
-        ArrayList<Point> left = (ArrayList) list.subList(0, mid);
-        ArrayList<Point> right = (ArrayList) list.subList(mid, 0);
-        return merge(constructHull(left), constructHull(right));
+
+        int mid = list.size() / 2;
+        ArrayList<Point> left = constructHull(new ArrayList<>(list.subList(0, mid)));
+        ArrayList<Point> right = constructHull(new ArrayList<>(list.subList(mid, list.size())));
+        return mergeHulls(left, right);
     }
 
     /**
@@ -259,7 +273,68 @@ public class ConvexHull extends JFrame {
         // to a list until the left lower tangent is reached. Similarly do the same starting at the right
         // bottom tangent to the right upper tangent.
         // 6) return the points from the newly constructed hull from part 5.
-        return null;
+        Point leftPoint = left.stream()
+                .max((Point t, Point t1) -> Integer.compare(t.x, t1.x)).get();
+        Point righPoint = right.stream()
+                .min((Point t, Point t1) -> Integer.compare(t.x, t1.x)).get();
+        Line lowerTangent = searchTangent(left, right, leftPoint, righPoint, false);
+        Line upperTangent = searchTangent(left, right, leftPoint, righPoint, true);
+        Point leftUpper = upperTangent.a;
+        Point leftLower = lowerTangent.a;
+        Point rightUpper = upperTangent.b;
+        Point rightLower = lowerTangent.b;
+
+        ArrayList<Point> convexHull = new ArrayList<>();
+        convexHull.add(leftUpper);
+        // Trace the new hull in a counterclockwise direction. Notice how a new CCW path is created
+        // by the upper tangent and the lower. Therefore, tracing the new path in the bigger hull 
+        // using as connections the tangent lines will naturally remove the points that are not part of the new hull.
+        int index = left.indexOf(leftUpper);
+        while (left.get(index) != leftLower) {
+            convexHull.add(left.get(index));
+            index = (index + 1) % left.size();
+        }
+        convexHull.add(leftLower);
+        index = right.indexOf(rightLower);
+        while (right.get(index) != rightUpper) {
+            convexHull.add(right.get(index));
+            index = (index + 1) % right.size();
+        }
+        convexHull.add(rightUpper);
+        return convexHull;
+    }
+
+    /**
+     * Search a tangent line between two convex hulls. The algorithm to find the lower and upper tangent lines is identical but with sign flipped.
+     * Finding the tangent line is done by recursively finding exterior points until no more CCW or CW points are found in respect to the seed points of the recursion.
+     * @param left 
+     * @param right
+     * @param leftPoint is the point from the right hull that is the leftmost point.
+     * @param rightPoint the rightmost point from the left hull.
+     * @param upper wether searching for upper or lower tangent line.
+     * @return
+     */
+    private Line searchTangent(ArrayList<Point> left, ArrayList<Point> right, Point leftPoint, Point rightPoint, boolean upper) {
+        int sign = upper ? 1 : -1;
+        Point leftUpper = left.stream()
+                .reduce(leftPoint, (p, q) -> {
+                    if (ccw(rightPoint, p, q) == -sign)
+                        return q;
+                    return p;
+                });
+
+        Point rightUpper = right.stream()
+                .reduce(rightPoint, (p, q) -> {
+                    if (ccw(leftPoint, p, q) == sign)
+                        return q;
+                    return p;
+                });
+        
+        if (left.stream().anyMatch(p -> ccw(rightUpper, leftUpper, p) == -sign) ||
+                right.stream().anyMatch(p -> ccw(leftUpper, rightUpper, p) == sign)) {
+            return searchTangent(left, right, leftUpper, rightUpper, upper);
+        }
+        return new Line(leftUpper, rightUpper);
     }
 
     /**
@@ -270,14 +345,13 @@ public class ConvexHull extends JFrame {
      * @param r
      * @return
      */
-    public static int ccw(Box<Point> p, Point q, Point r) {
-        double val = (q.y - p.item.y) * (r.x - q.x) - (q.x - p.item.x) * (r.y - q.y);
-        return (val == 0) ? 0 : val > 0 ? 1 : -1; // collinear, clockwise, counterclockwise respectively
-    }
-
     public static int ccw(Point p, Point q, Point r) {
         double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
         return (val == 0) ? 0 : val > 0 ? 1 : -1; // collinear, clockwise, counterclockwise respectively
+    }
+
+    public static String getPoint(Point p) {
+        return "(" + p.x + ", " + p.y + ")";
     }
 
     public static void main(String[] args) {
