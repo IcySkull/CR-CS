@@ -279,28 +279,38 @@ public class ConvexHull extends JFrame {
                 .min((Point t, Point t1) -> Integer.compare(t.x, t1.x)).get();
         Line lowerTangent = searchTangent(left, right, leftPoint, righPoint, false);
         Line upperTangent = searchTangent(left, right, leftPoint, righPoint, true);
-        Point leftUpper = upperTangent.a;
-        Point leftLower = lowerTangent.a;
-        Point rightUpper = upperTangent.b;
-        Point rightLower = lowerTangent.b;
+        return traceHull(left, right, upperTangent, lowerTangent);
+    }
 
-        ArrayList<Point> convexHull = new ArrayList<>();
-        convexHull.add(leftUpper);
-        // Trace the new hull in a counterclockwise direction. Notice how a new CCW path is created
+    /**
+     * Search for the upper or lower tangent line between two convex hulls. Notice how a new CCW path is created
         // by the upper tangent and the lower. Therefore, tracing the new path in the bigger hull 
         // using as connections the tangent lines will naturally remove the points that are not part of the new hull.
-        int index = left.indexOf(leftUpper);
-        while (left.get(index) != leftLower) {
+     * @param left
+     * @param right
+     * @param upperTangent
+     * @param lowerTangent
+     * @return
+     */
+    private static ArrayList<Point> traceHull(ArrayList<Point> left, ArrayList<Point> right, Line upperTangent, Line lowerTangent) {
+        ArrayList<Point> convexHull = new ArrayList<>();
+        convexHull.add(upperTangent.a);
+        int index = left.indexOf(upperTangent.a);
+
+        while (left.get(index) != lowerTangent.a) {
             convexHull.add(left.get(index));
             index = (index + 1) % left.size();
         }
-        convexHull.add(leftLower);
-        index = right.indexOf(rightLower);
-        while (right.get(index) != rightUpper) {
+
+        convexHull.add(lowerTangent.a);
+        index = right.indexOf(lowerTangent.b);
+
+        while (right.get(index) != upperTangent.b) {
             convexHull.add(right.get(index));
             index = (index + 1) % right.size();
         }
-        convexHull.add(rightUpper);
+
+        convexHull.add(upperTangent.b);
         return convexHull;
     }
 
