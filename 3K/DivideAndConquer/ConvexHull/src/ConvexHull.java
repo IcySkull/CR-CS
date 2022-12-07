@@ -213,7 +213,7 @@ public class ConvexHull extends JFrame {
                 .min((Point t, Point t1) -> Integer.compare(t.x, t1.x)).get();
         Point mostCCW = leftMostPoint;
         int len = pointsList.size();
-        int lastIndex = 0;
+        int lastIndex = 0; // remember the index of the most CCW point found (see loop) so the next iteration can start from there
         ArrayList<Point> convexHull = new ArrayList<>();
         // This loop is way easier to understand if index % len is replaced with a next() method of a list of nodes.
         // Basically, the loop goes through all the points and finds the most counterclockwise point for each point.
@@ -224,11 +224,12 @@ public class ConvexHull extends JFrame {
             if (convexHull.size() > 0 && mostCCW == convexHull.get(convexHull.size() - 1)) {} // check for duplicates
             else convexHull.add(mostCCW);
             int index = ++lastIndex;
-            Point mostCCWFound = pointsList.get( index % len);
-            for (int i = 1; i < len; i++) {
-                Point unknownPoint = pointsList.get((i + index) % len);
-                int ccw = ccw(mostCCW, mostCCWFound, unknownPoint);
-                if (ccw == -1) {
+            Point mostCCWFound = pointsList.get( index% len); // resembles a next() method of a linked list
+            // a search max algorithm for the most CCW point
+            // could have been simplified with max() method of a stream if a LinkedList was used instead of an ArrayList as the data structure to store the points
+            for (int i = 0; i < len; i++) {
+                Point unknownPoint = pointsList.get((i + index) % len); // linked list like style
+                if (ccw(mostCCW, mostCCWFound, unknownPoint) == -1) {
                     mostCCWFound = unknownPoint;
                     lastIndex = i;
                 }
@@ -252,9 +253,9 @@ public class ConvexHull extends JFrame {
             return bruteForce(list);
 
         int mid = list.size() / 2;
-        ArrayList<Point> left = constructHull(new ArrayList<>(list.subList(0, mid)));
-        ArrayList<Point> right = constructHull(new ArrayList<>(list.subList(mid, list.size())));
-        return mergeHulls(left, right);
+        ArrayList<Point> leftHull = constructHull(new ArrayList<>(list.subList(0, mid)));
+        ArrayList<Point> rightHull = constructHull(new ArrayList<>(list.subList(mid, list.size())));
+        return mergeHulls(leftHull, rightHull);
     }
 
     /**
@@ -284,8 +285,11 @@ public class ConvexHull extends JFrame {
 
     /**
      * Search for the upper or lower tangent line between two convex hulls. Notice how a new CCW path is created
-        // by the upper tangent and the lower. Therefore, tracing the new path in the bigger hull 
-        // using as connections the tangent lines will naturally remove the points that are not part of the new hull.
+     * by the upper tangent and the lower. Therefore, tracing the new path in the bigger hull using as connections 
+     * the tangent lines will naturally remove the points that are not part of the new hull. Also, this method
+     * could be much faster, readable and efficient if a LinkedList were to use instead of an ArrayList, because
+     * this method is inserting the upper and lower tangent points into the new hull as you would insert
+     * a node into a linked list.
      * @param left
      * @param right
      * @param upperTangent
@@ -327,21 +331,22 @@ public class ConvexHull extends JFrame {
     private Line searchTangent(ArrayList<Point> left, ArrayList<Point> right, Point leftPoint, Point rightPoint, boolean upper) {
         int sign = upper ? 1 : -1;
         Point leftUpper = left.stream()
-                .reduce(leftPoint, (p, q) -> {
-                    if (ccw(rightPoint, p, q) == -sign)
-                        return q;
-                    return p;
+                .reduce(leftPoint, (Point mostExtremeFound, Point unknown) -> {
+                    if (ccw(rightPoint, mostExtremeFound, unknown) == -sign)
+                        return unknown;
+                    return mostExtremeFound;
                 });
 
         Point rightUpper = right.stream()
-                .reduce(rightPoint, (p, q) -> {
-                    if (ccw(leftPoint, p, q) == sign)
-                        return q;
-                    return p;
+                .reduce(rightPoint, (Point mostExtremeFound, Point unknown) -> {
+                    if (ccw(leftPoint, mostExtremeFound, unknown) == sign)
+                        return unknown;
+                    return mostExtremeFound;
                 });
         
-        if (left.stream().anyMatch(p -> ccw(rightUpper, leftUpper, p) == -sign) ||
-                right.stream().anyMatch(p -> ccw(leftUpper, rightUpper, p) == sign)) {
+        // check if the new points are extreme points of the hulls, if not, reccur to find the extreme points.
+        if (left.stream().anyMatch((Point unknown) -> ccw(rightUpper, leftUpper, unknown) == -sign) ||
+                right.stream().anyMatch((Point unknown) -> ccw(leftUpper, rightUpper, unknown) == sign)) {
             return searchTangent(left, right, leftUpper, rightUpper, upper);
         }
         return new Line(leftUpper, rightUpper);
