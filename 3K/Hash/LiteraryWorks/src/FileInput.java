@@ -2,6 +2,7 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URL;
 import java.util.Scanner;
 import java.util.*;
 
@@ -11,8 +12,11 @@ public class FileInput {
 	private static Set<String> commonWords;
 
 	public static void init(){
-		File shakespeare = new File("hamlet.txt");
-		File bacon = new File("bacon-essays.txt");
+		// File shakespeare = new File("C:\\Users\\diejo\\Documents\\CR-CS\\3K\\Hash\\LiteraryWorks\\hamlet.txt");
+		// File bacon = new File("C:\\Users\\diejo\\Documents\\CR-CS\\3K\\Hash\\LiteraryWorks\\bacon-essays.txt");
+		String workingDir = FileInput.class.getResource("").getPath();
+		File shakespeare = new File(workingDir + "../hamlet.txt");
+		File bacon = new File(workingDir + "../bacon-essays.txt");
 		try {
 			sInput = new Scanner(shakespeare);
 			bInput = new Scanner(bacon);

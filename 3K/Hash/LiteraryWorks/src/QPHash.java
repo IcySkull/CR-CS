@@ -2,7 +2,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class QPHash implements Iterable<WordCount> {
+public class QPHash implements Iterable<String> {
     private int size; 
     private int capacity; 
     private WordCount[] table; 
@@ -17,6 +17,13 @@ public class QPHash implements Iterable<WordCount> {
         capacity = startSize;
         table = new WordCount[capacity];
         size = 0;
+    }
+
+    public QPHash(String[] words) {
+        this();
+        for (String word : words) {
+            insert(word);
+        }
     }
 
     private void rehash() {
@@ -74,8 +81,6 @@ public class QPHash implements Iterable<WordCount> {
     }
 
     public void insert(WordCount word) {
-        if (size > capacity / 2)
-            rehash();
         WordCount wordInTable = get(word.getWord());
         if (wordInTable != null) {
             wordInTable.incrementCount(word.getCount());
@@ -84,6 +89,8 @@ public class QPHash implements Iterable<WordCount> {
         size++;
         int index = map(word.getWord());
         table[index] = word;
+        if (size > capacity / 2)
+            rehash();
     }
 
     public WordCount get(String keyToFind) {
@@ -138,16 +145,16 @@ public class QPHash implements Iterable<WordCount> {
         return sb.toString();
     }
 
-    public Stream<WordCount> stream() {
+    public Stream<String> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
     @Override
-    public Iterator<WordCount> iterator() {
+    public Iterator<String> iterator() {
         return new QPHashIterator();
     }
 
-    private class QPHashIterator implements Iterator<WordCount> {
+    private class QPHashIterator implements Iterator<String> {
         private int indexTable;
         private int totalChecked;
 
@@ -161,13 +168,13 @@ public class QPHash implements Iterable<WordCount> {
         }
 
         @Override
-        public WordCount next() {
+        public String next() {
             if (hasNext()) {
                 while (table[indexTable] == null) {
                     indexTable++;
                 }
                 totalChecked++;
-                return table[indexTable++];
+                return table[indexTable++].getWord();
             }
             return null;
         }

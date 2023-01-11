@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ChainingHash implements Iterable<WordCount> {
+public class ChainingHash implements Iterable<String> {
     private int size;
     private int capacity;
     private List<WordCount>[] table;
@@ -17,6 +17,13 @@ public class ChainingHash implements Iterable<WordCount> {
         size = 0;
         capacity = startSize;
         table = new LinkedList[capacity];
+    }
+
+    public ChainingHash(String[] words) {
+        this();
+        for (String word : words) {
+            insert(word);
+        }
     }
 
     private void rehash() {
@@ -66,9 +73,6 @@ public class ChainingHash implements Iterable<WordCount> {
     }
 
     public void insert(WordCount key) {
-        if (size > capacity / 4 * 3)
-            rehash();
-
         WordCount wordInTable = get(key.getWord());
         if (wordInTable != null) {
             wordInTable.incrementCount(key.getCount());
@@ -83,6 +87,9 @@ public class ChainingHash implements Iterable<WordCount> {
             table[index].add(key);
         } else
             bucket.add(key);
+
+        if (size > capacity / 4 * 3)
+            rehash();
     }
 
     public WordCount get(String key) {
@@ -135,16 +142,16 @@ public class ChainingHash implements Iterable<WordCount> {
         return sb.toString();
     }
 
-    public Stream<WordCount> stream() {
+    public Stream<String> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
     @Override
-    public Iterator<WordCount> iterator() {
+    public Iterator<String> iterator() {
         return new ChainingHashIterator();
     }
 
-    private class ChainingHashIterator implements Iterator<WordCount> {
+    private class ChainingHashIterator implements Iterator<String> {
         private int indexTable;
         private int totalChecked;
         private Iterator<WordCount> bucket;
@@ -160,7 +167,7 @@ public class ChainingHash implements Iterable<WordCount> {
         }
 
         @Override
-        public WordCount next() {
+        public String next() {
             if (bucket == null || !bucket.hasNext()) {
                 while (table[indexTable] == null) {
                     indexTable++;
@@ -169,7 +176,7 @@ public class ChainingHash implements Iterable<WordCount> {
                 indexTable++;
             }
             totalChecked++;
-            return bucket.next();
+            return bucket.next().getWord();
         }
     }
 }
