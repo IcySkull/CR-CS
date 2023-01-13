@@ -1,15 +1,15 @@
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-public class ChainingHash implements Iterable<String> {
+public class ChainingHash implements Map<String, Integer> {
     private int size;
     private int capacity;
     private List<WordCount>[] table;
 
+    private Iterator<String> keys;
+
     public ChainingHash() {
         size = 0;
-        capacity = 97;
+        capacity = 16;
         table = new LinkedList[capacity];
     }
 
@@ -26,6 +26,65 @@ public class ChainingHash implements Iterable<String> {
         }
     }
 
+    /**
+     * Adds the key to the hash table.
+     * If there is a collision, it should be dealt with by chaining the keys
+     * together.
+     * If the key is already in the hash table, it increments that key's counter.
+     * 
+     * @param keyToAdd : the key which will be added to the hash table
+     */
+    public void insert(Object key) {
+        put(checkKey(key), 1);
+    }
+
+    private String checkKey(Object key) {
+        if (!(key instanceof String))
+            throw new IllegalStateException("Key must be a String");
+        return (String) key;
+    }
+
+    /**
+     * This function allows rudimentary iteration through the QPHash.
+     * The ordering is not important so long as all added elements are returned only
+     * once.
+     * It should return null once it has gone through all elements
+     * 
+     * @return Returns the next element of the hash table. Returns null if it is at
+     *         its end.
+     */
+    public Object getNextKey() {
+        if (keys == null)
+            keys = keySet().iterator();
+        else if (!keys.hasNext())
+            return null;
+        return keys.next();
+    }
+
+    /**
+     * Returns the number of times a key has been added to the hash table.
+     * 
+     * @param keyToFind : The key being searched for
+     * @return returns the number of times that key has been added.
+     */
+    public int findCount(String key) {
+        Integer count = get(key);
+        return count == null ? 0 : count;
+    }
+
+    /**
+     * Returns the number of keys in the hash table.
+     * 
+     * @return return keys
+     */
+    public int getSize() {
+        return size;
+    }
+
+    private int hash(Object key) {
+        return Math.abs(key.hashCode()) % capacity;
+    }
+
     private void rehash() {
         capacity = findNextPrime(capacity * 2);
         List<WordCount>[] oldTable = table;
@@ -33,10 +92,15 @@ public class ChainingHash implements Iterable<String> {
         size = 0;
         for (List<WordCount> bucket : oldTable) {
             if (bucket == null)
-                continue; 
+                continue;
             for (WordCount word : bucket)
-                insert(word);
+                put(word.getWord(), word.getCount());
         }
+    }
+
+    private void checkRehash() {
+        if (size > capacity / 4 * 3)
+            rehash();
     }
 
     private int findNextPrime(int n) {
@@ -60,74 +124,20 @@ public class ChainingHash implements Iterable<String> {
         return true;
     }
 
-    /**
-     * Adds the key to the hash table.
-     * If there is a collision, it should be dealt with by chaining the keys
-     * together.
-     * If the key is already in the hash table, it increments that key's counter.
-     * 
-     * @param keyToAdd : the key which will be added to the hash table
-     */
-    public void insert(String keyToAdd) {
-        insert(new WordCount(keyToAdd));
-    }
-
-    public void insert(WordCount key) {
-        WordCount wordInTable = get(key.getWord());
-        if (wordInTable != null) {
-            wordInTable.incrementCount(key.getCount());
-            return;
-        }
-
-        size++;
-        int index = map(key.getWord());
-        List<WordCount> bucket = table[index];
-        if (bucket == null) {
-            table[index] = new LinkedList<WordCount>();
-            table[index].add(key);
-        } else
-            bucket.add(key);
-
-        if (size > capacity / 4 * 3)
-            rehash();
-    }
-
-    public WordCount get(String key) {
-        List<WordCount> bucket = table[map(key)];
+    private WordCount getWordCount(Object key) {
+        List<WordCount> bucket = table[hash(key)];
         if (bucket == null)
             return null;
 
-        int indexOfKey = bucket.indexOf(new WordCount(key));
+        int indexOfKey;
+        if (key instanceof String)
+            indexOfKey = bucket.indexOf(new WordCount((String) key));
+        else
+            indexOfKey = bucket.indexOf(key);
         if (indexOfKey == -1)
             return null;
 
         return bucket.get(indexOfKey);
-    }
-
-    /**
-     * Returns the number of times a key has been added to the hash table.
-     * 
-     * @param keyToFind : The key being searched for
-     * @return returns the number of times that key has been added.
-     */
-    public int findCount(String keyToFind) {
-        WordCount word = get(keyToFind);
-        if (word == null)
-            return 0;
-        return word.getCount();
-    }
-
-    /**
-     * Returns the number of keys in the hash table.
-     * 
-     * @return return keys
-     */
-    public int getSize() {
-        return size;
-    }
-
-    private int map(String key) {
-        return Math.abs(key.hashCode()) % capacity;
     }
 
     @Override
@@ -142,41 +152,116 @@ public class ChainingHash implements Iterable<String> {
         return sb.toString();
     }
 
-    public Stream<String> stream() {
-        return StreamSupport.stream(spliterator(), false);
+    @Override
+    public int size() {
+        return getSize();
     }
 
     @Override
-    public Iterator<String> iterator() {
-        return new ChainingHashIterator();
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
-    private class ChainingHashIterator implements Iterator<String> {
-        private int indexTable;
-        private int totalChecked;
-        private Iterator<WordCount> bucket;
+    @Override
+    public void clear() {
+        size = 0;
+        capacity = 16;
+        table = new LinkedList[capacity];
+    }
 
-        public ChainingHashIterator() {
-            indexTable = 0;
-            totalChecked = 0;
+    @Override
+    public boolean containsKey(Object key) {
+        return getWordCount(key) != null;
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return get(value) != null;
+    }
+
+    @Override
+    public Integer get(Object key) {
+        WordCount word = getWordCount(key);
+        return word == null ? null : word.getCount();
+    }
+
+    @Override
+    public Integer put(String key, Integer value) {
+        int index = hash(key);
+        List<WordCount> bucket = table[index];
+        size++;
+
+        if (bucket == null) {
+            bucket = new LinkedList<>();
+            table[index] = bucket;
         }
 
-        @Override
-        public boolean hasNext() {
-            return totalChecked < getSize();
+        int indexOfKey = bucket.indexOf(new WordCount(key));
+
+        // search if entry its in bucket
+        if (indexOfKey == -1)
+            bucket.add(new WordCount(key, value));
+        else {
+            // there's an entry then, no new entry is added to the buket
+            size--;
+            WordCount word = bucket.get(indexOfKey);
+            word.incrementCount(value);
+            return word.getCount() - value;
         }
 
-        @Override
-        public String next() {
-            if (bucket == null || !bucket.hasNext()) {
-                while (table[indexTable] == null) {
-                    indexTable++;
-                }
-                bucket = table[indexTable].iterator();
-                indexTable++;
-            }
-            totalChecked++;
-            return bucket.next().getWord();
+        checkRehash();
+        return null;
+    }
+
+    @Override
+    public Integer remove(Object key) {
+        int index = hash(key);
+        List<WordCount> bucket = table[index];
+        if (bucket == null)
+            return null;
+        int indexOfKey = bucket.indexOf(key);
+        if (indexOfKey == -1)
+            return null;
+        return bucket.remove(indexOfKey).getCount();
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends Integer> m) {
+        m.keySet().forEach(k -> insert(k));
+    }
+
+    private Set<WordCount> pairs() {
+        Set<WordCount> wordCounts = new HashSet<>();
+        for (List<WordCount> bucket : table) {
+            if (bucket == null)
+                continue;
+            for (WordCount word : bucket)
+                wordCounts.add(word);
         }
+        return wordCounts;
+    }
+
+    @Override
+    public Collection<Integer> values() {
+        List<Integer> values = new ArrayList<>();
+        for (WordCount word : pairs())
+            values.add(word.getCount());
+        return values;
+    }
+
+    @Override
+    public Set<String> keySet() {
+        Set<String> keySet = new HashSet<>();
+        for (WordCount word : pairs())
+            keySet.add(word.getWord());
+        return keySet;
+    }
+
+    @Override
+    public Set<Entry<String, Integer>> entrySet() {
+        Set<Entry<String, Integer>> entrySet = new HashSet<>();
+        for (WordCount word : pairs())
+            entrySet.add(new AbstractMap.SimpleEntry<String, Integer>(word.getWord(), word.getCount()));
+        return entrySet;
     }
 }

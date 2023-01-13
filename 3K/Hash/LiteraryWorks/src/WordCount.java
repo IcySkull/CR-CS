@@ -1,10 +1,15 @@
 public class WordCount {
     private String word;
-    private int count;
+    private Integer count;
 
     public WordCount(String word) {
         this.word = word;
         this.count = 1;
+    }
+
+    public WordCount(String word, Integer count) {
+        this.word = word;
+        this.count = count;
     }
 
     public WordCount() {
@@ -14,12 +19,20 @@ public class WordCount {
         return word;
     }
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 
     public void incrementCount() {
         count++;
+    }
+
+    public void decrementCount() {
+        count--;
+    }
+
+    public void decrementCount(int count) {
+        this.count -= count;
     }
 
     public void incrementCount(int count) {
@@ -36,7 +49,7 @@ public class WordCount {
         if (obj instanceof WordCount)
             return word.equals(((WordCount) obj).getWord());
         else if (obj instanceof String)
-            return word.equals(obj);
+            return word.equals((String) obj);
         return false;
     }
 
