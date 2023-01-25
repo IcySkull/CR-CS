@@ -11,7 +11,6 @@ public class Test {
 		shakes = FileInput.readShakespeare();
 		bacon = FileInput.readBacon();
 
-		System.out.println("Diego's table");
 		test(new ChainingHash(shakes), new QPHash(bacon));
 
 		System.out.println();
