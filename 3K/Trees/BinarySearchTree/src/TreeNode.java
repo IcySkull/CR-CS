@@ -4,11 +4,11 @@
 //Class -   Computer Science III
 //Lab  -	Binary Search Tree
 
-public class TreeNode<T extends Comparable<T>> implements Treeable<T>
+public class TreeNode implements Treeable
 {
-	private T treeNodeValue;
-	private TreeNode<T> leftTreeNode;
-	private TreeNode<T> rightTreeNode;
+	private Comparable treeNodeValue;
+	private TreeNode leftTreeNode;
+	private TreeNode rightTreeNode;
 
 	public TreeNode( )
 	{
@@ -17,42 +17,42 @@ public class TreeNode<T extends Comparable<T>> implements Treeable<T>
 		rightTreeNode = null;
 	}
 
-	public TreeNode(T value)
+	public TreeNode(Comparable value)
 	{
 		treeNodeValue = value;
 		leftTreeNode = null;
 		rightTreeNode = null;
 	}
 
-	public TreeNode(T value, TreeNode<T> left, TreeNode<T> right)
+	public TreeNode(Comparable value, TreeNode left, TreeNode right)
 	{
 		treeNodeValue = value;
 		leftTreeNode = left;
 		rightTreeNode = right;
 	}
 
-	public T getValue() {
+	public Comparable getValue() {
 		return treeNodeValue;
 	}
 
-	public Treeable<T> getLeft() {
+	public Treeable getLeft() {
 		return leftTreeNode;
 	}
 
-	public Treeable<T> getRight() {
+	public Treeable getRight() {
 		return rightTreeNode;
 	}
 
-	public void setValue(T value) {
+	public void setValue(Comparable value) {
 		treeNodeValue = value;
 	}
 
-	public void setLeft(Treeable<T> left) {
-		leftTreeNode = (TreeNode<T>)left;
+	public void setLeft(Treeable left) {
+		leftTreeNode = (TreeNode)left;
 	}
 
-	public void setRight(Treeable<T> right) {
-		rightTreeNode = (TreeNode<T>)right;
+	public void setRight(Treeable right) {
+		rightTreeNode = (TreeNode)right;
 	}
 
 }

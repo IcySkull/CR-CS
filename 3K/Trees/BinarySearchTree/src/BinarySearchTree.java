@@ -1,21 +1,21 @@
 import java.util.*;
 
 public class BinarySearchTree {
-	private Treeable<Comparable> root;
+	private Treeable root;
 
 	public BinarySearchTree() {
 		root = null;
 	}
 
-	public void add(T val) {
+	public void add(Comparable val) {
 		root = add(val, root);
 	}
 
-	private Treeable<Comparable> add(Comparable val, Treeable<Comparable> tree) {
+	private Treeable add(Comparable val, Treeable tree) {
 		if (tree == null)
-			tree = new TreeNode<Comparable>(val);
+			tree = (Treeable) new TreeNode(val);
 
-		T treeValue = tree.getValue();
+		Comparable treeValue = (Comparable)tree.getValue();
 		int valToTree = val.compareTo(treeValue);
 
 		if (valToTree < 0)
@@ -35,7 +35,7 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 
-	private void inOrder(Treeable<T> tree) {
+	private void inOrder(Treeable tree) {
 		if (tree != null) {
 			inOrder(tree.getLeft());
 			System.out.print(tree.getValue() + " ");
@@ -48,7 +48,7 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 
-	private void preOrder(Treeable<T> tree) {
+	private void preOrder(Treeable tree) {
 		if (tree != null) {
 			System.out.print(tree.getValue() + " ");
 			preOrder(tree.getLeft());
@@ -61,7 +61,7 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 
-	private void postOrder(Treeable<T> tree) {
+	private void postOrder(Treeable tree) {
 		if (tree != null) {
 			postOrder(tree.getLeft());
 			postOrder(tree.getRight());
@@ -74,7 +74,7 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 
-	private void revOrder(Treeable<T> tree) {
+	private void revOrder(Treeable tree) {
 		if (tree != null) {
 			revOrder(tree.getRight());
 			System.out.print(tree.getValue() + " ");
@@ -87,13 +87,13 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 	
-	private void levelOrder(Treeable<T> tree) {
-		Queue<Treeable<T>> queue = new LinkedList<>();
+	private void levelOrder(Treeable tree) {
+		Queue<Treeable> queue = new LinkedList<>();
 		queue.add(tree);
 		while(!queue.isEmpty()) {
-			Treeable<T> node = queue.poll();
-			Treeable<T> left = node.getLeft();
-			Treeable<T> right = node.getRight();
+			Treeable node = queue.poll();
+			Treeable left = node.getLeft();
+			Treeable right = node.getRight();
 			System.out.print(node.getValue() + " ");
 			if (left != null)
 				queue.offer(left);
@@ -107,15 +107,15 @@ public class BinarySearchTree {
 		System.out.println("\n");
 	}
 
-	private void zigzagOrder(Treeable<T> tree) {
-		Stack<Treeable<T>> stack1 = new Stack<>();
-		Stack<Treeable<T>> stack2 = new Stack<>();
+	private void zigzagOrder(Treeable tree) {
+		Stack<Treeable> stack1 = new Stack<>();
+		Stack<Treeable> stack2 = new Stack<>();
 		stack1.add(tree);
 		while (!(stack1.isEmpty() && stack2.isEmpty())) {
 			while (!stack1.isEmpty()) {
-				Treeable<T> node = stack1.pop();
-				Treeable<T> left = node.getLeft();
-				Treeable<T> right = node.getRight();
+				Treeable node = stack1.pop();
+				Treeable left = node.getLeft();
+				Treeable right = node.getRight();
 				System.out.print(node.getValue() + " ");
 				if (left != null)
 					stack2.push(left);
@@ -123,9 +123,9 @@ public class BinarySearchTree {
 					stack2.push(right);
 			}
 			while (!stack2.isEmpty()) {
-				Treeable<T> node = stack2.pop();
-				Treeable<T> right = node.getRight();
-				Treeable<T> left = node.getLeft();
+				Treeable node = stack2.pop();
+				Treeable right = node.getRight();
+				Treeable left = node.getLeft();
 				System.out.print(node.getValue() + " ");
 				if (right != null)
 					stack1.push(right);
@@ -139,7 +139,7 @@ public class BinarySearchTree {
 		return getNumLevels(root);
 	}
 
-	private int getNumLevels(Treeable<T> tree) {
+	private int getNumLevels(Treeable tree) {
 		if (tree == null)
 			return 0;
 		int leftHeight = getNumLevels(tree.getLeft());
@@ -151,7 +151,7 @@ public class BinarySearchTree {
 		return getHeight(root);
 	}
 
-	private int getHeight(Treeable<T> tree) {
+	private int getHeight(Treeable tree) {
 		if (tree == null)
 			return 0;
 		return getNumLevels(tree) - 1;
@@ -161,7 +161,7 @@ public class BinarySearchTree {
 		return getWidth(root);
 	}
 
-	private int getWidth(Treeable<T> tree) {
+	private int getWidth(Treeable tree) {
 		if (tree == null)
 			return 0;
 		int widthLeft= getWidth(tree.getLeft());
@@ -174,7 +174,7 @@ public class BinarySearchTree {
 		return getNumNodes(root);
 	}
 
-	private int getNumNodes(Treeable<T> tree) {
+	private int getNumNodes(Treeable tree) {
 		if (tree == null)
 			return 0;
 		return 1 + getNumNodes(tree.getLeft()) + getNumNodes(tree.getRight());
@@ -184,7 +184,7 @@ public class BinarySearchTree {
 		return getNumLeaves(root);
 	}
 
-	private int getNumLeaves(Treeable<T> tree) {
+	private int getNumLeaves(Treeable tree) {
 		if (tree == null)
 			return 0;
 		else if (tree.getLeft() == null && tree.getRight() == null)
@@ -198,11 +198,11 @@ public class BinarySearchTree {
 	}
 
 	// contains
-	public boolean contains(T val) {
+	public boolean contains(Comparable val) {
 		return contains(val, root);
 	}
 
-	private boolean contains(T val, Treeable<T> tree) {
+	private boolean contains(Comparable val, Treeable tree) {
 		return tree != null && 
 			(tree.getValue().equals(val) || 
 			contains(val, tree.getLeft()) || 
@@ -210,27 +210,27 @@ public class BinarySearchTree {
 	}
 
 	// maxNode
-	public T maxNode() {
+	public Comparable<?> maxNode() {
 		return getLargest(root);
 	}
 
 	// minNode
-	public T minNode() {
+	public Comparable<?> minNode() {
 		return getSmallest(root);
 	}
 
-	public T getSmallest() {
+	public Comparable<?> getSmallest() {
 		return getSmallest(root);
 	}
 
 	// getSmallest
-	public T getSmallest(Treeable<T> tree) {
+	public Comparable<?> getSmallest(Treeable tree) {
 		if (tree == null)
 			return null;
 		
-		T nodeVal = tree.getValue();
-		T leftVal = getSmallest(tree.getLeft());
-		T rightVal = getSmallest(tree.getRight());
+		Comparable nodeVal = (Comparable<?>)tree.getValue();
+		Comparable leftVal = getSmallest(tree.getLeft());
+		Comparable rightVal = getSmallest(tree.getRight());
 
 		if (leftVal != null && leftVal.compareTo(nodeVal) < 0)
 			nodeVal = leftVal;
@@ -240,17 +240,17 @@ public class BinarySearchTree {
 		return nodeVal;
 	}
 
-	public T getLargest() {
+	public Comparable<?> getLargest() {
 		return getLargest(root);
 	}
 
-	public T getLargest(Treeable<T> tree) {
+	public Comparable<?> getLargest(Treeable tree) {
 		if (tree == null)
 			return null;
 
-		T nodeVal = tree.getValue();
-		T leftVal = getLargest(tree.getLeft());
-		T rightVal = getLargest(tree.getRight());
+		Comparable nodeVal = (Comparable) tree.getValue();
+		Comparable leftVal = getLargest(tree.getLeft());
+		Comparable rightVal = getLargest(tree.getRight());
 
 		if (leftVal != null && leftVal.compareTo(nodeVal) > 0)
 			nodeVal = leftVal;
@@ -264,11 +264,11 @@ public class BinarySearchTree {
 	// 1st case = no children
 	// 2nd case = one child
 	// 3rd case two children
-	public void remove(T val) {
+	public void remove(Comparable val) {
 		root = remove(val, root);
 	}
 
-	private Treeable<T> remove(T val, Treeable<T> tree) {
+	private Treeable remove(Comparable val, Treeable tree) {
 		if (tree == null)
 			return null;
 		if (val.compareTo(tree.getValue()) < 0)
@@ -281,16 +281,20 @@ public class BinarySearchTree {
 			else if (tree.getRight() == null)
 				return tree.getLeft();
 			tree.setValue(getSmallest(tree.getRight()));
-			tree.setRight(remove(tree.getValue(), tree.getRight()));
+			tree.setRight(remove((Comparable)tree.getValue(), tree.getRight()));
 		}
 		return tree;
+	}
+
+	public void print() {
+		System.out.println(toString());
 	}
 
 	public String toString() {
 		return toString(root);
 	}
 
-	private String toString(Treeable<T> tree) {
+	private String toString(Treeable tree) {
 		String out = "";
 		if (tree != null) {
 			out += toString(tree.getLeft());

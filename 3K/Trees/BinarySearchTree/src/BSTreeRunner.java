@@ -12,7 +12,7 @@ public class BSTreeRunner
    {
  		//add test cases here
 
-        BinarySearchTree<Integer> bst = new BinarySearchTree<>();
+        BinarySearchTree bst = new BinarySearchTree();
         bst.add(90);
         bst.add(80);
         bst.add(100);
@@ -215,10 +215,9 @@ public class BSTreeRunner
 
         bst.clear();
 
-        BinarySearchTree<String> bstString = new BinarySearchTree<>();
         System.out.println("Testing print function");
         for (String item : new String[]{"Z", "h", "P", "R", "S", "Q", "G", "L", "C", "z", "r"}) {
-            bstString.add(item);
+            bst.add(item);
         }
         bst.print();
 
@@ -227,7 +226,7 @@ public class BSTreeRunner
         for (String item : new String[]{"Z", "p", "N", "S", "U", "Q", "G", "L", "C", "w", "r",
             "y", "z", "x", "4", "D", "I", "M", "O", "R", "T", "W",
             "t", "q", "f", "d", "j", "l", "i", "e", "c"}) {
-            bstString.add(item);
+            bst.add(item);
         }
         bst.print();
 

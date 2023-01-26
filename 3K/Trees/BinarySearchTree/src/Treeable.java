@@ -4,12 +4,12 @@
 //Class - 	Computer Science III
 //Lab  -	Binary Search Tree
 
-public interface Treeable<T extends Comparable<T>>
+public interface Treeable
 {
-	public T getValue();
-	public Treeable<T> getLeft();
-	public Treeable<T> getRight();
-	public void setValue(T value);
-	public void setLeft(Treeable<T> left);
-	public void setRight(Treeable<T> right);
+	public Object getValue();
+	public Treeable getLeft();
+	public Treeable getRight();
+	public void setValue(Comparable value);
+	public void setLeft(Treeable left);
+	public void setRight(Treeable right);
 }
