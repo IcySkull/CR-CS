@@ -1,41 +1,46 @@
 
-import java.util.LinkedList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A class that implements the Dictionary interface using a LinkedList
  *
  */
-public class DictionaryLL implements Dictionary
-{
+public class DictionaryLL implements Dictionary {
 
-	private LinkedList<String> dict;
+    private LinkedList<String> dict;
 
-
-    public DictionaryLL(String[] words) {
-        dict = Arrays.stream(words).collect(Collectors.toList());
+    public DictionaryLL() {
+        dict = new LinkedList<>();
     }
 
+    public DictionaryLL(String[] words) {
+        dict = Arrays.stream(words).collect(Collectors.toCollection(LinkedList::new));
+    }
 
-    /** Add this word to the dictionary.  Convert it to lowercase first
+    /**
+     * Add this word to the dictionary. Convert it to lowercase first
      * for the assignment requirements.
+     * 
      * @param word The word to add
      * @return true if the word was added to the dictionary
-     * (it wasn't already there). */
+     *         (it wasn't already there).
+     */
     public boolean addWord(String word) {
+        if (dict.contains(word.toLowerCase())) {
+            return false;
+        }
         return dict.add(word.toLowerCase());
     }
 
-
     /** Return the number of words in the dictionary */
-    public int size()
-    {
-		return dict.size();
+    public int size() {
+        return dict.size();
     }
 
     /** Is this a word according to this dictionary? */
     public boolean isWord(String s) {
-		return dict.contains(s.toLowerCase());
+        return dict.contains(s.toLowerCase());
     }
-
 
 }

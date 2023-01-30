@@ -16,7 +16,8 @@ public class DictionaryLoader {
         BufferedReader reader = null;
         try {
             String nextWord;
-            reader = new BufferedReader(new FileReader(filename));
+            String workingDir = DictionaryLoader.class.getResource("").getPath();
+            reader = new BufferedReader(new FileReader(workingDir + "../" + filename));
             while ((nextWord = reader.readLine()) != null) {
                 d.addWord(nextWord);
             }
