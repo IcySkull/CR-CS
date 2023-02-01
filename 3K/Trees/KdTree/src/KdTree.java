@@ -6,6 +6,8 @@ import edu.princeton.cs.algs4.StdDraw;
 import java.util.ArrayList;
 
 public class KdTree {
+    private Node root;
+    private int size;
 
     /**
      * returns if the size is equal to zero
@@ -124,8 +126,7 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-
-        return null;
+        return nearest(p, root, );
     }
 
     /**

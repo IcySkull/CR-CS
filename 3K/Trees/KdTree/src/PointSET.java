@@ -46,7 +46,8 @@ public class PointSET {
 
     public Point2D nearest(Point2D p) {           // a nearest neighbor in the set to point p; null if the set is empty 
         checkIfNull(p);
-        return set.stream().min((p1, p2) -> Integer.compare(0, );
+        return set.stream().min((p1, p2) -> Double.compare(p1.distanceSquaredTo(p), p2.distanceSquaredTo(p)))
+            .orElseThrow(java.util.NoSuchElementException::new);
     }
 
     private void checkIfNull(Object o) {
