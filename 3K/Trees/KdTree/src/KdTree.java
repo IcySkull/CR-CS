@@ -14,8 +14,8 @@ public class KdTree {
      *
      * @return
      */
-    public boolean isEmpty() {                      // is the set empty? 
-        return false;
+    public boolean isEmpty() { // is the set empty?
+        return size == 0;
     }
 
     /**
@@ -23,23 +23,28 @@ public class KdTree {
      *
      * @return
      */
-    public int size() {                      // number of points in the set 
-        return 0;
+    public int size() { // number of points in the set
+        return size;
     }
 
     /**
-     * inserts a new node if not in the treeSet already the rectangles will encompass the whole area
+     * inserts a new node if not in the treeSet already the rectangles will
+     * encompass the whole area
      * and the point will lie inside
      *
      * @param p
      */
     public void insert(Point2D p) {
-
+        checkIfNull(p);
+        root = insert(p, root, true);
+        root.rect = new RectHV(0, 0, 1, 1);
     }
 
     /**
-     * helper method that inserts a node recursively and updates the Rectangle with it -
-     * alternatively a Rectangle could be passed as a parameter to free up space in the node class
+     * helper method that inserts a node recursively and updates the Rectangle with
+     * it -
+     * alternatively a Rectangle could be passed as a parameter to free up space in
+     * the node class
      *
      * @param p
      * @param node
@@ -47,8 +52,47 @@ public class KdTree {
      * @return
      */
     private Node insert(Point2D p, Node node, boolean vertical) {
+        checkIfNull(p);
+        size++;
+        if (node == null)
+            return node = new Node(p);
 
-        return null;
+        double nodeEntry;
+        double pEntry;
+        if (vertical) {
+            nodeEntry = node.p.x();
+            pEntry = p.x();
+        } else {
+            nodeEntry = node.p.y();
+            pEntry = p.y();
+        }
+
+        int cmp = Double.compare(pEntry, nodeEntry); // inserted point compared to current node
+        if (cmp > 0) {
+            node.right = insert(p, node.right, !vertical);
+            if (vertical) {
+                node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
+            } else {
+                node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
+            }
+        } else if (cmp < 0) {
+            node.left = insert(p, node.left, !vertical);
+            if (vertical) {
+                node.left.rect = new RectHV(node.rect.xmin(), node.rect.ymin(), node.p.x(), node.rect.ymax());
+            } else {
+                node.left.rect = new RectHV(node.rect.xmin(), node.rect.ymin(), node.rect.xmax(), node.p.y());
+            }
+        } else if (p.equals(node.p)) {
+            size--;
+            return node;
+        }
+        node.right = insert(p, node.right, !vertical);
+        if (vertical) {
+            node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
+        } else {
+            node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
+        }
+        return node;
     }
 
     /**
@@ -57,12 +101,14 @@ public class KdTree {
      * @param p
      * @return
      */
-    public boolean contains(Point2D p) {           // does the set contain point p? 
-        return false;
+    public boolean contains(Point2D p) { // does the set contain point p?
+        checkIfNull(p);
+        return contains(p.x(), p.y(), root, true);
     }
 
     /**
-     * helper method to recursively determine if a point is in the tree by checking left or right
+     * helper method to recursively determine if a point is in the tree by checking
+     * left or right
      * based on vertical == true for x points and vertical == false for y points
      *
      * @param x
@@ -72,8 +118,21 @@ public class KdTree {
      * @return
      */
     private boolean contains(double x, double y, Node node, boolean vertical) {
-
-        return false;
+        if (node == null)
+            return false;
+        else if (node.p.x() == x && node.p.y() == y)
+            return true;
+        else if (vertical) {
+            if (x < node.p.x())
+                return contains(x, y, node.left, !vertical);
+            else
+                return contains(x, y, node.right, !vertical);
+        } else {
+            if (y < node.p.y())
+                return contains(x, y, node.left, !vertical);
+            else
+                return contains(x, y, node.right, !vertical);
+        }
     }
 
     /**
@@ -81,20 +140,35 @@ public class KdTree {
      */
     public void draw() {
         StdDraw.setPenRadius(0.01);
-        StdDraw.setPenColor(StdDraw.BLACK);
-
+        draw(root, true);
     }
 
     /**
-     * method recursively draws nodes and red vertical lines and blue horizontal lines based on
+     * method recursively draws nodes and red vertical lines and blue horizontal
+     * lines based on
      * vertical
      *
      * @param node
-     * @param vertical - true draws vertical red line inside node's rectangle and blue horizontal
-     * line inside node's rectangle otherwise
+     * @param vertical - true draws vertical red line inside node's rectangle and
+     *                 blue horizontal
+     *                 line inside node's rectangle otherwise
      */
     private void draw(Node node, boolean vertical) {
+        if (node == null)
+            return;
 
+        StdDraw.setPenColor(StdDraw.BLACK);
+        node.p.draw();
+        if (vertical) {
+            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.line(node.p.x(), node.rect.ymin(), node.p.x(), node.rect.ymax());
+        } else {
+            StdDraw.setPenColor(StdDraw.BLUE);
+            StdDraw.line(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.p.y());
+        }
+
+        draw(node.left, !vertical);
+        draw(node.right, !vertical);
     }
 
     /**
@@ -130,7 +204,8 @@ public class KdTree {
     }
 
     /**
-     * helper method to recursively calculate closest point in tree to p with pruning
+     * helper method to recursively calculate closest point in tree to p with
+     * pruning
      *
      * @param p
      * @param node
@@ -151,7 +226,7 @@ public class KdTree {
         }
     }
 
-    public static void main(String[] args) {                // unit testing of the methods (optional) 
+    public static void main(String[] args) { // unit testing of the methods (optional)
         String filename = "circle100.txt"; // args[0];
         In in = new In(filename);
 
@@ -172,7 +247,8 @@ public class KdTree {
     }
 
     /**
-     * inner class that provides the functionality of a Node with references left/right, a point and
+     * inner class that provides the functionality of a Node with references
+     * left/right, a point and
      * a RectHV object that is optional
      */
     private class Node {
@@ -183,6 +259,22 @@ public class KdTree {
 
         public Node(Point2D p) {
             this.p = p;
+        }
+
+        public void unionRectangles(RectHV rect1, RectHV rect2) {
+            double xMin = Math.min(rect1.xmin(), rect2.xmin());
+            double xMax = Math.max(rect1.xmax(), rect2.xmax());
+            double yMin = Math.min(rect1.ymin(), rect2.ymin());
+            double yMax = Math.max(rect1.ymax(), rect2.ymax());
+            this.rect = new RectHV(xMin, yMin, xMax, yMax);
+        }
+
+        public void intersectRectangles(RectHV rect1, RectHV rect2) {
+            double xMin = Math.max(rect1.xmin(), rect2.xmin());
+            double xMax = Math.min(rect1.xmax(), rect2.xmax());
+            double yMin = Math.max(rect1.ymin(), rect2.ymin());
+            double yMax = Math.min(rect1.ymax(), rect2.ymax());
+            this.rect = new RectHV(xMin, yMin, xMax, yMax);
         }
     }
 }
