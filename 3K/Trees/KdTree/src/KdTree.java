@@ -55,10 +55,11 @@ public class KdTree {
         checkIfNull(p);
         size++;
         if (node == null)
-            return node = new Node(p);
+            return new Node(p);
 
         double nodeEntry;
         double pEntry;
+
         if (vertical) {
             nodeEntry = node.p.x();
             pEntry = p.x();
@@ -68,30 +69,33 @@ public class KdTree {
         }
 
         int cmp = Double.compare(pEntry, nodeEntry); // inserted point compared to current node
-        if (cmp > 0) {
-            node.right = insert(p, node.right, !vertical);
-            if (vertical) {
-                node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
-            } else {
-                node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
-            }
-        } else if (cmp < 0) {
+
+        if (cmp < 0) {
             node.left = insert(p, node.left, !vertical);
-            if (vertical) {
+            if (vertical)
                 node.left.rect = new RectHV(node.rect.xmin(), node.rect.ymin(), node.p.x(), node.rect.ymax());
-            } else {
+            else
                 node.left.rect = new RectHV(node.rect.xmin(), node.rect.ymin(), node.rect.xmax(), node.p.y());
-            }
-        } else if (p.equals(node.p)) {
-            size--;
-            return node;
         }
-        node.right = insert(p, node.right, !vertical);
-        if (vertical) {
-            node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
-        } else {
-            node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
+
+        else if (cmp > 0) {
+            node.right = insert(p, node.right, !vertical);
+            if (vertical)
+                node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
+            else
+                node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
         }
+
+        else {
+            if (node.p.equals(p))
+                size--;
+            node.right = insert(p, node.right, !vertical);
+            if (vertical)
+                node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
+            else
+                node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
+        }
+
         return node;
     }
 
@@ -157,8 +161,10 @@ public class KdTree {
         if (node == null)
             return;
 
+        StdDraw.setPenRadius(0.010);
         StdDraw.setPenColor(StdDraw.BLACK);
         node.p.draw();
+        StdDraw.setPenRadius(0.001);
         if (vertical) {
             StdDraw.setPenColor(StdDraw.RED);
             StdDraw.line(node.p.x(), node.rect.ymin(), node.p.x(), node.rect.ymax());
@@ -209,9 +215,12 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
+<<<<<<< HEAD
         checkIfNull(p);
         if (root == null)
             return null;
+=======
+>>>>>>> 7da44ff6a1db1f9e3d31b52375149aca58c5dcbb
         return nearest(p, root, true);
     }
 
@@ -224,8 +233,11 @@ public class KdTree {
      * @param vertical
      */
     private Point2D nearest(Point2D p, Node node, boolean vertical) {
+<<<<<<< HEAD
         // node is assumed to never be null
         
+=======
+>>>>>>> 7da44ff6a1db1f9e3d31b52375149aca58c5dcbb
         return null;
     }
 
@@ -273,22 +285,6 @@ public class KdTree {
 
         public Node(Point2D p) {
             this.p = p;
-        }
-
-        public void unionRectangles(RectHV rect1, RectHV rect2) {
-            double xMin = Math.min(rect1.xmin(), rect2.xmin());
-            double xMax = Math.max(rect1.xmax(), rect2.xmax());
-            double yMin = Math.min(rect1.ymin(), rect2.ymin());
-            double yMax = Math.max(rect1.ymax(), rect2.ymax());
-            this.rect = new RectHV(xMin, yMin, xMax, yMax);
-        }
-
-        public void intersectRectangles(RectHV rect1, RectHV rect2) {
-            double xMin = Math.max(rect1.xmin(), rect2.xmin());
-            double xMax = Math.min(rect1.xmax(), rect2.xmax());
-            double yMin = Math.max(rect1.ymin(), rect2.ymin());
-            double yMax = Math.min(rect1.ymax(), rect2.ymax());
-            this.rect = new RectHV(xMin, yMin, xMax, yMax);
         }
     }
 }
