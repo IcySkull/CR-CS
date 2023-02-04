@@ -178,8 +178,10 @@ public class KdTree {
      * @return
      */
     public Iterable<Point2D> range(RectHV rect) {
-
-        return null;
+        checkIfNull(rect);
+        ArrayList<Point2D> list = new ArrayList<>();
+        range(rect, root, list);
+        return list;
     }
 
     /**
@@ -190,7 +192,14 @@ public class KdTree {
      * @param list
      */
     private void range(RectHV rect, Node node, ArrayList<Point2D> list) {
-
+        if (node == null)
+            return;
+        if (rect.contains(node.p))
+            list.add(node.p);
+        if (node.left != null && rect.intersects(node.left.rect))
+            range(rect, node.left, list);
+        if (node.right != null && rect.intersects(node.right.rect))
+            range(rect, node.right, list);
     }
 
     /**
@@ -200,7 +209,10 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-        return nearest(p, root, );
+        checkIfNull(p);
+        if (root == null)
+            return null;
+        return nearest(p, root, true);
     }
 
     /**
@@ -211,8 +223,10 @@ public class KdTree {
      * @param node
      * @param vertical
      */
-    private void nearest(Point2D p, Node node, boolean vertical) {
-
+    private Point2D nearest(Point2D p, Node node, boolean vertical) {
+        // node is assumed to never be null
+        
+        return null;
     }
 
     /**
