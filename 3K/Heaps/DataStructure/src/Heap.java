@@ -3,7 +3,7 @@ import static java.lang.System.out;
 
 public class Heap {
 
-    private int[] data;
+    public int[] data;
     private int size;
 
     public Heap() {
@@ -15,17 +15,11 @@ public class Heap {
         size = 0;
     }
 
-    private void resize() {
-        int capacity = data.length*2;
-        int[] newData = new int[capacity];
-        System.arraycopy(data, 0, newData, 0, data.length);
-        data = newData;
-    }
 
     public void add(int value) {
         size++;
         if (size > data.length) {
-            resize();
+            doubleData();
         }
         data[size-1] = value;
         swapUp(size-1);
@@ -112,7 +106,10 @@ public class Heap {
     }
 
     private void doubleData() {
-
+        int capacity = data.length*2;
+        int[] newData = new int[capacity];
+        System.arraycopy(data, 0, newData, 0, data.length);
+        data = newData;
     }
 
     // part 2
@@ -123,10 +120,11 @@ public class Heap {
 
     @Override
     public String toString() {
-        String out = "";
-        for (int i = 0; i<size; i++) {
-            out += data[i] + " ";
+        String out = "[";
+        for (int i = 0; i<size-1; i++) {
+            out += data[i] + ", ";
         }
+        out += data[size-1] + "]";
         return out;
     }
 
