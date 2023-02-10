@@ -213,7 +213,11 @@ public class KdTree {
         checkIfNull(p);
         if (root == null)
             return null;
+<<<<<<< HEAD
         return nearest(p, root, root.p, true);
+=======
+        return nearest(p, root, true);
+>>>>>>> 2844df0753e57076cfcc66efdf46f8941546a5bd
     }
 
     /**
@@ -224,6 +228,7 @@ public class KdTree {
      * @param node
      * @param vertical
      */
+<<<<<<< HEAD
     private Point2D nearest(Point2D query, Node node, Point2D closestFound, boolean vertical) {
         if (node.p.distanceSquaredTo(query) < closestFound.distanceSquaredTo(query))
             closestFound = node.p;
@@ -260,6 +265,12 @@ public class KdTree {
             return nearest(query, node, closestFound, !vertical);
         }
         return closestFound;
+=======
+    private Point2D nearest(Point2D p, Node node, boolean vertical) {
+        // node is assumed to never be null
+        
+        return null;
+>>>>>>> 2844df0753e57076cfcc66efdf46f8941546a5bd
     }
 
     /**
