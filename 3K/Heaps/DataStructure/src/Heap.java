@@ -31,13 +31,6 @@ public class Heap {
         swapUp(size-1);
     }
 
-    private int getParentIndex(int bot) {
-        if (bot == 0) {
-            return -1;
-        }
-        return (bot-1)/2;
-    }
-
     private void swapUp(int botIndex) {
         int parentIndex = getParentIndex(botIndex);
         if (parentIndex != -1 && data[botIndex] >= data[parentIndex]) {
@@ -46,11 +39,69 @@ public class Heap {
         }
     }
 
+    private int getParentIndex(int bot) {
+        if (bot == 0) {
+            return -1;
+        }
+        return (bot-1)/2;
+    }
+
     public void remove() {
+        if (size <= 0)
+            throw new IllegalStateException();
+        size--;
+        data[0] = data[size];
+        swapDown(0, size);
+    }
+
+    public double logb(int base, int n) {
+        return Math.log(n) / Math.log(base);
+    }
+
+    private int indexMin() {
+        int min = getFirstBot();
+        for (int i = min+1; i < size; i++) {
+            if (data[i] < data[min])
+                min = i;
+        }
+        return min;
+    }
+
+    private int getFirstBot() {
+        int prevLevel = (int) (Math.log(size) / Math.log(2));
+        return (int) Math.round(Math.pow(2, prevLevel) - 1);
     }
 
     private void swapDown(int start, int stop) {
+        int leftIndex = getLeftChildIndex(start);
+        int rightIndex = getRightChildIndex(start);
+        int maxIndex = start;
+        if (leftIndex != -1 && data[leftIndex] >= data[maxIndex]) {
+            maxIndex = leftIndex;
+        }
+        if (rightIndex != -1 && data[rightIndex] >= data[maxIndex]) {
+            maxIndex = rightIndex;
+        }
+        if (maxIndex != start) {
+            swap(start, maxIndex);
+            swapDown(maxIndex, stop);
+        }
+    }
 
+    private int getLeftChildIndex(int parent) {
+        int pos = parent*2+1;
+        if (pos >= size) {
+            return -1;
+        }
+        return pos;
+    }
+
+    private int getRightChildIndex(int parent) {
+        int pos = parent*2+2;
+        if (pos >= size) {
+            return -1;
+        }
+        return pos;
     }
 
     // simple helper method that swaps values at indices loc1 and loc2
@@ -66,7 +117,7 @@ public class Heap {
 
     // part 2
     public void print() {
-        out.println("\n\nPRINTING THE HEAP!\n\n");
+        out.println("\nPRINTING THE HEAP!");
         System.out.println(this.toString());
     }
 
@@ -95,26 +146,26 @@ public class Heap {
         heap.add(5);
 
         heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
-        // heap.print();
-        // heap.remove();
+        heap.remove();
+        heap.print();
+        heap.remove();
+        heap.print();
+        heap.remove();
+        heap.print();
+        heap.remove();
+        heap.print();
+        heap.remove();
+        heap.print();
+        heap.remove();
+        heap.print();
+        heap.remove();
 
-        // heap.print();
-        // heap.add(25);
-        // heap.print();
-        // heap.add(35);
-        // heap.print();
-        // heap.remove();
-        // heap.print();
+        heap.print();
+        heap.add(25);
+        heap.print();
+        heap.add(35);
+        heap.print();
+        heap.remove();
+        heap.print();
     }
 }
