@@ -3,7 +3,6 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -41,18 +40,18 @@ public class PointSET {
 
     public Iterable<Point2D> range(RectHV rect) {           // all points that are inside the rectangle 
         checkIfNull(rect);
-        return set.stream().filter(p -> rect.contains(p)).toList();
+        return set.stream().filter(p -> rect.contains(p)).collect(Collectors.toList());
     }
 
     public Point2D nearest(Point2D p) {           // a nearest neighbor in the set to point p; null if the set is empty 
         checkIfNull(p);
         return set.stream().min((p1, p2) -> Double.compare(p1.distanceSquaredTo(p), p2.distanceSquaredTo(p)))
-            .orElseThrow(java.util.NoSuchElementException::new);
+            .orElse(null);
     }
 
     private void checkIfNull(Object o) {
         if (o == null) {
-            throw new java.lang.NullPointerException();
+            throw new java.lang.IllegalArgumentException();
         }
     }
 

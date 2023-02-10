@@ -36,6 +36,7 @@ public class KdTree {
      */
     public void insert(Point2D p) {
         checkIfNull(p);
+        size++;
         root = insert(p, root, true);
         root.rect = new RectHV(0, 0, 1, 1);
     }
@@ -53,7 +54,6 @@ public class KdTree {
      */
     private Node insert(Point2D p, Node node, boolean vertical) {
         checkIfNull(p);
-        size++;
         if (node == null)
             return new Node(p);
 
@@ -68,6 +68,11 @@ public class KdTree {
             pEntry = p.y();
         }
 
+        if (node.p.equals(p) && nodeEntry == pEntry) {
+            size--;
+            return node;
+        }
+
         int cmp = Double.compare(pEntry, nodeEntry); // inserted point compared to current node
 
         if (cmp < 0) {
@@ -78,17 +83,7 @@ public class KdTree {
                 node.left.rect = new RectHV(node.rect.xmin(), node.rect.ymin(), node.rect.xmax(), node.p.y());
         }
 
-        else if (cmp > 0) {
-            node.right = insert(p, node.right, !vertical);
-            if (vertical)
-                node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
-            else
-                node.right.rect = new RectHV(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.rect.ymax());
-        }
-
         else {
-            if (node.p.equals(p))
-                size--;
             node.right = insert(p, node.right, !vertical);
             if (vertical)
                 node.right.rect = new RectHV(node.p.x(), node.rect.ymin(), node.rect.xmax(), node.rect.ymax());
@@ -215,30 +210,56 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-<<<<<<< HEAD
         checkIfNull(p);
         if (root == null)
             return null;
-=======
->>>>>>> 7da44ff6a1db1f9e3d31b52375149aca58c5dcbb
-        return nearest(p, root, true);
+        return nearest(p, root, root.p, true);
     }
 
     /**
      * helper method to recursively calculate closest point in tree to p with
      * pruning
      *
-     * @param p
+     * @param query
      * @param node
      * @param vertical
      */
-    private Point2D nearest(Point2D p, Node node, boolean vertical) {
-<<<<<<< HEAD
-        // node is assumed to never be null
-        
-=======
->>>>>>> 7da44ff6a1db1f9e3d31b52375149aca58c5dcbb
-        return null;
+    private Point2D nearest(Point2D query, Node node, Point2D closestFound, boolean vertical) {
+        if (node.p.distanceSquaredTo(query) < closestFound.distanceSquaredTo(query))
+            closestFound = node.p;
+        Node first = node.left;
+        Node second = node.right;
+
+        if (vertical) {
+            if (query.x() < node.p.x()) {
+                first = node.left;
+                second = node.right;
+            } else {
+                first = node.right;
+                second = node.left;
+            }
+        } else {
+            if (query.y() < node.p.y()) {
+                first = node.left;
+                second = node.right;
+            } else {
+                first = node.right;
+                second = node.left;
+            }
+        }
+
+        closestFound = dictateMin(query, first, closestFound, vertical);
+        closestFound = dictateMin(query, second, closestFound, vertical);
+        return closestFound;
+    }
+
+    private Point2D dictateMin(Point2D query, Node node, Point2D closestFound, boolean vertical) {
+        if (node == null)
+            return closestFound;
+        if (node.rect.distanceSquaredTo(query) < closestFound.distanceSquaredTo(query)) {
+            return nearest(query, node, closestFound, !vertical);
+        }
+        return closestFound;
     }
 
     /**
@@ -248,7 +269,7 @@ public class KdTree {
      */
     private void checkIfNull(Object o) {
         if (o == null) {
-            throw new java.lang.NullPointerException();
+            throw new java.lang.IllegalArgumentException();
         }
     }
 
