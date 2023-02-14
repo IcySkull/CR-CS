@@ -13,6 +13,25 @@ public class Heap implements Heapable {
         size = 0;
     }
 
+	@Override
+	public int getSize() {
+		return size;
+	}
+
+    @Override
+    public int getLevel(int n) {
+        return (int)Math.ceil(Math.log(n+1)/Math.log(2));
+    }
+
+    @Override
+    public int maxNodes(int level) {
+        return (int)Math.pow(2, level)-1;
+    }
+
+	@Override
+	public int get(int index) {
+		return data[index];
+	}
 
     public void add(int value) {
         size++;
@@ -44,25 +63,6 @@ public class Heap implements Heapable {
         size--;
         data[0] = data[size];
         swapDown(0, size);
-    }
-
-    public static double logb(int base, int n) {
-        return Math.log(n) / Math.log(base);
-    }
-
-
-    private int indexMin() {
-        int min = getFirstBot();
-        for (int i = min+1; i < size; i++) {
-            if (data[i] < data[min])
-                min = i;
-        }
-        return min;
-    }
-
-    private int getFirstBot() {
-        int prevLevel = (int) (Math.log(size) / Math.log(2));
-        return (int) Math.round(Math.pow(2, prevLevel) - 1);
     }
 
     private void swapDown(int start, int stop) {
@@ -166,27 +166,23 @@ public class Heap implements Heapable {
         heap.print();
     }
 
-	@Override
-	public int getSize() {
-		return size;
-	}
-
-    @Override
-    public int getLevel(int n) {
-        return (int)Math.ceil(Math.log(n+1)/Math.log(2));
+    //unused
+    /* 
+    public static double logb(int base, int n) {
+        return Math.log(n) / Math.log(base);
     }
 
-	public int getLevel() {
-		return getLevel(getSize());
-	}
-
-    @Override
-    public int limitNodes(int level) {
-        return (int)Math.pow(2, level)-1;
+    private int indexMin() {
+        int min = getFirstBot();
+        for (int i = min+1; i < size; i++) {
+            if (data[i] < data[min])
+                min = i;
+        }
+        return min;
     }
-
-	@Override
-	public int get(int index) {
-		return data[index];
-	}
+    private int getFirstBot() {
+        int prevLevel = (int) (Math.log(size) / Math.log(2));
+        return (int) Math.round(Math.pow(2, prevLevel) - 1);
+    }
+    */
 }
