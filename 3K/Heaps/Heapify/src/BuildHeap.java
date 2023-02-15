@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -12,7 +13,7 @@ public class BuildHeap {
     private PrintWriter out;
 
     public static void main(String[] args) throws IOException {
-        new BuildHeap().solve();
+        new BuildHeap().solve("tests/own2.txt");
     }
 
     private void readData() throws IOException {
@@ -28,6 +29,7 @@ public class BuildHeap {
         for (Swap swap : swaps) {
           out.println(swap.index1 + " " + swap.index2);
         }
+        out.println(Arrays.toString(data));
     }
 
     private void generateSwaps() {
@@ -38,44 +40,44 @@ public class BuildHeap {
       // This turns the given array into a heap, 
       // but in the worst case gives a quadratic number of swaps.
       //
-
+        ensureHeap(swaps, 0);
     }
 
-    private void ensureHeap(int parent) {
-        if (parent == -1) 
+    private void ensureHeap(List<Swap> swaps, int parent) {
+        if (parent == -1)
             return;
-        int leftChild = getLeftChildIndex(parent);
-        int rightChild = getRightChildrenIndex(parent);
-        int lowestIndex = parent;
+        int leftChild = getLeftChild(parent);
+        int rightChild = getRightChild(parent);
+        int smallestChild = parent;
 
-        if (leftChild != 1 && data[leftChild] < data[lowestIndex]) {
-            lowestIndex = leftChild;
-        }
-        if (rightChild != 1 && data[rightChild] < data[lowestIndex]) {
-            lowestIndex = rightChild;
-        }
+        ensureHeap(swaps, leftChild);
+        ensureHeap(swaps, rightChild);
 
-        if (lowestIndex != parent) {
-            swap(parent, lowestIndex);
-            ensureHeap(leftChild);
-            ensureHeap(rightChild);
+        if (leftChild != -1 && data[leftChild] < data[smallestChild])
+            smallestChild = leftChild;
+        if (rightChild != -1 && data[rightChild] < data[smallestChild])
+            smallestChild = rightChild;
+        
+        if (smallestChild != parent) {
+            swap(swaps, parent, smallestChild);
+            ensureHeap(swaps, smallestChild);
         }
     }
 
-    private int getLeftChildIndex(int parent) {
-        int pos = parent*2+1;
-        if (pos >= data.length) {
+    private int getLeftChild(int parent) {
+        int leftChild = 2 * parent + 1;
+        if (leftChild >= data.length) {
             return -1;
         }
-        return pos;
+        return leftChild;
     }
 
-    private int getRightChildrenIndex(int parent) {
-        int pos = parent*2+2;
-        if (pos >= data.length) {
+    private int getRightChild(int parent) {
+        int rightChild = 2 * parent + 2;
+        if (rightChild >= data.length) {
             return -1;
         }
-        return pos;
+        return rightChild;
     }
 
     private void swap(List<Swap> swaps, int aIndex, int bIndex) {
@@ -94,7 +96,24 @@ public class BuildHeap {
         out.close();
     }
 
-    static class Swap {
+    public void solve(String fileName) throws IOException {
+        in = new FastScanner(fileName);
+        out = new PrintWriter(new BufferedOutputStream(System.out));
+        readData();
+        generateSwaps();
+        writeResponse();
+        out.close();
+    }
+
+    public int[] getData() {
+        return data;
+    }
+
+    public List<Swap> getSwaps() {
+        return swaps;
+    }
+
+    public static class Swap {
         int index1;
         int index2;
 
@@ -108,7 +127,15 @@ public class BuildHeap {
         private BufferedReader reader;
         private StringTokenizer tokenizer;
 
-        public FastScanner() {
+        public FastScanner(String fileName) throws FileNotFoundException {
+            String workingDir = BuildHeap.class.getResource("").getPath();
+            System.out.println("Working dir: " + workingDir);
+            reader = new BufferedReader(new FileReader(workingDir + "../" + fileName));
+            tokenizer = null;
+        }
+
+        public FastScanner() throws FileNotFoundException {
+            // reader = new BufferedReader(new FileReader("tests/03.txt"));
             reader = new BufferedReader(new InputStreamReader(System.in));
             tokenizer = null;
         }
