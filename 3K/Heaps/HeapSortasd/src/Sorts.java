@@ -27,19 +27,19 @@ public class Sorts {
      * @param arr
      */
     public static void heapSort(int[] arr) {
-        Integer size = arr.length;
+        int size = arr.length;
         int[] sorted = new int[size];
         ensureHeap(arr, 0);
         int index = 0;
-        System.out.println(Arrays.toString(arr));
-        System.out.println(isHeap(arr));
         while (size > 0) {
             int next = remove(arr, size--);
             sorted[index++] = next;
         }
+        System.arraycopy(sorted, 0, arr, 0, arr.length);
     }
 
-    public static boolean isHeap(int[] arr) {
+    // helper method for debugging
+    private static boolean isHeap(int[] arr) {
         for (int parent = 0; parent < arr.length; parent++) {
             int leftChild = getLeftChild(arr.length, parent);
             int rightChild = getRightChild(arr.length, parent);
@@ -65,10 +65,10 @@ public class Sorts {
         int leftIndex = getLeftChild(stop, start);
         int rightIndex = getRightChild(stop, start);
         int maxIndex = start;
-        if (leftIndex != -1 && data[leftIndex] >= data[maxIndex]) {
+        if (leftIndex != -1 && data[leftIndex] < data[maxIndex]) {
             maxIndex = leftIndex;
         }
-        if (rightIndex != -1 && data[rightIndex] >= data[maxIndex]) {
+        if (rightIndex != -1 && data[rightIndex] < data[maxIndex]) {
             maxIndex = rightIndex;
         }
         if (maxIndex != start) {
