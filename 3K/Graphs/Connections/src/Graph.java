@@ -16,14 +16,16 @@ public class Graph
 
 	public Graph(String line)
 	{ 
-		System.out.println("line " + line + "\n");
-		line = line + " " + (new StringBuilder(line)).reverse().toS;
+		line = line.trim();
+		String reversed = (new StringBuilder(line)).reverse().toString();
+		line = line + " " + reversed;
 		map = Arrays.stream(line.split(" "))
 			.collect(
 				Collectors.toMap(
 					s -> ""+s.charAt(0),
 					s -> ""+s.charAt(1),
-					(String a, String b) -> a + b
+					(String a, String b) -> a + b,
+					TreeMap::new
 				)
 		);
 	}
@@ -35,9 +37,8 @@ public class Graph
 
 	public boolean check(String first, String second)
 	{
-		System.out.println(first);
 		String connections = map.remove(first);
-		System.out.println(map);
+		if (connections == null) return false;
 		return connections.contains(second) || 
 			connections.chars()
 				.anyMatch(node -> check(""+(char)node, second));
