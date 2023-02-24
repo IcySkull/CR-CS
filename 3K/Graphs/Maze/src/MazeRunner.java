@@ -24,7 +24,8 @@ public class MazeRunner
 			}
 			Maze test = new Maze(maze);
 			System.out.println(test);
-			System.out.println(test.checkForExitPath(new Location(0, 0)));
+			boolean exit = test.checkForExitPath(new Location(0, 0));
+			System.out.println("exit" + (exit ? " " : " not ") + "found");
 			System.out.println();
 		}
 	}

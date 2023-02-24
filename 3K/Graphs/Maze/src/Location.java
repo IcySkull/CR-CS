@@ -1,5 +1,5 @@
 
-public class Location implements Comparable<Location> {
+public class Location {
     int row;
     int col;
     
@@ -9,28 +9,15 @@ public class Location implements Comparable<Location> {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Location))
-            return false;
-        Location loc = (Location) obj;
-        return this.row == loc.row && this.col == loc.col;
+    public int hashCode() {
+        return row * 1000 + col;
     }
 
-    @Override
-    public int compareTo(Location o) {
-        if (this.row > o.row)
-            return 1;
-        else if (this.row == o.row) {
-            if (this.col > o.col)
-                return 1;
-            else if (this.col < o.col)
-                return -1;
-            return 0;
+    public boolean equals(Object obj) {
+        if (obj instanceof Location) {
+            Location loc = (Location) obj;
+            return row == loc.row && col == loc.col;
         }
-        else if (this.col > o.col)
-            return 1;
-        else if (this.col < o.col)
-            return -1;
-        return 0;
+        return false;
     }
 }
