@@ -14,13 +14,18 @@ public class MazeRunner
 	public static void main( String args[] ) throws IOException
 	{
 		Scanner file = new Scanner(new File("maze.dat"));
-		int size = file.nextInt();
-		int[][] maze = new int[size][size];
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				maze[i][j] = file.nextInt(); 
+		while (file.hasNextInt()) {
+			int size = file.nextInt();
+			int[][] maze = new int[size][size];
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					maze[i][j] = file.nextInt(); 
+				}
 			}
+			Maze test = new Maze(maze);
+			System.out.println(test);
+			System.out.println(test.checkForExitPath(new Location(0, 0)));
+			System.out.println();
 		}
-		Maze test = new Maze(maze);
 	}
 }
