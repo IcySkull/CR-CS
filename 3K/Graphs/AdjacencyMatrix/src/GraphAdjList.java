@@ -1,9 +1,6 @@
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /** A class that implements a directed graph.
  * The graph may have self-loops, parallel edges.
@@ -87,15 +84,14 @@ public class GraphAdjList extends Graph {
 	 * @return List<Integer> a list of indices of vertices.
 	 */
 	 public List<Integer> getDistance2(int v) {
-		// Implement this method
-
-
-
-
-
-
-
-		return null;
+		return getNeighbors(v)
+			.stream()
+			.map(this::getNeighbors)
+			.flatMap(List::stream)
+			.distinct()
+			.sorted()
+			.collect(Collectors.toList()
+		);
 	}
 
 	/**

@@ -103,7 +103,12 @@ public abstract class Graph {
 	 */
 	public List<Integer> degreeSequence() {
 		return IntStream.range(0, numVertices)
-			.mapToObj(vertex -> getNeighbors(vertex).size() + getInNeighbors(vertex).size())
+			.mapToObj(vertex -> {
+				TreeSet<Integer> vertices = new TreeSet<>();
+				vertices.addAll(getInNeighbors(vertex));
+				vertices.addAll(getNeighbors(vertex));
+				return vertices.size();
+			})
 			.sorted(Comparator.reverseOrder())
 			.collect(Collectors.toList());
 	}
