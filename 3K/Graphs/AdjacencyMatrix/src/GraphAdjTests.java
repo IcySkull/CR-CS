@@ -14,6 +14,7 @@ public class GraphAdjTests {
 
     GraphAdjList actualList = new GraphAdjList();
     GraphAdjMatrix actualMatrix = new GraphAdjMatrix();
+
     ListTester listTester = new ListTester();
     MatrixTester matrixTester = new MatrixTester();
 
@@ -22,7 +23,7 @@ public class GraphAdjTests {
     }
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> inputFiles() {
+    public static Collection<Object[]> inputFilesTxt() {
         return Arrays.asList(new Object[][] {
                 { "graph1.txt" },
                 { "graph2.txt" },
@@ -78,7 +79,7 @@ public class GraphAdjTests {
         assertEquals(expected.size(), actual.size());
         Set<Integer> expectedSet = new HashSet<>(expected);
         Set<Integer> actualSet = new HashSet<>(actual);
-
+        
         assertEquals(expectedSet, actualSet);
     }
 }
