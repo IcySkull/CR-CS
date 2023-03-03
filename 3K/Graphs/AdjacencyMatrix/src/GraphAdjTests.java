@@ -8,23 +8,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class GraphAdjTests {
-    private final String inputFileName;
-    String workingDir = GraphAdjMatrix.class.getResource("").getPath()  + ".." + File.separator;
-
-    GraphAdjList actualList = new GraphAdjList();
-    GraphAdjMatrix actualMatrix = new GraphAdjMatrix();
-
-    ListTester listTester = new ListTester();
-    MatrixTester matrixTester = new MatrixTester();
-
-    public GraphAdjTests(String inputFileName) {
-        this.inputFileName = inputFileName;
-    }
+public class GraphAdjTests extends GraphAdjTestsAbstract<String> {
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> inputFilesTxt() {
-        return Arrays.asList(new Object[][] {
+    public static Collection<String[]> inputFiles() {
+        return Arrays.asList(new String[][] {
                 { "graph1.txt" },
                 { "graph2.txt" },
                 { "graph3.txt" },
@@ -36,12 +24,9 @@ public class GraphAdjTests {
 
     @Before
     public void setUp() throws FileNotFoundException {
-        actualList = new GraphAdjList();
-        actualMatrix = new GraphAdjMatrix();
-        listTester = new ListTester();
-        matrixTester = new MatrixTester();
+        super.setUp();
 
-        Scanner sc = new Scanner(new File(workingDir + inputFileName));
+        Scanner sc = new Scanner(new File(workingDir + input));
         int size = sc.nextInt();
 
         for (int i = 0; i<size; i++) {
@@ -61,25 +46,14 @@ public class GraphAdjTests {
         }
     }
 
-    @Test
+    @Override @Test
     public void testDegreeSequence() {
-        assertEquals(listTester.degreeSequence(), actualList.degreeSequence());
-        assertEquals(matrixTester.degreeSequence(), actualMatrix.degreeSequence());
+        super.testDegreeSequence();
     }
 
-    @Test
+    @Override @Test
     public void testGetDistance2() {
-        for (int vertex = 0; vertex < matrixTester.getNumVertices(); vertex++) {
-            testDistances(listTester.getDistance2(vertex), actualList.getDistance2(vertex));
-            testDistances(matrixTester.getDistance2(vertex), actualMatrix.getDistance2(vertex));
-        }
+        super.testGetDistance2();
     }
 
-    public void testDistances(List<Integer> expected, List<Integer> actual) {
-        assertEquals(expected.size(), actual.size());
-        Set<Integer> expectedSet = new HashSet<>(expected);
-        Set<Integer> actualSet = new HashSet<>(actual);
-        
-        assertEquals(expectedSet, actualSet);
-    }
 }
