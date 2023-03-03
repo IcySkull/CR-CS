@@ -4,12 +4,10 @@ import java.io.*;
 import java.util.*;
 
 import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 public abstract class GraphAdjTestsAbstract<I> {
     final I input;
-    String workingDir = GraphAdjMatrix.class.getResource("").getPath()  + ".." + File.separator;
+    String workingDir = Graph.class.getResource("").getPath()  + ".." + File.separator;
 
     GraphAdjList actualList = new GraphAdjList();
     GraphAdjMatrix actualMatrix = new GraphAdjMatrix();
@@ -33,11 +31,13 @@ public abstract class GraphAdjTestsAbstract<I> {
         matrixTester = new MatrixTester();
     }
 
+    @Test
     public void testDegreeSequence() {
         assertEquals(listTester.degreeSequence(), actualList.degreeSequence());
         assertEquals(matrixTester.degreeSequence(), actualMatrix.degreeSequence());
     }
 
+    @Test
     public void testGetDistance2() {
         for (int vertex = 0; vertex < matrixTester.getNumVertices(); vertex++) {
             testDistances(listTester.getDistance2(vertex), actualList.getDistance2(vertex));

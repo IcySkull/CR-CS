@@ -8,7 +8,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class GraphAdjTests extends GraphAdjTestsAbstract<String> {
+public class GraphAdjTestsTxt extends GraphAdjTestsAbstract<String> {
+
+    public GraphAdjTestsTxt(String in) {
+        super(in);
+    }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<String[]> inputFiles() {
@@ -25,7 +29,6 @@ public class GraphAdjTests extends GraphAdjTestsAbstract<String> {
     @Before
     public void setUp() throws FileNotFoundException {
         super.setUp();
-
         Scanner sc = new Scanner(new File(workingDir + input));
         int size = sc.nextInt();
 
@@ -45,15 +48,4 @@ public class GraphAdjTests extends GraphAdjTestsAbstract<String> {
             matrixTester.addEdge(v, n);
         }
     }
-
-    @Override @Test
-    public void testDegreeSequence() {
-        super.testDegreeSequence();
-    }
-
-    @Override @Test
-    public void testGetDistance2() {
-        super.testGetDistance2();
-    }
-
 }
