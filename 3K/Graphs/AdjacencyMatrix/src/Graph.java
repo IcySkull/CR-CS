@@ -229,8 +229,8 @@ public abstract class Graph {
 
 	}
 	public static void test(String num, int case1) throws IOException{
-		GraphAdjList adjList = new GraphAdjList();
-		GraphAdjMatrix adjMat = new GraphAdjMatrix();
+		ListTester adjList = new ListTester();
+		MatrixTester adjMat = new MatrixTester();
 		Scanner file = new Scanner(new File("graph"+num+".txt"));
 		int numberOfVertices = file.nextInt();
 		for(int i=0;i<numberOfVertices;i++){

@@ -10,6 +10,7 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class GraphAdjTests {
     private final String inputFileName;
+    String workingDir = GraphAdjMatrix.class.getResource("").getPath()  + ".." + File.separator;
 
     GraphAdjList actualList = new GraphAdjList();
     GraphAdjMatrix actualMatrix = new GraphAdjMatrix();
@@ -32,33 +33,31 @@ public class GraphAdjTests {
         });
     }
 
-    public void loadGraphs(Graph graph1, Graph graph2, Graph graph3, Graph graph4, String fileName) throws FileNotFoundException {
-        String workingDir = GraphAdjMatrix.class.getResource("").getPath() + "..";
-        Scanner sc = new Scanner(new File(workingDir + "/graph1.txt"));
-        int size = sc.nextInt();
-        for (int i = 0; i<size; i++) {
-            graph1.addVertex();
-            graph2.addVertex();
-            graph3.addVertex();
-            graph4.addVertex();
-        }
-        while (sc.hasNextInt()) {
-            int v = sc.nextInt();
-            int n = sc.nextInt();
-            graph1.addEdge(v, n);
-            graph2.addEdge(v, n);
-            graph3.addEdge(v, n);
-            graph4.addEdge(v, n);
-        }
-    }
-
     @Before
     public void setUp() throws FileNotFoundException {
         actualList = new GraphAdjList();
         actualMatrix = new GraphAdjMatrix();
         listTester = new ListTester();
         matrixTester = new MatrixTester();
-        loadGraphs(actualList, actualMatrix, listTester, matrixTester, inputFileName);
+
+        Scanner sc = new Scanner(new File(workingDir + inputFileName));
+        int size = sc.nextInt();
+
+        for (int i = 0; i<size; i++) {
+            actualList.addVertex();
+            actualMatrix.addVertex();
+            listTester.addVertex();
+            matrixTester.addVertex();
+        }
+
+        while (sc.hasNextInt()) {
+            int v = sc.nextInt();
+            int n = sc.nextInt();
+            actualList.addEdge(v, n);
+            actualMatrix.addEdge(v, n);
+            listTester.addEdge(v, n);
+            matrixTester.addEdge(v, n);
+        }
     }
 
     @Test

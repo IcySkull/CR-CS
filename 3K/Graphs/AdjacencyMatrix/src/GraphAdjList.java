@@ -10,11 +10,9 @@ import java.util.stream.Collectors;
  * Representation of edges via adjacency lists.
  */
 public class GraphAdjList extends Graph {
-
-
 	private Map<Integer,ArrayList<Integer>> adjListsMap;
 
-	public GraphAdjList () {
+	public GraphAdjList() {
 		adjListsMap = new HashMap<Integer,ArrayList<Integer>>();
 	}
 
@@ -89,7 +87,6 @@ public class GraphAdjList extends Graph {
 			.map(this::getNeighbors)
 			.flatMap(List::stream)
 			.distinct()
-			.sorted()
 			.collect(Collectors.toList()
 		);
 	}

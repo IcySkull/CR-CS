@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
  */
 public class GraphAdjMatrix extends Graph {
-
 	private final int defaultNumVertices = 5;
 	private int[][] adjMatrix;
 
@@ -106,7 +105,6 @@ public class GraphAdjMatrix extends Graph {
 			.map(this::getNeighbors)
 			.flatMap(Collection::stream)
 			.distinct()
-			.sorted()
 			.collect(Collectors.toList()
 		);	
 	}
