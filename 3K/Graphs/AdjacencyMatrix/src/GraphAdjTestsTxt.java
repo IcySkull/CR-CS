@@ -1,21 +1,24 @@
-import static org.junit.Assert.assertEquals;
-
 import java.io.*;
 import java.util.*;
 
 import org.junit.*;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-@RunWith(Parameterized.class)
-public class GraphAdjTestsTxt extends GraphAdjTestsAbstract<String> {
+/**
+ * This subclass of {@code GraphAdjTestsAbstract} implements text file inputs for the tests implemented
+ * in {@code GraphAdjTestsAbstract}. The 
+ */
+public final class GraphAdjTestsTxt extends GraphAdjTestsAbstract<String> {
+    // workingDir is the directory where the input files are located note that the path is relative to the package
+    // so if you are running the tests from the package, the path will be correct
+    final String workingDir = Graph.class.getResource("").getPath()  + ".." + File.separator;
 
     public GraphAdjTestsTxt(String in) {
         super(in);
     }
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection<String[]> inputFiles() {
+    public static Collection<String[]> input() {
         return Arrays.asList(new String[][] {
                 { "graph1.txt" },
                 { "graph2.txt" },
