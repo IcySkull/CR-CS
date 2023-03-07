@@ -102,17 +102,47 @@ public class MapGraph {
 	 *         path from start to goal (including both start and goal).
 	 */
 	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal) {
-		Map<GeographicPoint, Integer> distanceMap = new HashMap<GeographicPoint, Integer>();
-		List<GeographicPoint> path = new ArrayList<GeographicPoint>();
 		MapNode startNode = vertexMap.get(start);
 		MapNode goalNode = vertexMap.get(goal);
 		if (startNode == null || goalNode == null) 
 			throw new NullPointerException("Start or goal node is null");
+
+		Map<GeographicPoint, Integer> distanceMap = new HashMap<GeographicPoint, Integer>();
+		Queue<MapNode> verticesToBFS = new LinkedList<MapNode>();
+
 		distanceMap.put(start, 0);
-		Queue<Queue<MapNode>> queue = startNode.edges.stream()
-			.map(edge -> vertexMap.get(edge.end))
-			.collect(Collectors.toCollection(LinkedList::new));
-		int parentDistance = 0;
+		verticesToBFS.add(startNode);
+		while (!verticesToBFS.isEmpty()) {
+			MapNode curr = verticesToBFS.poll();
+			if (curr.equals(goalNode)) 
+				return backtrackPath(curr);
+			labelEdges(curr, distanceMap, verticesToBFS);
+		}
+
+		return null;
+	}
+
+	private List<GeographicPoint> backtrackPath(MapNode curr) {
+		List<GeographicPoint> path = new ArrayList<GeographicPoint>();
+		path.add(curr.gp);
+		while (parentMap.containsKey(curr)) {
+			curr = parentMap.get(curr);
+			path.add(curr.gp);
+		}
+		Collections.reverse(path);
+		return path;
+	}
+
+	private void labelEdges(MapNode start, Map<GeographicPoint, Integer> distanceMap,
+			Queue<MapNode> queue) {
+		for (MapEdge edge : start.edges) {
+			MapNode neighbor = vertexMap.get(edge.end);
+			if (!distanceMap.containsKey(neighbor.gp)) {
+				distanceMap.put(neighbor.gp, distanceMap.get(start.gp) + 1);
+				parentMap.put(neighbor, start);
+				queue.add(neighbor);
+			}
+		}
 	}
 
 	/**
@@ -123,11 +153,38 @@ public class MapGraph {
 	 * @return The list of intersections that form the shortest path from
 	 *         start to goal (including both start and goal).
 	 */
-	public List<GeographicPoint> dijkstra(GeographicPoint start,
-			GeographicPoint goal) {
-		// TODO: Implement this method in part two
+	public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal) {
+		MapNode startNode = vertexMap.get(start);
+		MapNode goalNode = vertexMap.get(goal);
+		if (startNode == null || goalNode == null) 
+			throw new NullPointerException("Start or goal node is null");
+
+		Map<GeographicPoint, Double> distanceMap = new HashMap<>();
+		PriorityQueue<MapNodeWeighted> verticesToDijkstra = new PriorityQueue<>();
+
+		distanceMap.put(start, 0.0);
+		verticesToDijkstra.add(new MapNodeWeighted(start, 0.0));
+		while (!verticesToDijkstra.isEmpty()) {
+			MapNode curr = vertexMap.get(verticesToDijkstra.poll().gp);
+			if (curr.equals(goalNode)) 
+				return backtrackPath(curr);
+			labelEdgesDijkstra(curr, distanceMap, verticesToDijkstra);
+		}
 
 		return null;
+	}
+
+	private void labelEdgesDijkstra(MapNode start, Map<GeographicPoint, Double> distanceMap,
+			PriorityQueue<MapNodeWeighted> queue) {
+		for (MapEdge edge : start.edges) {
+			MapNode neighbor = vertexMap.get(edge.end);
+			double newDistance = distanceMap.get(start.gp) + edge.distance; 
+			if (!distanceMap.containsKey(neighbor.gp) || newDistance < distanceMap.get(neighbor.gp)) {
+				parentMap.put(neighbor, start);
+				distanceMap.put(neighbor.gp, newDistance);
+				queue.add(new MapNodeWeighted(neighbor.gp, newDistance));
+			}
+		}
 	}
 
 	/**
@@ -142,9 +199,37 @@ public class MapGraph {
 	 */
 	public List<GeographicPoint> aStarSearch(GeographicPoint start,
 			GeographicPoint goal) {
-		// TODO: Implement this method in part two
+		MapNode startNode = vertexMap.get(start);
+		MapNode goalNode = vertexMap.get(goal);
+		if (startNode == null || goalNode == null) 
+			throw new NullPointerException("Start or goal node is null");
+
+		Map<GeographicPoint, Double> distanceMap = new HashMap<>();
+		PriorityQueue<MapNodeWeighted> verticesToAStar = new PriorityQueue<>();
+
+		distanceMap.put(start, 0.0);
+		verticesToAStar.add(new MapNodeWeighted(start, 0.0));
+		while (!verticesToAStar.isEmpty()) {
+			MapNode curr = vertexMap.get(verticesToAStar.poll().gp);
+			if (curr.equals(goalNode)) 
+				return backtrackPath(curr);
+			labelEdgesAStar(curr, goal, distanceMap, verticesToAStar);
+		}
 
 		return null;
+	}
+
+	private void labelEdgesAStar(MapNode start, GeographicPoint goal, Map<GeographicPoint, Double> distanceMap,
+			PriorityQueue<MapNodeWeighted> queue) {
+		for (MapEdge edge : start.edges) {
+			MapNode neighbor = vertexMap.get(edge.end);
+			double newDistance = distanceMap.get(start.gp) + edge.distance; 
+			if (!distanceMap.containsKey(neighbor.gp) || newDistance < distanceMap.get(neighbor.gp)) {
+				parentMap.put(neighbor, start);
+				distanceMap.put(neighbor.gp, newDistance);
+				queue.add(new MapNodeWeighted(neighbor.gp, newDistance + neighbor.gp.distance(goal)));
+			}
+		}
 	}
 
 	public static void main(String[] args) {
@@ -157,14 +242,39 @@ public class MapGraph {
 		System.out.println("Num edges: " + theMap.getNumEdges());
 		System.out.println(theMap.bfs(new GeographicPoint(1.0, 1.0), new GeographicPoint(8, -1)));
 
-		// uncomment for part 2
-		// System.out.println(theMap.dijkstra(new GeographicPoint(1.0,1.0), new
-		// GeographicPoint(8,-1)));
-		// System.out.println(theMap.aStarSearch(new GeographicPoint(1.0,1.0), new
-		// GeographicPoint(8,-1)));
+		System.out.println(theMap.dijkstra(new GeographicPoint(1.0,1.0), new
+		GeographicPoint(8,-1)));
+		System.out.println(theMap.aStarSearch(new GeographicPoint(1.0,1.0), new
+		GeographicPoint(8,-1)));
 
 	}
 
+}
+
+class MapNodeWeighted implements Comparable<MapNodeWeighted> {
+
+	GeographicPoint gp;
+	List<MapEdge> edges;
+	double weight;
+
+	public MapNodeWeighted(GeographicPoint gp) {
+		this.gp = gp;
+		edges = new ArrayList<MapEdge>();
+	}
+
+	public MapNodeWeighted(GeographicPoint gp, double weight) {
+		this.gp = gp;
+		edges = new ArrayList<MapEdge>();
+		this.weight = weight;
+	}
+
+	public int compareTo(MapNodeWeighted other) {
+		return Double.compare(weight, other.weight);
+	}
+
+	public String toString() {
+		return "" + gp;
+	}
 }
 
 class MapNode implements Comparable<MapNode> {
@@ -178,7 +288,7 @@ class MapNode implements Comparable<MapNode> {
 	}
 
 	public int compareTo(MapNode other) {
-		return -1;
+		return Double.compare(gp.distance(new GeographicPoint(0, 0)), other.gp.distance(new GeographicPoint(0, 0)));
 	}
 
 	public String toString() {
