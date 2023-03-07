@@ -4,8 +4,8 @@ import java.util.*;
 import org.junit.*;
 import org.junit.runners.Parameterized;
 
-public class BFSTestsAStar extends BFSTestsAbstract{
-    public BFSTestsAStar(String in, GeographicPoint start, GeographicPoint end) {
+public class AStarTests extends TestsAbstract{
+    public AStarTests(String in, GeographicPoint start, GeographicPoint end) {
         super(in, start, end);
     }
 
@@ -23,7 +23,7 @@ public class BFSTestsAStar extends BFSTestsAbstract{
     public void setUp() throws FileNotFoundException {
         super.setUp();
         
-        correct = new CorrectAnswer(workingDir + input + ".answer", false);
+        correct = new CorrectAnswer(input + ".answer", false);
 
         studentPath = studentImpl.aStarSearch(start, end);
     }

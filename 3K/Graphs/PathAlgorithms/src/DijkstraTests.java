@@ -4,9 +4,9 @@ import java.util.*;
 import org.junit.*;
 import org.junit.runners.Parameterized;
 
-public final class BFSTestsDijkstra extends BFSTestsAbstract {
+public final class DijkstraTests extends TestsAbstract {
 
-    public BFSTestsDijkstra(String in, GeographicPoint start, GeographicPoint end) {
+    public DijkstraTests(String in, GeographicPoint start, GeographicPoint end) {
         super(in, start, end);
     }
 
@@ -24,7 +24,7 @@ public final class BFSTestsDijkstra extends BFSTestsAbstract {
     public void setUp() throws FileNotFoundException {
         super.setUp();
         
-        correct = new CorrectAnswer(workingDir + input + ".answer", false);
+        correct = new CorrectAnswer(input + ".answer", false);
 
         studentPath = studentImpl.dijkstra(start, end);
     }

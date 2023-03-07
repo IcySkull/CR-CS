@@ -1,11 +1,13 @@
+import static org.junit.Assert.assertEquals;
+
 import java.io.*;
 import java.util.*;
 
 import org.junit.*;
 import org.junit.runners.Parameterized;
 
-public class BFSTestsSearch extends BFSTestsAbstract {
-    public BFSTestsSearch(String in, GeographicPoint start, GeographicPoint end) {
+public class BFSTests extends TestsAbstract {
+    public BFSTests(String in, GeographicPoint start, GeographicPoint end) {
         super(in, start, end);
     }
 
@@ -23,8 +25,18 @@ public class BFSTestsSearch extends BFSTestsAbstract {
     public void setUp() throws FileNotFoundException {
         super.setUp();
         
-        correct = new CorrectAnswer(workingDir + input + ".answer", true);
+        correct = new CorrectAnswer(input + ".answer", true);
 
         studentPath = studentImpl.bfs(start, end);
+    }
+
+    @Test
+    public void testVertexCount() {
+        assertEquals(correct.vertices, studentImpl.getNumVertices());
+    }
+
+    @Test
+    public void testEdgeCount() {
+        assertEquals(correct.edges, studentImpl.getNumEdges());
     }
 }
