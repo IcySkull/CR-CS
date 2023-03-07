@@ -4,44 +4,30 @@ import java.io.*;
 import java.util.*;
 
 import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-/**
- *  {@code} GraphAdjTestsAbstract} is the abstraction that implements the tests for student's implementation of
- *  {@code GraphAdjList} and {@code GraphAdjMatrix}. {@code GraphAdjTestsAbstract} defines how the tests are run 
- *  and what tests are run, but, the input format used for the tests is delegated for its subclasses to define. 
- *  The input is represented by the generic type {@code I} and is passed to the constructor of {@code GraphAdjTestsAbstract} 
- *  by its subclasses using Parametized JUnit runners. 
- * 
- *  The subclasses of {@code GraphAdjTestsAbstract} are responsible for for implementing setUp() method that defines how 
- *  the data in Input {@code I} is used to initialize the student's graphs and the expected graphs. And in providing the
- *  the parameters for the tests using the {@code Parameterized.Parameters} annotation, which is used by the JUnit runner
- *  to initialize a new instance of a subclass of {@code GraphAdjTestsAbstract} for each parameter in the collection returned.
- */
-@RunWith(Parameterized.class)
-public abstract class GraphAdjTestsAbstract<I> {
-    final I input;
+public final class AdjacencyTests  {
+    // workingDir is the directory where the input files are located note that the path is relative to the package
+    // so if you are running the tests from the package, the path will be correct
+    final String workingDir = Graph.class.getResource("").getPath()  + ".." + File.separator;
+
+    final String[] listInput = new String[] {"graph1.txt", "graph2.txt", "graph3.txt", "graph4.txt", "graph5.txt", "graph6.txt"};
 
     // actualList and actualMatrix are the student's implementations
-    GraphAdjList actualList = new GraphAdjList();
-    GraphAdjMatrix actualMatrix = new GraphAdjMatrix();
+    GraphAdjList[] actualLists;
+    GraphAdjMatrix[] actualMatrices;
 
     // ListTester and MatrixTester are the expected implementations of GraphAdjList and GraphAdjMatrix
     // that we are testing against actualList and actualMatrix which are student's implementations
     ListTester listTester = new ListTester();
     MatrixTester matrixTester = new MatrixTester();
 
-    public GraphAdjTestsAbstract(I in) {
-        this.input = in;
-    }
-
     @Before
     public void setUp() throws FileNotFoundException {
-        actualList = new GraphAdjList();
-        actualMatrix = new GraphAdjMatrix();
+        actualLists = new GraphAdjList[listInput.length];
+        actualMatrices = new GraphAdjMatrix[listInput.length];
         listTester = new ListTester();
         matrixTester = new MatrixTester();
+        for (String input : )
     }
 
     @Test
