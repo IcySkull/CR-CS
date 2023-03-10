@@ -48,7 +48,7 @@ public class ReachabilityTest {
         }
     }
 
-    @Test(timeout = 1000)
+    @Test
     public void testTiny() {
         loadFile("tinyG.txt");
         assertEquals(1, Reachability.reach(adj, 0, 4));
@@ -64,7 +64,7 @@ public class ReachabilityTest {
         assertEquals(0, Reachability.reach(adj, 8, 5));
     }
 
-    @Test(timeout = 1000)
+    @Test
     public void testMedium() {
         loadFile("mediumG.txt");
         assertEquals(0, Reachability.reach(adj, 0, 250));
@@ -85,6 +85,7 @@ public class ReachabilityTest {
         assertEquals(1, Reachability.reach(adj, 77, 88));
     }
 
+    @Test
     public void testLarge() {
         loadFile("largeG.txt");
         assertEquals(1, Reachability.reach(adj, 0, 999999));

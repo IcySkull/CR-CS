@@ -4,7 +4,6 @@ import java.util.Scanner;
 public class ConnectedComponents {
     static int numberOfComponents(ArrayList<Integer>[] adj) {
         int result = 0;
-        //write your code here
         return result;
     }
 
