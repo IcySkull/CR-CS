@@ -30,17 +30,7 @@ class AdjacencyList<W extends Number> extends AbstractGraph<Integer, W> {
 
     public AdjacencyList(List<Integer>[] adjList) {
         super();
-        for (int vertex = 0; vertex < adjList.length; vertex++) {
-            Set<UnWeightedEdge> incidentEdges = new HashSet<>();
-            vertices.add(vertex);
-            for (Integer w : adjList[vertex])
-                incidentEdges.add(new UnWeightedEdge(vertex, w));
-            adjMap.put(vertex, incidentEdges);
-            edges.addAll(incidentEdges);
-        }
         
-        ver
-
     }
 
     class UnWeightedEdge extends AbstractGraph<Integer, W>.Edge {

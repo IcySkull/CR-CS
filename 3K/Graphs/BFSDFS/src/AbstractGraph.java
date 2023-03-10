@@ -22,10 +22,6 @@ public abstract class AbstractGraph<V, W extends Number> {
         this.edges = edges;
     }
 
-    public void setVertices(Set<V> vertices) {
-        this.vertices = vertices;
-    }
-
     public Set<V> getVertices() {
         return vertices;
     }
@@ -55,10 +51,6 @@ public abstract class AbstractGraph<V, W extends Number> {
             throw new IllegalArgumentException("Vertex " + w + " is not in the graph");
         Edge e = new Edge(v, w, weight) {};
         edges.add(e);
-    }
-
-    public void addEdge(V v, V w) {
-        addEdge(v, w, (W) Double.valueOf(1));
     }
 
     /**
