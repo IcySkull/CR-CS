@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,10 @@ public abstract class AbstractGraph<V, W extends Number> {
     public AbstractGraph(Set<V> vertices, Set<Edge> edges) {
         this.vertices = vertices;
         this.edges = edges;
+    }
+
+    public void setVertices(Set<V> vertices) {
+        this.vertices = vertices;
     }
 
     public Set<V> getVertices() {
@@ -98,7 +103,7 @@ public abstract class AbstractGraph<V, W extends Number> {
         return incidentEdges(v).size();
     }
 
-    public <T extends Collection<V>> List<V> search (V start, V end, T traverse, Function<Edge, W> heuristic) {
+    public <T extends Collection<V>, R> List<V> search (V start, V end, T traverse, Function<Edge, W> heuristic, Consumer<AbstractGraph<V, W>> forEachVisited) {
         if (!vertices.contains(start))
             throw new IllegalArgumentException("Start vertex is not in the graph");
         if (!vertices.contains(end))
@@ -111,6 +116,8 @@ public abstract class AbstractGraph<V, W extends Number> {
         while (!traverse.isEmpty()) {
             V v = traverse.iterator().next();
             traverse.remove(v);
+
+            forEachVisited.accept(this);
 
             if (v.equals(end))
                 return backtrace(parent, end);
@@ -144,12 +151,13 @@ public abstract class AbstractGraph<V, W extends Number> {
     }
 
     public List<V> bfs(V start, V end) {
-        return search(start, end, (Queue)(new LinkedList<>()), e -> (W) Double.valueOf(0));
+        return search(start, end, (Queue)(new LinkedList<>()), e -> (W) Double.valueOf(0), (graph) -> {});
     }
 
     public List<V> dfs(V start, V end) {
-        return search(start, end, new Stack<>(), e -> (W) Double.valueOf(0));
+        return search(start, end, new Stack<>(), e -> (W) Double.valueOf(0), (graph) -> {});
     }
+
 
     public abstract class Edge {
         private V v;
@@ -197,7 +205,7 @@ public abstract class AbstractGraph<V, W extends Number> {
     public static void main(String[] args) {
 
         AbstractGraph<Integer, Number> graph = new AbstractGraph<Integer, Number>() {};
-        graph.addVertices(1, 2, 3);
+        graph.addVertices(1, 2, 3, 5, 3, 3);
         graph.addEdge(1, 2);
         graph.addEdge(3, 2);
         graph.addEdge(1, 3);
