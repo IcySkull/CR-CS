@@ -1,17 +1,50 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Reachability {
     static int reach(ArrayList<Integer>[] adj, int x, int y) {
-        return reach(adj, x, y, new boolean[adj.length]) ? 1 : 0;
+        return bfs(adj, x, y);
     }
 
-    static boolean reach(ArrayList<Integer>[] adj, int x, int y, boolean[] visited) {
-        if (visited[x])
-            return false;
+
+    static int bfs(ArrayList<Integer>[] adj, int x, int y) {
+        List<Integer> queue = new ArrayList<>();
+        boolean[] visited = new boolean[adj.length];
+        queue.add(x);
         visited[x] = true;
-        return x == y || adj[x].stream()
-            .anyMatch(vertex -> reach(adj, vertex, y, visited));
+        while (!queue.isEmpty()) {
+            int v = queue.remove(0);
+            if (v == y)
+                return 1;
+            for (int w : adj[v]) {
+                if (!visited[w]) {
+                    queue.add(w);
+                    visited[w] = true;
+                }
+            }
+        }
+        return 0;
+    }
+
+    static int dfs(ArrayList<Integer>[] adj, int x, int y) {
+        Stack<Integer> stack = new Stack<>();
+        boolean[] visited = new boolean[adj.length];
+        stack.add(x);
+        visited[x] = true;
+        while (!stack.isEmpty()) {
+            int v = stack.pop();
+            if (v == y)
+                return 1;
+            for (int w : adj[v]) {
+                if (!visited[w]) {
+                    stack.add(w);
+                    visited[w] = true;
+                }
+            }
+        }
+        return 0;
     }
 
     public static void main(String[] args) {
