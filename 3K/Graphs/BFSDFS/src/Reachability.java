@@ -31,6 +31,7 @@ class AdjacencyList<W extends Number> extends AbstractGraph<Integer, W> {
 
     public AdjacencyList(List<Integer>[] adjList) {
         super();
+<<<<<<< HEAD
         adjMap = new HashMap<>();
 
         Set<Integer> vertices = getVertices();
@@ -42,6 +43,9 @@ class AdjacencyList<W extends Number> extends AbstractGraph<Integer, W> {
             }
 
         }
+=======
+        
+>>>>>>> fe7b3004728a0fd4fef94962797ad348b5be3b0d
     }
 
     class UnweightedEdge extends Edge {
