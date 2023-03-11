@@ -1,3 +1,4 @@
+
 import java.util.*;
 
 public class Reachability {
@@ -26,25 +27,25 @@ public class Reachability {
 }
 
 class AdjacencyList<W extends Number> extends AbstractGraph<Integer, W> {
-    Map<Integer, Set<UnWeightedEdge>> adjMap;
+    Map<Integer, Set<UnweightedEdge>> adjMap;
 
     public AdjacencyList(List<Integer>[] adjList) {
         super();
-        for (int vertex = 0; vertex < adjList.length; vertex++) {
-            Set<UnWeightedEdge> incidentEdges = new HashSet<>();
-            vertices.add(vertex);
-            for (Integer w : adjList[vertex])
-                incidentEdges.add(new UnWeightedEdge(vertex, w));
-            adjMap.put(vertex, incidentEdges);
-            edges.addAll(incidentEdges);
-        }
-        
-        ver
+        adjMap = new HashMap<>();
 
+        Set<Integer> vertices = getVertices();
+        Set<Edge> edges = getEdges();
+        for (int i = 0; i < adjList.length; i++) {
+            vertices.add(i);
+            for (Integer j : adjList[i]) {
+                edges.add(new UnweightedEdge(i, j));
+            }
+
+        }
     }
 
-    class UnWeightedEdge extends AbstractGraph<Integer, W>.Edge {
-        public UnWeightedEdge (Integer v, Integer w) {
+    class UnweightedEdge extends Edge {
+        public UnweightedEdge (Integer v, Integer w) {
             super(v, w);
         }
 
