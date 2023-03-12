@@ -3,6 +3,7 @@ import java.util.*;
 
 public class Reachability {
     static int reach(ArrayList<Integer>[] adj, int x, int y) {
+        return 0;
     }
 
     public static void main(String[] args) {
@@ -25,35 +26,4 @@ public class Reachability {
         System.out.println(reach(adj, x, y));
     }
 }
-
-class AdjacencyList<W extends Number> extends AbstractGraph<Integer, W> {
-    Map<Integer, Set<UnweightedEdge>> adjMap;
-
-    public AdjacencyList(List<Integer>[] adjList) {
-        super();
-<<<<<<< HEAD
-        adjMap = new HashMap<>();
-
-        Set<Integer> vertices = getVertices();
-        Set<Edge> edges = getEdges();
-        for (int i = 0; i < adjList.length; i++) {
-            vertices.add(i);
-            for (Integer j : adjList[i]) {
-                edges.add(new UnweightedEdge(i, j));
-            }
-
-        }
-=======
-        
->>>>>>> fe7b3004728a0fd4fef94962797ad348b5be3b0d
-    }
-
-    class UnweightedEdge extends Edge {
-        public UnweightedEdge (Integer v, Integer w) {
-            super(v, w);
-        }
-
-        
-    }
-} 
 

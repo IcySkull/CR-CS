@@ -13,16 +13,10 @@ import java.util.Objects;
 abstract class Edge<V> {
     private V v;
     private V w;
-    private Double weight;
-
-    public Edge(V v, V w, Double weight) {
-        this.v = v;
-        this.w = w;
-        this.weight = weight;
-    }
 
     public Edge(V v, V w) {
-        this(v, w, Double.valueOf(1));
+        this.v = v;
+        this.w = w;
     }
 
     public V v() {
@@ -31,23 +25,6 @@ abstract class Edge<V> {
 
     public V w() {
         return w;
-    }
-
-    public Double weight() {
-        return weight;
-    }
-
-    /*
-     * Return the weight of this edge, adding the weight of the given edge. But
-     * without
-     * modifying the weight of the given edge.
-     */
-    public Double weight(Double weight) {
-        return this.weight + weight;
-    }
-
-    public void addWeight(Double weight) {
-        this.weight = this.weight.doubleValue() + weight.doubleValue();
     }
 
     /*
