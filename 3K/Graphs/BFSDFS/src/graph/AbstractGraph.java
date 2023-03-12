@@ -1,7 +1,11 @@
 package graph;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -95,66 +99,141 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return incidentEdges(v).size();
     }
 
-    public List<V> search(V start, V end, Collection<V> traverse, Function<Edge<V>, Number> heuristic) {
-        if (!vertices.contains(start))
-            throw new NullPointerException("Start vertex is not in the graph");
-        if (!vertices.contains(end))
-            throw new NullPointerException("End vertex is not in the graph");
-        Map<V, V> parent = new HashMap<>();
-        Map<V, Double> cost = new HashMap<>();
-        traverse.add(start);
-        cost.put(start, Double.valueOf(0));
+    public <L, R> R search(
+        V start, V goal,
+        Supplier<Collection<V>> frontierSupplier, Supplier<Map<V, V>> parentsSupplier, 
+        Supplier<Map<V, L>> labelsSupplier, Function<V, L> startLabeler,
+        SearchFunction<V, L> searchFunction, SearchFunction.Args<V, E, L> searchArgs,
+        TriFunction<V, V, Map<V, V>, R> backtrace, Function<V, R> noPath,
+        TriConsumer<AbstractGraph<V, E>, V, V> onVisit, TriConsumer<AbstractGraph<V, E>, V, V> found
+    ) {
+        Collection<V> frontier = frontierSupplier.get();
+        Map<V, V> parent = parentsSupplier.get();
+        Map<V, L> labels = labelsSupplier.get();
 
-        while (!traverse.isEmpty()) {
-            V v = traverse.iterator().next();
-            traverse.remove(v);
+        frontier.add(start);
+        labels.put(start, startLabeler.apply(start));
 
-            if (v.equals(end))
-                return backtrace(parent, end);
+        while (!frontier.isEmpty()) {
+            Iterator<V> it = frontier.iterator();
+            V v = it.next();
+            it.remove();
 
-            for (Edge<V> e : incidentEdges(v)) {
+            SearchResult<V, L> result = searchFunction.search(
+                searchArgs.state(v, frontier, parent, labels, onVisit, found)
+            );
+
+            putEntry(parent, result.parentEntry);
+            putEntry(labels, result.labelEntry);
+            if (result.found)
+                return backtrace.apply(start, goal, parent);
+            
+            frontier.addAll(result.upcomingVertices);
+        }
+
+        return noPath.apply(start);
+    }
+
+    private <K, B> void putEntry(Map<K, B> map, AbstractMap.SimpleEntry<K, B> entry) {
+        map.put(entry.getKey(), entry.getValue());
+    }
+
+    public <L, R> R search(
+            V start, V goal, 
+            Supplier<Collection<V>> frontierSupplier, Supplier<Map<V, V>> parentsSupplier, Supplier<Map<V, L>> labelsSupplier,
+            Function<V, L> startLabeler, Function<V, L> labeler, BiFunction<L, L, Boolean> labelerComparator, BinaryOperator<L> labelerCombiner,
+            Function<V, L> heuristic, 
+            TriFunction<V, V, Map<V,V>, R> backtrace, Function<V, R> noPath,
+            TriConsumer<AbstractGraph<V, E>, V, V> onStep, BiConsumer<AbstractGraph<V, E>, V> found
+    ) {
+        Collection<V> frontier = frontierSupplier.get();
+        Map<V, V> parent = parentsSupplier.get();
+        Map<V, L> labels = labelsSupplier.get();
+
+        labels.put(start, startLabeler.apply(start));
+        frontier.add(start);
+
+        while (!frontier.isEmpty()) {
+            Iterator<V> it = frontier.iterator();
+            V v = it.next();
+            it.remove();
+
+            for (E e : incidentEdges(v)) {
                 V w = e.adj(v);
-                Double newCost = e.weight(cost.get(v));
-                if (!cost.containsKey(w) || newCost.doubleValue() < cost.get(w).doubleValue()) {
+                onStep.accept(this, v, w);
+                L label = labelerCombiner.apply(labels.get(v), labeler.apply(w));
+                label = labelerCombiner.apply(label, heuristic.apply(w));
+                if (w.equals(goal)) {
+                    found.accept(this, w);
                     parent.put(w, v);
-                    cost.put(w, Double.valueOf(newCost.doubleValue() + heuristic.apply(e).doubleValue()));
-                    traverse.add(w);
+                    labels.put(w, label);
+                    return backtrace.apply(start, goal, parent);
+                }
+                else if (!labels.containsKey(w) || labelerComparator.apply(label, labels.get(w))) {
+                    frontier.add(w);
+                    parent.put(w, v);
+                    labels.put(w, label);
                 }
             }
         }
 
-        return null;
+        return noPath.apply(start);
     }
 
-    /*
-     * Backtrace the path from start to end. Helper function for search.
-     */
-    public List<V> backtrace(Map<V, V> parent, V end) {
+    private List<V> backtrace(V start, V end, Map<V, V> parent) {
         List<V> path = new ArrayList<>();
-        V v = end;
-        while (v != null) {
-            path.add(v);
-            v = parent.get(v);
+        while (end != null) {
+            path.add(end);  
+            end = parent.get(end);
         }
         Collections.reverse(path);
         return path;
     }
 
-    public List<V> bfs(V start, V end) {
-        return search(start, end, (Queue) new LinkedList<>(), e -> 0);
-    }
-
-    public List<V> dfs(V start, V end) {
-        return search(start, end, new Stack<>(), e -> 0);
+    public <R, L> List<V> bfs(V start, V end, TriConsumer<AbstractGraph<V, E>, V, V> onStep, BiConsumer<AbstractGraph<V, E>, V> found) {
+        return search(start, end, 
+            LinkedList::new, HashMap::new, HashMap::new,
+            startLabeler -> 0, labeler -> 0, (l1, l2) -> false, (l1, l2) -> l1 + l2, 
+            v -> 0,
+            (s, e, parentMap) -> backtrace(start, end, parentMap), noPath -> null,
+            onStep, found
+        );
     }
 
     public static void main(String[] args) {
-        AbstractGraph<Integer, Edge<Integer>> g = new AbstractGraph<Integer,Edge<Integer>>() {};
+        AbstractGraph<Integer, Edge<Integer>> g = new AbstractGraph<Integer, Edge<Integer>>() {};
         g.addVertices(1, 2, 3, 4);
         g.addEdge(new Edge<Integer>(1, 2) {});
         g.addEdge(new Edge<Integer>(3, 2) {});
         g.addEdge(new Edge<Integer>(4, 3) {});
+        g.addEdge(new Edge<Integer>(1, 4) {});
 
-        System.out.println(g.bfs(1, 4));
+        System.out.println(g.bfs(1, 4, (graph, from, to) -> {
+            System.out.println("Step: " + from + " -> " + to);
+        }, (graph, v) -> {
+            System.out.println("Found: " + v);
+        }));
+    }
+}
+
+@FunctionalInterface
+interface TriFunction<T, U, V, R> {
+    R apply(T t, U u, V v);
+}
+
+@FunctionalInterface
+interface TriConsumer<T, U, V> {
+    void accept(T t, U u, V v);
+}
+
+class NullMap<K, V> extends HashMap<K, V> {
+    @Override
+    public V get(Object key) {
+        return null;
+    }
+
+    @Override
+    public V put(K key, V value) {
+        return null;
     }
 }
