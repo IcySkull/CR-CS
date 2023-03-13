@@ -9,15 +9,15 @@ import java.util.Collection;
  * The fourth element is a boolean indicating whether the adjacent vertex is the
  */
 public abstract class SearchResult<V, L> {
+    public final V vertex;
     public final V adjacentVertex;
-    public final Collection<V> upcomingVertices;
     public final AbstractMap.SimpleEntry<V, V> parentEntry;
     public final AbstractMap.SimpleEntry<V, L> labelEntry;
     public final Boolean found;
     
-    public SearchResult(V adjacentVertex, Collection<V> upcomingVertices, AbstractMap.SimpleEntry<V, V> parentEntry, AbstractMap.SimpleEntry<V, L> labelEntry, Boolean found) {
+    public SearchResult(V vertex, V adjacentVertex, AbstractMap.SimpleEntry<V, V> parentEntry, AbstractMap.SimpleEntry<V, L> labelEntry, Boolean found) {
+        this.vertex = vertex;
         this.adjacentVertex = adjacentVertex;
-        this.upcomingVertices = upcomingVertices;
         this.parentEntry = parentEntry;
         this.labelEntry = labelEntry;
         this.found = found;
@@ -25,6 +25,6 @@ public abstract class SearchResult<V, L> {
 
     @Override
     public String toString() {
-        return String.format("SearchResult(%s, %s, %s, %s, %s)", adjacentVertex, upcomingVertices, parentEntry, labelEntry, found);
+        return String.format("SearchResult(%s, %s, %s, %s, %s)", vertex, adjacentVertex, parentEntry, labelEntry, found);
     }
 }

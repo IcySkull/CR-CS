@@ -99,13 +99,13 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return incidentEdges(v).size();
     }
 
-    public <L, R> R search(
+    public <T, L, R> R search(
         V start, V goal,
         Supplier<Collection<V>> frontierSupplier, Supplier<Map<V, V>> parentsSupplier, 
         Supplier<Map<V, L>> labelsSupplier, Function<V, L> startLabeler,
         SearchFunction<V, L> searchFunction, SearchFunction.Args<V, E, L> searchArgs,
         TriFunction<V, V, Map<V, V>, R> backtrace, Function<V, R> noPath,
-        TriConsumer<AbstractGraph<V, E>, V, V> onVisit, TriConsumer<AbstractGraph<V, E>, V, V> found
+        T... args
     ) {
         Collection<V> frontier = frontierSupplier.get();
         Map<V, V> parent = parentsSupplier.get();
@@ -119,16 +119,19 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
             V v = it.next();
             it.remove();
 
-            SearchResult<V, L> result = searchFunction.search(
-                searchArgs.state(v, frontier, parent, labels, onVisit, found)
-            );
+            for (V nextVertex : adjacentVertices(v)) {
+                SearchResult<V, L> result = searchFunction.search(
+                    searchArgs.args(v, nextVertex, frontier, parent, labels, args)
+                );
 
-            putEntry(parent, result.parentEntry);
-            putEntry(labels, result.labelEntry);
-            if (result.found)
-                return backtrace.apply(start, goal, parent);
-            
-            frontier.addAll(result.upcomingVertices);
+                putEntry(parent, result.parentEntry);
+                putEntry(labels, result.labelEntry);
+                if (result.found)
+                    return backtrace.apply(start, goal, parent);
+                
+                frontier.add(result.adjacentVertex);
+            }
+
         }
 
         return noPath.apply(start);
