@@ -9,6 +9,6 @@ public interface SearchFunction<V, L> {
 
     @FunctionalInterface
     public interface Args<V, E extends Edge<V>, L> {
-        public <T> Object[] state(V nextVertex, Collection<V> frontier, Map<V, V> parent, Map<V, L> labels, TriConsumer<AbstractGraph<V, E>, V, V> onVisit, TriConsumer<AbstractGraph<V, E>, V, V> found);
+        public <T> Object[] args(V fromm, V to, Collection<V> frontier, Map<V, V> parent, Map<V, L> labels, T... args);
     }
 }
