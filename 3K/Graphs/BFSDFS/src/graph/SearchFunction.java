@@ -7,9 +7,16 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+
+/*
+ * Functional interface for search algorithms. It is a function that takes 
+ * {@code SearchState} and {@code SearchUtils} as parameters and returns a {@code SearchResult}.
+ * It is used to implement search algorithms such as BFS, DFS, Dijkstra, etc. with the 
+ * archetypal {@code searchPath} function in {@code AbstractGraph}. 
+ */
 @FunctionalInterface
 public interface SearchFunction<V, E extends Edge<V>, L> {
-    public SearchResult<V, L> search(SearchState<V, E, L> state, SearchUtils<V, E, L> utils);
+    public SearchResult<V, L> search(SearchState<V, E, L> state, SearchUtils<V, E,L> utils);
 
     public class SearchResult<V, L> {
         public final V vertex;

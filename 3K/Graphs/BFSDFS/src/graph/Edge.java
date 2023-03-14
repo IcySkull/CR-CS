@@ -1,16 +1,12 @@
 package graph;
-import java.util.HashSet;
+
 import java.util.Objects;
-import java.util.Set;
 
 /*
  * An edge is a pair of vertices. It is directed in the sense that vertices v
- * and w
- * are ordered, giving a diferent hashCode for (v, w) than for (w, v).
- * Nevertheless,
- * adj() method is undirected. Directed or undirected should be determined by
- * its
- * implementations, taking into account adj() method.
+ * and w are ordered, giving a diferent hashCode for (v, w) than for (w, v).
+ * Nevertheless, adj() method is undirected. Directed or undirected should be 
+ * determined by its implementations, taking into account adj() method.
  */
 abstract class Edge<V> {
     private V v;
@@ -31,7 +27,8 @@ abstract class Edge<V> {
 
     /*
      * Return the adjacent vertex to u, this is the most fundamental operation
-     * on an edge.
+     * on an edge. It represents the human identification of giving the other
+     * vertex of an edge when one vertex is given.
      */
     public V adj(V u) {
         if (u.equals(v))
@@ -56,6 +53,10 @@ abstract class Edge<V> {
         return ( Objects.hash(v) + Objects.hash(w) );
     }
 
+    /**
+     * Returns true if this edge is equal to the specified object. Two edges are
+     * equal if they have the same vertices, regardless of the order of the vertices.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
