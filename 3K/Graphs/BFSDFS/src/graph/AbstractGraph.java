@@ -1,9 +1,6 @@
 package graph;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -101,6 +98,21 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return incidentEdges(v).size();
     }
 
+    /**
+     * Archetypal search function. It is a generic function that can be used to implement any
+     * search algorithm.
+     * @param <L>
+     * @param start The starting vertex
+     * @param goal The goal vertex
+     * @param frontierSupplier A supplier of a collection that will be used to store upcoming vertices to explore,
+     *                        e.g. a queue or a stack. The collection type is specially important since it will
+     *                       determine the order in which the vertices are explored.
+     * @param startLabeler A function that will be used to label the starting vertex, it aslo determines the type
+     *                      of the {@code L} generic parameter.
+     * @param searchFunction A functional interface how the upcoming vertices are explored.
+     * @param searchUtils A utility class that contains useful functions for the search. 
+     * @return A list of vertices that form a path from the starting vertex to the goal vertex.
+     */
     public <L> List<V> searchPath(
         V start, 
         V goal,
@@ -141,10 +153,16 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return new ArrayList<>();
     }
 
+    /*
+     * This is a helper function that is used to put an entry into a map.
+     */
     private <K, B> void putEntry(Map<K, B> map, AbstractMap.SimpleEntry<K, B> entry) {
         map.put(entry.getKey(), entry.getValue());
     }
 
+    /*
+     * This is a helper function that is used to backtrace the path from the starting vertex to the goal vertex.
+     */
     private List<V> backtrace(V start, V end, Map<V, V> parent) {
         List<V> path = new ArrayList<>();
         while (end != null) {
@@ -155,6 +173,9 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return path;
     }
 
+    /*
+     * A path search function that doesn't use any utility functions such as bfs or dfs.
+     */
     public <L> List<V> noUtilsSearchPath(
         V start, 
         V goal, 
@@ -216,23 +237,6 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
 }
 
 @FunctionalInterface
-interface TriFunction<T, U, V, R> {
-    R apply(T t, U u, V v);
-}
-
-@FunctionalInterface
 interface TriConsumer<T, U, V> {
     void accept(T t, U u, V v);
-}
-
-class NullMap<K, V> extends HashMap<K, V> {
-    @Override
-    public V get(Object key) {
-        return null;
-    }
-
-    @Override
-    public V put(K key, V value) {
-        return null;
-    }
 }
