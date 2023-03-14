@@ -1,5 +1,7 @@
 package graph;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /*
  * An edge is a pair of vertices. It is directed in the sense that vertices v
@@ -46,7 +48,22 @@ abstract class Edge<V> {
         return u.equals(v) || u.equals(w);
     }
 
+    /*
+     * Returns the HashCode of this edge using addition so (v, w) and (w, v)
+     * have equal hashCodes.
+     */
     public int hashCode() {
-        return Objects.hash(v, w);
+        return ( Objects.hash(v) + Objects.hash(w) );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (!(obj instanceof Edge<?>))
+            return false;
+        Edge<?> other = (Edge<?>) obj;
+        return  (Objects.equals(this.v, other.v) && Objects.equals(this.w, other.w)) ||
+                (Objects.equals(this.v, other.w) && Objects.equals(this.w, other.v));
     }
 }

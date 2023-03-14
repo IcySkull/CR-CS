@@ -8,6 +8,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import graph.SearchFunction.*;
+
 /**
  * A graph is a set of vertices and a set of edges. Each edge connects two
  * vertices. Note that AbstractGraph ignores if directed or undirected.
@@ -99,17 +101,17 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return incidentEdges(v).size();
     }
 
-    public <T, L, R> R search(
-        V start, V goal,
-        Supplier<Collection<V>> frontierSupplier, Supplier<Map<V, V>> parentsSupplier, 
-        Supplier<Map<V, L>> labelsSupplier, Function<V, L> startLabeler,
-        SearchFunction<V, L> searchFunction, SearchFunction.Args<V, E, L> searchArgs,
-        TriFunction<V, V, Map<V, V>, R> backtrace, Function<V, R> noPath,
-        T... args
+    public <L> List<V> searchPath(
+        V start, 
+        V goal,
+        Supplier<Collection<V>> frontierSupplier, 
+        Function<V, L> startLabeler,
+        SearchFunction<V, E, L> searchFunction, 
+        SearchUtils<V, E, L> searchUtils
     ) {
         Collection<V> frontier = frontierSupplier.get();
-        Map<V, V> parent = parentsSupplier.get();
-        Map<V, L> labels = labelsSupplier.get();
+        Map<V, V> parent = new HashMap<>();
+        Map<V, L> labels = new HashMap<>();
 
         frontier.add(start);
         labels.put(start, startLabeler.apply(start));
@@ -119,68 +121,28 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
             V v = it.next();
             it.remove();
 
-            for (V nextVertex : adjacentVertices(v)) {
-                SearchResult<V, L> result = searchFunction.search(
-                    searchArgs.args(v, nextVertex, frontier, parent, labels, args)
-                );
+            for (E adjE: incidentEdges(v)) {
+                if (labels.containsKey(adjE.adj(v)))
+                    continue;
+                SearchState<V, E, L> state = new SearchState<>(v, adjE, frontier, parent, labels);
+
+                SearchResult<V, L> result = searchFunction.search(state, searchUtils);
 
                 putEntry(parent, result.parentEntry);
                 putEntry(labels, result.labelEntry);
                 if (result.found)
-                    return backtrace.apply(start, goal, parent);
+                    return backtrace(start, result.adjacentVertex, parent);
                 
                 frontier.add(result.adjacentVertex);
             }
 
         }
 
-        return noPath.apply(start);
+        return new ArrayList<>();
     }
 
     private <K, B> void putEntry(Map<K, B> map, AbstractMap.SimpleEntry<K, B> entry) {
         map.put(entry.getKey(), entry.getValue());
-    }
-
-    public <L, R> R search(
-            V start, V goal, 
-            Supplier<Collection<V>> frontierSupplier, Supplier<Map<V, V>> parentsSupplier, Supplier<Map<V, L>> labelsSupplier,
-            Function<V, L> startLabeler, Function<V, L> labeler, BiFunction<L, L, Boolean> labelerComparator, BinaryOperator<L> labelerCombiner,
-            Function<V, L> heuristic, 
-            TriFunction<V, V, Map<V,V>, R> backtrace, Function<V, R> noPath,
-            TriConsumer<AbstractGraph<V, E>, V, V> onStep, BiConsumer<AbstractGraph<V, E>, V> found
-    ) {
-        Collection<V> frontier = frontierSupplier.get();
-        Map<V, V> parent = parentsSupplier.get();
-        Map<V, L> labels = labelsSupplier.get();
-
-        labels.put(start, startLabeler.apply(start));
-        frontier.add(start);
-
-        while (!frontier.isEmpty()) {
-            Iterator<V> it = frontier.iterator();
-            V v = it.next();
-            it.remove();
-
-            for (E e : incidentEdges(v)) {
-                V w = e.adj(v);
-                onStep.accept(this, v, w);
-                L label = labelerCombiner.apply(labels.get(v), labeler.apply(w));
-                label = labelerCombiner.apply(label, heuristic.apply(w));
-                if (w.equals(goal)) {
-                    found.accept(this, w);
-                    parent.put(w, v);
-                    labels.put(w, label);
-                    return backtrace.apply(start, goal, parent);
-                }
-                else if (!labels.containsKey(w) || labelerComparator.apply(label, labels.get(w))) {
-                    frontier.add(w);
-                    parent.put(w, v);
-                    labels.put(w, label);
-                }
-            }
-        }
-
-        return noPath.apply(start);
     }
 
     private List<V> backtrace(V start, V end, Map<V, V> parent) {
@@ -193,29 +155,63 @@ public abstract class AbstractGraph<V, E extends Edge<V>> {
         return path;
     }
 
-    public <R, L> List<V> bfs(V start, V end, TriConsumer<AbstractGraph<V, E>, V, V> onStep, BiConsumer<AbstractGraph<V, E>, V> found) {
-        return search(start, end, 
-            LinkedList::new, HashMap::new, HashMap::new,
-            startLabeler -> 0, labeler -> 0, (l1, l2) -> false, (l1, l2) -> l1 + l2, 
-            v -> 0,
-            (s, e, parentMap) -> backtrace(start, end, parentMap), noPath -> null,
-            onStep, found
+    public <L> List<V> noUtilsSearchPath(
+        V start, 
+        V goal, 
+        Supplier<Collection<V>> frontierSupplier, 
+        Function<V, L> startLabeler
+    ) {
+        return searchPath(
+            start,
+            goal,
+            LinkedList::new,
+            startLabeler,
+            (state, utils) -> {
+                V w = state.adjE.adj(state.v);
+                SearchResult<V, L> result = new SearchResult<>(
+                    state.v, 
+                    w, 
+                    new AbstractMap.SimpleEntry<>(w, state.v), 
+                    new AbstractMap.SimpleEntry<>(w, utils.labeler.apply(w)), 
+                    false
+                );
+                if (w.equals(goal))
+                    result.found = true;
+
+                return result;
+            },
+            new SearchUtils<>()
         );
     }
 
-    public static void main(String[] args) {
-        AbstractGraph<Integer, Edge<Integer>> g = new AbstractGraph<Integer, Edge<Integer>>() {};
-        g.addVertices(1, 2, 3, 4);
-        g.addEdge(new Edge<Integer>(1, 2) {});
-        g.addEdge(new Edge<Integer>(3, 2) {});
-        g.addEdge(new Edge<Integer>(4, 3) {});
-        g.addEdge(new Edge<Integer>(1, 4) {});
+    public <L> List<V> bfs(
+        V start, 
+        V goal, 
+        Function<V, L> startLabeler
+    ) {
+        return noUtilsSearchPath(start, goal, LinkedList::new, startLabeler);
+    }
 
-        System.out.println(g.bfs(1, 4, (graph, from, to) -> {
-            System.out.println("Step: " + from + " -> " + to);
-        }, (graph, v) -> {
-            System.out.println("Found: " + v);
-        }));
+    public <L> List<V> dfs(
+        V start, 
+        V goal, 
+        Function<V, L> startLabeler
+    ) {
+        return noUtilsSearchPath(start, goal, Stack::new, startLabeler);
+    }
+
+    public static void main(String[] args) {
+        AbstractGraph<Integer, Edge<Integer>> graph = new AbstractGraph<Integer, Edge<Integer>>() {};
+        graph.addVertices(1, 2, 3, 4);
+
+        graph.addEdges(
+            new Edge<>(1, 2){},
+            new Edge<>(3, 2){},
+            new Edge<>(4, 3){},
+            new Edge<>(4, 1){}
+        );
+
+        System.out.println(graph.dfs(1, 4, v -> 0));
     }
 }
 
