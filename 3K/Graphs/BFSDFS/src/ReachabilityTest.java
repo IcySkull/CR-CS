@@ -15,7 +15,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 /**
@@ -23,8 +22,8 @@ import static org.junit.Assert.*;
  * @author bryce
  */
 public class ReachabilityTest {
+    String workingDir = getClass().getResource("").getPath() + "../";
 
-    String workingDir = getClass().getResource("").getPath() + "/../";
     ArrayList<Integer>[] adj;
 
     void loadFile(String name) {

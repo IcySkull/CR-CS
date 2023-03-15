@@ -1,9 +1,13 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
 
-import java.util.*;
+import graph.AdjacencyList;
 
 public class Reachability {
     static int reach(ArrayList<Integer>[] adj, int x, int y) {
-        return 0;
+        AdjacencyList graph = new AdjacencyList(adj);
+        return graph.bfs(x, y) != null ? 1 : 0;
     }
 
     public static void main(String[] args) {
