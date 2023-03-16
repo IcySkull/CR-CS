@@ -1,20 +1,27 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
-import graph.AdjacencyList;
+import grafos.AbstractGraph;
+import grafos.AdjacencyList;
+import grafos.edges.AbstractEdge;
+import grafos.edges.Diedge;
+import grafos.visual.GraphViewer;
 
 public class Reachability {
-    static int reach(ArrayList<Integer>[] adj, int x, int y) {
-        AdjacencyList graph = new AdjacencyList(adj);
-        return graph.bfs(x, y) != null ? 1 : 0;
+    static  int reach(AdjacencyList<Integer> graph, int x, int y) {
+        return graph.dfs(x, y, v->0) != null ? 1 : 0;
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File("tinyG.txt"));
         int n = scanner.nextInt();
         int m = scanner.nextInt();
-        ArrayList<Integer>[] adj = (ArrayList<Integer>[])new ArrayList[n];
+        List<Integer>[] adj = new List[n];
+        double startTime = System.currentTimeMillis();
         for (int i = 0; i < n; i++) {
             adj[i] = new ArrayList<Integer>();
         }
@@ -22,12 +29,14 @@ public class Reachability {
             int x, y;
             x = scanner.nextInt();
             y = scanner.nextInt();
-            adj[x - 1].add(y - 1);
-            adj[y - 1].add(x - 1);
+            adj[x].add(y);
+            adj[y].add(x);
         }
-        int x = scanner.nextInt() - 1;
-        int y = scanner.nextInt() - 1;
-        System.out.println(reach(adj, x, y));
+
+        AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
+
+        GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
+        viewer.run();
     }
 }
 
