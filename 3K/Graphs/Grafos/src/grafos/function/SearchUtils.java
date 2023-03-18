@@ -1,11 +1,11 @@
-package grafos.search;
+package grafos.function;
 
 import java.util.function.*;
 
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public abstract class SearchUtils<V, E extends AbstractEdge<V>, L> {
+public class SearchUtils<V, E extends AbstractEdge<V>, L> {
     public final Function<E, L> labeler;
     public final BiFunction<L, L, Boolean> labelerCmp;
     public final BinaryOperator<L> labelerAcc;

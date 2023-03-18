@@ -44,6 +44,16 @@ public class Diedge<V> extends AbstractEdge<V> {
         throw new IllegalArgumentException("Vertex " + u + " is the end vertex of this edge");
     }
 
+    public void transpose() {
+        V tail = tail();
+        setV(head());
+        setW(tail);
+    }
+
+    public Diedge<V> transposed() {
+        return new Diedge<>(head(), tail());
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(tail(), head());

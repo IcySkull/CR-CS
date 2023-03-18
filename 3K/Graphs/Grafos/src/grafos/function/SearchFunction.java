@@ -1,4 +1,4 @@
-package grafos.search;
+package grafos.function;
 
 import java.util.AbstractMap;
 import java.util.Collection;

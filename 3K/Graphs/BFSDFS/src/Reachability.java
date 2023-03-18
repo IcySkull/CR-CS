@@ -2,8 +2,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Stack;
 
 import grafos.AbstractGraph;
 import grafos.AdjacencyList;
@@ -34,9 +36,10 @@ public class Reachability {
         }
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
-
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
+
+        System.out.println(graph.dfs(0, 3, v->0));
     }
 }
 

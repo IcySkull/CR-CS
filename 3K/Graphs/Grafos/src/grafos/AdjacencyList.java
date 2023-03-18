@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import grafos.edges.Diedge;
 
 public class AdjacencyList<V> extends Digraph<V> {
-    Map<V, Set<Diedge<V>>> adjList;
+    private Map<V, Set<Diedge<V>>> adjList;
 
     public AdjacencyList() {
         adjList = new HashMap<>();
@@ -37,9 +37,6 @@ public class AdjacencyList<V> extends Digraph<V> {
         }
     }
 
-    public <L> List<V> dfs(V start, V goal, Function<V, L> startLabeler) {
-        return super.dfs(start, goal, startLabeler);
-    }
 
     @Override
     public Collection<V> vertices() {
@@ -51,18 +48,6 @@ public class AdjacencyList<V> extends Digraph<V> {
         return adjList.values().stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Collection<Diedge<V>> incidentEdges(V u) {
-        return edges().stream()
-            .filter(e -> e.head().equals(u))
-            .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Collection<Diedge<V>> adjacentEdges(V u) {
-        return adjList.get(u);
     }
 
     @Override
@@ -83,5 +68,52 @@ public class AdjacencyList<V> extends Digraph<V> {
 
     public void addEdge(V tail, V head) {
         addEdge(new Diedge<>(tail, head));
+    }
+
+    @Override
+    public Collection<Diedge<V>> incidentEdges(V u) {
+        return edges().stream()
+            .filter(e -> e.head().equals(u))
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Collection<Diedge<V>> adjacentEdges(V u) {
+        return adjList.get(u);
+    }
+
+    public <L> List<V> dfs(V start, V goal, Function<V, L> startLabeler) {
+        return super.dfs(start, goal, startLabeler);
+    }
+
+    @Override
+    public AdjacencyList<V> transposed() {
+        AdjacencyList<V> transposed = new AdjacencyList<>();
+        for (V v : vertices())
+            transposed.addVertex(v);
+
+        for (Diedge<V> e : edges()) {
+            transposed.addEdge(e.transposed());
+        }
+
+        return transposed;
+    }
+
+    @Override
+    public Set<Collection<V>> stronglyConnectedComponents(V root) {
+        Set<Collection<V>> sccs = new HashSet<>();
+        Set<V> visited = new HashSet<>();
+
+        Collection<V> connected = dft(root);
+        AdjacencyList<V> transposed = transposed();
+
+        for (V v : connected) {
+            if (visited.contains(v))
+                continue;
+            
+            sccs.add(transposed.dft(v));
+        }
+
+        return sccs;
     }
 }

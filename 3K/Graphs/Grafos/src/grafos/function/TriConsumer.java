@@ -1,4 +1,4 @@
-package grafos.search;
+package grafos.function;
 
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

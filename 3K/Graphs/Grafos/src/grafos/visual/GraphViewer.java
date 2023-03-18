@@ -25,7 +25,7 @@ public class GraphViewer<V, E extends AbstractEdge<V>> {
     private static final int width = 800;
     private static final int height = 600;
 
-    private final double radius = 20;
+    private final int radius = 14;
     private final AbstractGraph<V, E> graph;
     private final JFrame frame;
     private final GraphPanel panel;
@@ -70,7 +70,7 @@ public class GraphViewer<V, E extends AbstractEdge<V>> {
             circles.put(vertex, circle);
 
             JLabel label = new JLabel(vertex.toString());
-            label.setBounds((int) circle.getCenterX() - 10, (int) circle.getCenterY() - 10, 20, 20);
+            label.setBounds((int) circle.getCenterX() - (int)radius/2, (int) circle.getCenterY() - (int)radius/2, (int)radius, (int)radius);
             label.setForeground(Color.WHITE);
             panel.add(label);
             labels.put(vertex, label);
@@ -158,7 +158,8 @@ public class GraphViewer<V, E extends AbstractEdge<V>> {
                     }
         
                     JLabel label = labels.get(selectedVertex);
-                    label.setBounds((int) x - 15, (int) y - 10, 30, 20);
+                    
+                    label.setBounds((int)x -radius/2, (int)y-radius/2, radius, radius);
                     panel.repaint();
                 }
             }

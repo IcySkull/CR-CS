@@ -23,6 +23,14 @@ public abstract class AbstractEdge<V> {
         return w;
     }
 
+    protected void setV(V v) {
+        this.v = v;
+    }
+
+    protected void setW(V w) {
+        this.w = w;
+    }
+
     /*
      * Return the adjacent vertex to u in the edge.
      */
