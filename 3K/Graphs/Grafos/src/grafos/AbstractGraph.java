@@ -1,6 +1,7 @@
 package grafos;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -181,15 +182,17 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     /**
      * instance variable that defines a {@link FunctionalInterface} used to traverse graphs.
      */
-    public final TraverseFunction<V, E> traverseFunction = (self, upVertex, fstart, fend) -> {
-        if (upVertex.getVisited().contains(upVertex.to))
+    public final TraverseFunction<V, E> traverseFunction = (self, upVertex, fstart, fend, fcycle) -> {
+        if (upVertex.getVisited().contains(upVertex.to)) {
+            fcycle.accept(upVertex.to);
             return;
+        }
 
         fstart.start(upVertex.to, upVertex.state);
 
         for (E adjEdge : adjacentEdges(upVertex.to)) {
             TraverseState<V, E>.Upcoming up = upVertex.state.new Upcoming(upVertex.state, upVertex.to, adjEdge);
-            self.traverse(self, up, fstart, fend);
+            self.traverse(self, up, fstart, fend, fcycle);
         }
 
         fend.end(upVertex.to, upVertex.state);
@@ -221,7 +224,8 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         Supplier<Collection<V>> traversalSupplier,
         Supplier<Collection<V>> visitedSupplier,
         TraverseFunction.Start<V, E> starting,
-        TraverseFunction.End<V, E> finalizing 
+        TraverseFunction.End<V, E> finalizing,
+        Consumer<V> cycle
     ) {
         Collection<V> frontier = frontierSupplier.get();
         Collection<V> traversal = traversalSupplier.get();
@@ -233,7 +237,7 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
 
         for (E adjEdge : adjacentEdges(start)) {
             TraverseState<V, E>.Upcoming upVertex = state.new Upcoming(state, start, adjEdge);
-            traverseFunction.traverse(traverseFunction, upVertex, starting, finalizing);
+            traverseFunction.traverse(traverseFunction, upVertex, starting, finalizing, cycle);
         }
 
         finalizing.end(start, state);
@@ -261,7 +265,8 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             traversalSupplier, 
             visitedSupplier, 
             startFunction, 
-            endFunction
+            endFunction,
+            v -> {}
         );
     }
 
@@ -286,7 +291,8 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             traversalSupplier, 
             visitedSupplier, 
             startFunction, 
-            endFunction
+            endFunction,
+            v -> {}
         );
     }
 
@@ -319,6 +325,53 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         }
 
         return components;
+    }
+
+    /**
+     * Returns a set of cycles in the graph. O((|V| + |E|)^2)
+     * @return
+     */
+    public Set<Cycle<V>> cycles() {
+        Set<Cycle<V>> cycles = new HashSet<>();
+        Stack<V> stack = new Stack<>();
+
+        TraverseFunction.Start<V, E> startFunction = (vertex, state) -> {
+            state.addFrontier(vertex);
+            state.addVisited(vertex);
+            stack.push(vertex);
+        };
+
+        TraverseFunction.End<V, E> endFunction = (vertex, state) -> {
+            stack.pop();
+        };
+
+        Consumer<V> cycleFunction = v -> {
+            int index = stack.indexOf(v);
+            if (stack.size() - index < 3 || index == -1)
+                return;
+            Cycle<V> cycle = new Cycle<>(stack.subList(index, stack.size()));
+            cycles.add(cycle);
+        };
+
+        Set<V> visited = new HashSet<>();
+        for (V vertex : vertices()) {
+            if (visited.contains(vertex))
+                continue;
+
+            traverse(
+                vertex, 
+                Stack::new, 
+                Stack::new, 
+                HashSet::new, 
+                startFunction, 
+                endFunction,
+                cycleFunction
+            );
+
+            visited.add(vertex);
+        }
+
+        return cycles;
     }
 }
 

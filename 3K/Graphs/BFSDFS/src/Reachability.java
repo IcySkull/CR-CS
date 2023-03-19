@@ -1,11 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 import grafos.AbstractGraph;
 import grafos.AdjacencyList;
@@ -19,7 +18,7 @@ public class Reachability {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File("tinyG.txt"));
+        Scanner scanner = new Scanner(new File("mediumG.txt"));
         int n = scanner.nextInt();
         int m = scanner.nextInt();
         List<Integer>[] adj = new List[n];
@@ -36,10 +35,11 @@ public class Reachability {
         }
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
+
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
 
-        System.out.println(graph.dfs(0, 3, v->0));
+        System.out.println(graph.cycles());
     }
 }
 

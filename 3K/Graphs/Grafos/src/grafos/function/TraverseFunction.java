@@ -1,6 +1,9 @@
 package grafos.function;
 
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import grafos.edges.AbstractEdge;
 
 @FunctionalInterface
@@ -9,7 +12,8 @@ public interface TraverseFunction<V, E extends AbstractEdge<V>> {
         TraverseFunction<V,E> self,
         TraverseState<V,E>.Upcoming state, 
         TraverseFunction.Start<V,E> fstart,
-        TraverseFunction.End<V,E> fend
+        TraverseFunction.End<V,E> fend,
+        Consumer<V> cycle
     );
 
     @FunctionalInterface

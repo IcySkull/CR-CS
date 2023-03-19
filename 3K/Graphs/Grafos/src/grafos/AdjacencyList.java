@@ -111,7 +111,9 @@ public class AdjacencyList<V> extends Digraph<V> {
             if (visited.contains(v))
                 continue;
             
-            sccs.add(transposed.dft(v));
+            Collection<V> ssc = transposed.dft(v);
+            sccs.add(ssc);
+            visited.addAll(ssc);
         }
 
         return sccs;

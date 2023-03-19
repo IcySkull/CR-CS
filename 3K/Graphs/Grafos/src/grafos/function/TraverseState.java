@@ -13,7 +13,8 @@ public class TraverseState <V, E extends AbstractEdge<V>> {
     public TraverseState(
         Collection<V> frontier,
         Collection<V> traversal, 
-        Collection<V> visited) 
+        Collection<V> visited
+        ) 
     {
         this.frontierRef = new AtomicReference<>(frontier);
         this.traversalRef = new AtomicReference<>(traversal);
