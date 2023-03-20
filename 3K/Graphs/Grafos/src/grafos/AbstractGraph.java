@@ -265,13 +265,14 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
 
     public Collection<V> traversePreOrder(
             Supplier<Collection<V>> frontierSupplier,
-            Collection<V> traversal,
+            Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> starting,
             Consumer<V> finalizing,
             Consumer<V> cycle
     ) {
         Collection<V> frontier = frontierSupplier.get();
+        Collection<V> traversal = traversalSupplier.get();
         
         TraverseFunction.Start<V, E> startFunction = (vertex) -> {
             frontier.add(vertex);
@@ -294,13 +295,14 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
 
     public Collection<V> traversePostOrder(
             Supplier<Collection<V>> frontierSupplier,
-            Collection<V> traversal,
+            Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> starting,
             Consumer<V> ending,
             Consumer<V> cycle
     ) {
         Collection<V> frontier = frontierSupplier.get();
+        Collection<V> traversal = traversalSupplier.get();
 
         TraverseFunction.Start<V, E> startFunction = (vertex) -> {
             frontier.add(vertex);
@@ -326,12 +328,12 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             Consumer<V> starting,
             Consumer<V> ending,
             Consumer<V> cycle) {
-        Stack<V> frontier = new Stack<>();
-        Queue<V> traversal = new LinkedList<>();
+        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
+        Supplier<Collection<V>> traversalSupplier = () -> (Queue)new LinkedList<>();
 
         return traversePreOrder(
-                frontier,
-                traversal,
+                frontierSupplier,
+                traversalSupplier,
                 visited,
                 starting,
                 ending,
@@ -343,12 +345,12 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             Consumer<V> starting,
             Consumer<V> ending,
             Consumer<V> cycle) {
-        Stack<V> frontier = new Stack<>();
-        Queue<V> traversal = new LinkedList<>();
+        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
+        Supplier<Collection<V>> traversalSupplier = () -> (Queue) new LinkedList<>();
 
         return traversePostOrder(
-                frontier,
-                traversal,
+                frontierSupplier,
+                traversalSupplier,
                 visited,
                 starting,
                 ending,
@@ -360,12 +362,12 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             Consumer<V> starting,
             Consumer<V> ending,
             Consumer<V> cycle) {
-        Stack<V> frontier = new Stack<>();
-        Stack<V> traversal = new Stack<>();
+        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
+        Supplier<Collection<V>> traversalSupplier = () -> new Stack<>();
 
         return traversePostOrder(
-                frontier,
-                traversal,
+                frontierSupplier,
+                traversalSupplier,
                 visited,
                 starting,
                 ending,

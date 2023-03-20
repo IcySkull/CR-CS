@@ -1,10 +1,13 @@
 package grafos;
 
-public class Cycle<V> {
-    java.util.Set<V> marked;
-    java.util.List<V> cycle;
+import java.util.List;
+import java.util.Set;
 
-    public Cycle(java.util.Collection<V> cycle) {
+public class Cycle<V> {
+    Set<V> marked;
+    List<V> cycle;
+
+    public Cycle(List<V> cycle) {
         this.cycle = new java.util.ArrayList<>(cycle);
         this.marked = new java.util.HashSet<>(this.cycle);
         if (marked.size() < 3)

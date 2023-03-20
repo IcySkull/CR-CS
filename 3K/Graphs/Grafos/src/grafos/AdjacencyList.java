@@ -98,4 +98,10 @@ public class AdjacencyList<V> extends Digraph<V> {
 
         return transposed;
     }
+
+    @Override
+    public Set<Collection<V>> stronglyConnectedComponents() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'stronglyConnectedComponents'");
+    }
 }
