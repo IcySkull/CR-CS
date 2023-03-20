@@ -32,8 +32,8 @@ public abstract class Digraph<V> extends AbstractGraph<V, Diedge<V>> {
     public abstract Digraph<V> transposed();
 
     /**
-     * Returns the strongly connected components of the graph from the given vertex.
+     * Returns the strongly connected components of the graph.
      * @param root The vertex from which the search will start.
      */
-    public abstract Set<Collection<V>> stronglyConnectedComponents(V root);
+    public abstract Set<Collection<V>> stronglyConnectedComponents();
 }

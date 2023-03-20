@@ -98,24 +98,4 @@ public class AdjacencyList<V> extends Digraph<V> {
 
         return transposed;
     }
-
-    @Override
-    public Set<Collection<V>> stronglyConnectedComponents(V root) {
-        Set<Collection<V>> sccs = new HashSet<>();
-        Set<V> visited = new HashSet<>();
-
-        Collection<V> connected = dft(root);
-        AdjacencyList<V> transposed = transposed();
-
-        for (V v : connected) {
-            if (visited.contains(v))
-                continue;
-            
-            Collection<V> ssc = transposed.dft(v);
-            sccs.add(ssc);
-            visited.addAll(ssc);
-        }
-
-        return sccs;
-    }
 }

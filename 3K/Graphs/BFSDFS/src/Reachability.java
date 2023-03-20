@@ -18,7 +18,7 @@ public class Reachability {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File("mediumG.txt"));
+        Scanner scanner = new Scanner(new File("tinyG.txt"));
         int n = scanner.nextInt();
         int m = scanner.nextInt();
         List<Integer>[] adj = new List[n];

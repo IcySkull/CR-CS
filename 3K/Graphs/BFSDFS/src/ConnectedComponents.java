@@ -28,12 +28,14 @@ public class ConnectedComponents {
             adj[x].add(y);
             adj[y].add(x);
         }
-
+        
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
-        System.out.println(graph.connectedComponents());
 
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
+
+        System.out.println(graph.connectedComponents());
+
     }
 }
 

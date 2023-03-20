@@ -48,7 +48,6 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
      */
     public abstract Collection<E> adjacentEdges(V u);
 
-
     /**
      * Returns the degree of verte cx v.
      */
@@ -57,28 +56,36 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     }
 
     /**
-     * Archetypal search function. It is a generic function that can be used to implement any
+     * Archetypal search function. It is a generic function that can be used to
+     * implement any
      * search algorithm.
+     * 
      * @param <L>
-     * @param start The starting vertex
-     * @param goal The goal vertex
-     * @param frontierSupplier A supplier of a collection that will be used to store upcoming vertices to explore,
-     *                        e.g. a queue or a stack. The collection type is specially important since it will
-     *                       determine the order in which the vertices are explored.
-     * @param startLabeler A function that will be used to label the starting vertex, it aslo determines the type
-     *                      of the {@code L} generic parameter.
-     * @param searchFunction A functional interface how the upcoming vertices are explored.
-     * @param searchUtils A utility class that contains useful functions for the search. 
-     * @return A list of vertices that form a path from the starting vertex to the goal vertex.
+     * @param start            The starting vertex
+     * @param goal             The goal vertex
+     * @param frontierSupplier A supplier of a collection that will be used to store
+     *                         upcoming vertices to explore,
+     *                         e.g. a queue or a stack. The collection type is
+     *                         specially important since it will
+     *                         determine the order in which the vertices are
+     *                         explored.
+     * @param startLabeler     A function that will be used to label the starting
+     *                         vertex, it aslo determines the type
+     *                         of the {@code L} generic parameter.
+     * @param searchFunction   A functional interface how the upcoming vertices are
+     *                         explored.
+     * @param searchUtils      A utility class that contains useful functions for
+     *                         the search.
+     * @return A list of vertices that form a path from the starting vertex to the
+     *         goal vertex.
      */
     public <L> List<V> searchPath(
-        V start, 
-        V goal,
-        Supplier<Collection<V>> frontierSupplier, 
-        Function<V, L> startLabeler,
-        SearchFunction<V, E, L> searchFunction, 
-        SearchUtils<V, E, L> searchUtils
-    ) {
+            V start,
+            V goal,
+            Supplier<Collection<V>> frontierSupplier,
+            Function<V, L> startLabeler,
+            SearchFunction<V, E, L> searchFunction,
+            SearchUtils<V, E, L> searchUtils) {
         Collection<V> frontier = frontierSupplier.get();
         Map<V, V> parent = new HashMap<>();
         Map<V, L> labels = new HashMap<>();
@@ -91,7 +98,7 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             V v = it.next();
             it.remove();
 
-            for (E adjE: adjacentEdges(v)) {
+            for (E adjE : adjacentEdges(v)) {
                 if (labels.containsKey(adjE.adj(v)))
                     continue;
                 SearchState<V, E, L> state = new SearchState<>(v, adjE, frontier, parent, labels);
@@ -102,7 +109,7 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
                 putEntry(labels, result.labelEntry);
                 if (result.found)
                     return backtrace(start, result.adjacentVertex, parent);
-                
+
                 frontier.add(result.adjacentVertex);
             }
 
@@ -119,12 +126,13 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     }
 
     /*
-     * This is a helper function that is used to backtrace the path from the starting vertex to the goal vertex.
+     * This is a helper function that is used to backtrace the path from the
+     * starting vertex to the goal vertex.
      */
     private List<V> backtrace(V start, V end, Map<V, V> parent) {
         List<V> path = new ArrayList<>();
         while (end != null) {
-            path.add(end);  
+            path.add(end);
             end = parent.get(end);
         }
         Collections.reverse(path);
@@ -132,247 +140,294 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     }
 
     /*
-     * A path search function that doesn't use any utility functions such as bfs or dfs.
+     * A path search function that doesn't use any utility functions such as bfs or
+     * dfs.
      */
     public <L> List<V> noUtilsSearchPath(
-        V start, 
-        V goal, 
-        Supplier<Collection<V>> frontierSupplier, 
-        Function<V, L> startLabeler
-    ) {
+            V start,
+            V goal,
+            Supplier<Collection<V>> frontierSupplier,
+            Function<V, L> startLabeler) {
         return searchPath(
-            start,
-            goal,
-            LinkedList::new,
-            startLabeler,
-            (state, utils) -> {
-                V w = state.adjEdge.adj(state.vertex);
-                SearchResult<V, L> result = new SearchResult<>(
-                    state.vertex, 
-                    w, 
-                    new AbstractMap.SimpleEntry<>(w, state.vertex), 
-                    new AbstractMap.SimpleEntry<>(w, utils.labeler.apply(state.adjEdge)), 
-                    false
-                );
-                if (w.equals(goal))
-                    result.found = true;
+                start,
+                goal,
+                LinkedList::new,
+                startLabeler,
+                (state, utils) -> {
+                    V w = state.adjEdge.adj(state.vertex);
+                    SearchResult<V, L> result = new SearchResult<>(
+                            state.vertex,
+                            w,
+                            new AbstractMap.SimpleEntry<>(w, state.vertex),
+                            new AbstractMap.SimpleEntry<>(w, utils.labeler.apply(state.adjEdge)),
+                            false);
+                    if (w.equals(goal))
+                        result.found = true;
 
-                return result;
-            },
-            new SearchUtils<>()
-        );
+                    return result;
+                },
+                new SearchUtils<>());
     }
 
     public <L> List<V> bfs(
-        V start, 
-        V goal, 
-        Function<V, L> startLabeler
-    ) {
+            V start,
+            V goal,
+            Function<V, L> startLabeler) {
         return noUtilsSearchPath(start, goal, LinkedList::new, startLabeler);
     }
 
     public <L> List<V> dfs(
-        V start, 
-        V goal, 
-        Function<V, L> startLabeler
-    ) {
+            V start,
+            V goal,
+            Function<V, L> startLabeler) {
         return noUtilsSearchPath(start, goal, Stack::new, startLabeler);
     }
 
-    /**
-     * instance variable that defines a {@link FunctionalInterface} used to traverse graphs.
-     */
-    public final TraverseFunction<V, E> traverseFunction = (self, upVertex, fstart, fend, fcycle) -> {
-        if (upVertex.getVisited().contains(upVertex.to)) {
-            fcycle.accept(upVertex.to);
-            return;
-        }
-
-        fstart.start(upVertex.to, upVertex.state);
-
-        for (E adjEdge : adjacentEdges(upVertex.to)) {
-            TraverseState<V, E>.Upcoming up = upVertex.state.new Upcoming(upVertex.state, upVertex.to, adjEdge);
-            self.traverse(self, up, fstart, fend, fcycle);
-        }
-
-        fend.end(upVertex.to, upVertex.state);
-    };
-
-    /**
-     * A generic function to traverse graphs. It uses the instance variable 
-     * {@link #traverseFunction} to traverse the graph.
-     * 
-     * @param start The starting vertex.
-     * 
-     * @param frontierSupplier  It provides the collection that determines the order in which the vertices are explored.
-     * 
-     * @param traversalSupplier A collection supplier to define the order in which the vertices are stored in the 
-     *                          traversal collection.
-     * 
-     * @param visitedSupplier   Visited vertices collection supplier.
-     * 
-     * @param starting          A function that is called when a vertex is first visited.
-     * 
-     * @param finalizing        A function that is called when a vertex is completely done being explored.
-     * 
-     * @return                  A collection of vertices that are traversed. The type of the collection determines the 
-     *                          order in which the vertices are stored.
-     */
     public Collection<V> traverse(
-        V start,
-        Supplier<Collection<V>> frontierSupplier,
-        Supplier<Collection<V>> traversalSupplier,
-        Supplier<Collection<V>> visitedSupplier,
-        TraverseFunction.Start<V, E> starting,
-        TraverseFunction.End<V, E> finalizing,
-        Consumer<V> cycle
-    ) {
-        Collection<V> frontier = frontierSupplier.get();
-        Collection<V> traversal = traversalSupplier.get();
-        Collection<V> visited = visitedSupplier.get();
+            V start,
+            Collection<V> traversal,
+            Set<V> visited,
+            TraverseFunction.Start<V, E> starting,
+            TraverseFunction.End<V, E> finalizing,
+            Consumer<V> cycle) {
+        starting.start(start);
 
-        TraverseState<V, E> state = new TraverseState<>(frontier, traversal, visited);
+        TraverseFunction<V, E> traverseFunction = (self, from, adjEdge, fstart, fend, fcycle) -> {
+            V to = adjEdge.adj(from);
+            if (visited.contains(to)) {
+                fcycle.accept(to);
+                return;
+            }
 
-        starting.start(start, state);
+            fstart.start(to);
+
+            for (E e : adjacentEdges(to)) {
+                self.traverse(self, to, e, fstart, fend, fcycle);
+            }
+
+            fend.end(to);
+        };
+
+        starting.start(start);
 
         for (E adjEdge : adjacentEdges(start)) {
-            TraverseState<V, E>.Upcoming upVertex = state.new Upcoming(state, start, adjEdge);
-            traverseFunction.traverse(traverseFunction, upVertex, starting, finalizing, cycle);
+            traverseFunction.traverse(traverseFunction, start, adjEdge, starting, finalizing, cycle);
         }
 
-        finalizing.end(start, state);
-
+        finalizing.end(start);
         return traversal;
     }
 
+    public Collection<V> traverse(
+            Collection<V> traversal,
+            Set<V> visited,
+            TraverseFunction.Start<V, E> starting,
+            TraverseFunction.End<V, E> finalizing,
+            Consumer<V> cycle) {
+        for (V v : vertices()) {
+            if (visited.contains(v))
+                continue;
+
+            traversal.addAll(
+                    traverse(
+                            v,
+                            traversal,
+                            visited,
+                            starting,
+                            finalizing,
+                            cycle));
+        }
+        return traversal;
+    }
+
+    public Set<Set<V>> traverse(
+            Set<Set<V>> components,
+            Supplier<Set<V>> traversalSupplier,
+            Set<V> visited,
+            TraverseFunction.Start<V, E> starting,
+            TraverseFunction.End<V, E> finalizing,
+            Consumer<V> cycle) {
+        for (V v : vertices()) {
+            if (visited.contains(v))
+                continue;
+
+            Set<V> traversal = (Set<V>) traverse(
+                    v,
+                    traversalSupplier.get(),
+                    visited,
+                    starting,
+                    finalizing,
+                    cycle);
+            components.add(traversal);
+        }
+        return components;
+    }
+
     public Collection<V> traversePreOrder(
-        V start,
-        Supplier<Collection<V>> frontierSupplier,
-        Supplier<Collection<V>> traversalSupplier,
-        Supplier<Collection<V>> visitedSupplier
+            Supplier<Collection<V>> frontierSupplier,
+            Collection<V> traversal,
+            Set<V> visited,
+            Consumer<V> starting,
+            Consumer<V> finalizing,
+            Consumer<V> cycle
     ) {
-        TraverseFunction.Start<V, E> startFunction = (vertex, state) -> {
-            state.addFrontier(vertex);
-            state.addTraversal(vertex);
-            state.addVisited(vertex);
+        Collection<V> frontier = frontierSupplier.get();
+        
+        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
+            frontier.add(vertex);
+            traversal.add(vertex);
+            visited.add(vertex);
+            starting.accept(vertex);
         };
 
-        TraverseFunction.End<V, E> endFunction = (vertex, state) -> {};
+        TraverseFunction.End<V, E> endFunction = (vertex) -> {
+            finalizing.accept(vertex);
+        };
 
         return traverse(
-            start, 
-            frontierSupplier, 
-            traversalSupplier, 
-            visitedSupplier, 
-            startFunction, 
-            endFunction,
-            v -> {}
-        );
+                traversal,
+                visited,
+                startFunction,
+                endFunction,
+                cycle);
     }
 
     public Collection<V> traversePostOrder(
-        V start,
-        Supplier<Collection<V>> frontierSupplier,
-        Supplier<Collection<V>> traversalSupplier,
-        Supplier<Collection<V>> visitedSupplier
+            Supplier<Collection<V>> frontierSupplier,
+            Collection<V> traversal,
+            Set<V> visited,
+            Consumer<V> starting,
+            Consumer<V> ending,
+            Consumer<V> cycle
     ) {
-        TraverseFunction.Start<V, E> startFunction = (vertex, state) -> {
-            state.addFrontier(vertex);
-            state.addVisited(vertex);
+        Collection<V> frontier = frontierSupplier.get();
+
+        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
+            frontier.add(vertex);
+            visited.add(vertex);
+            starting.accept(vertex);
         };
 
-        TraverseFunction.End<V, E> endFunction = (vertex, state) -> {
-            state.addTraversal(vertex);
+        TraverseFunction.End<V, E> endFunction = (vertex) -> {
+            traversal.add(vertex);
+            ending.accept(vertex);
         };
 
         return traverse(
-            start, 
-            frontierSupplier, 
-            traversalSupplier, 
-            visitedSupplier, 
-            startFunction, 
-            endFunction,
-            v -> {}
-        );
+                traversal,
+                visited,
+                startFunction,
+                endFunction,
+                cycle);
+    }
+
+    public Collection<V> dfsPreOrder(
+            Set<V> visited,
+            Consumer<V> starting,
+            Consumer<V> ending,
+            Consumer<V> cycle) {
+        Stack<V> frontier = new Stack<>();
+        Queue<V> traversal = new LinkedList<>();
+
+        return traversePreOrder(
+                frontier,
+                traversal,
+                visited,
+                starting,
+                ending,
+                cycle);
+    }
+
+    public Collection<V> dfsPostOrder(
+            Set<V> visited,
+            Consumer<V> starting,
+            Consumer<V> ending,
+            Consumer<V> cycle) {
+        Stack<V> frontier = new Stack<>();
+        Queue<V> traversal = new LinkedList<>();
+
+        return traversePostOrder(
+                frontier,
+                traversal,
+                visited,
+                starting,
+                ending,
+                cycle);
+    }
+
+    public Collection<V> dfsReversePostOrder(
+            Set<V> visited,
+            Consumer<V> starting,
+            Consumer<V> ending,
+            Consumer<V> cycle) {
+        Stack<V> frontier = new Stack<>();
+        Stack<V> traversal = new Stack<>();
+
+        return traversePostOrder(
+                frontier,
+                traversal,
+                visited,
+                starting,
+                ending,
+                cycle);
+    }
+
+    public Set<V> traverse() {
+        return (Set<V>) traverse(new HashSet<>(), new HashSet<>(), (v) -> {
+        }, (v) -> {
+        }, (v) -> {
+        });
     }
 
     /**
-     * Returns a collection of vertices that are traversed following depth-first pre-order.
-     * 
-     * @param start The starting vertex.
-     * @return
-     */
-    public Collection<V> dft(V start) {
-        return traversePreOrder(start, Stack::new, Stack::new, HashSet::new);
-    }
-
-    /**
-     * Returns a set of connected components of the graph. A connected component is a set 
+     * Returns a set of connected components of the graph. A connected component is
+     * a set
      * of vertices that are reachable from each other.
+     * 
      * @return A set of connected components.
      */
-    public Set<Collection<V>> connectedComponents() {
-        Set<Collection<V>> components = new HashSet<>();
-        Set<V> visited = new HashSet<>();
+    public Set<Set<V>> connectedComponents() {
+        Set<Set<V>> components = new HashSet<>();
+        Supplier<Set<V>> traversalSupplier = () -> new HashSet<>();
 
-        for (V vertex : vertices()) {
-            if (visited.contains(vertex))
-                continue;
-
-            Collection<V> component = dft(vertex);
-            components.add(component);
-            visited.addAll(component);
-        }
-
-        return components;
+        return (Set<Set<V>>) traverse(
+                components,
+                traversalSupplier,
+                new HashSet<>(),
+                (v) -> {
+                },
+                (v) -> {
+                },
+                (v) -> {
+                });
     }
 
     /**
      * Returns a set of cycles in the graph. O((|V| + |E|)^2)
+     * 
      * @return
      */
     public Set<Cycle<V>> cycles() {
         Set<Cycle<V>> cycles = new HashSet<>();
-        Stack<V> stack = new Stack<>();
-
-        TraverseFunction.Start<V, E> startFunction = (vertex, state) -> {
-            state.addFrontier(vertex);
-            state.addVisited(vertex);
-            stack.push(vertex);
-        };
-
-        TraverseFunction.End<V, E> endFunction = (vertex, state) -> {
-            stack.pop();
-        };
-
-        Consumer<V> cycleFunction = v -> {
-            int index = stack.indexOf(v);
-            if (stack.size() - index < 3 || index == -1)
-                return;
-            Cycle<V> cycle = new Cycle<>(stack.subList(index, stack.size()));
-            cycles.add(cycle);
-        };
-
         Set<V> visited = new HashSet<>();
-        for (V vertex : vertices()) {
-            if (visited.contains(vertex))
-                continue;
+        Stack<V> stacked = new Stack<>();
 
-            traverse(
-                vertex, 
-                Stack::new, 
-                Stack::new, 
-                HashSet::new, 
-                startFunction, 
-                endFunction,
-                cycleFunction
-            );
+        dfsPreOrder(
+            visited,
+            (v) -> stacked.push(v),
+            (v) -> stacked.pop(),
+            (v) -> {
+                if (stacked.peek() == v) {
+                    List<V> path = new ArrayList<>();
+                    while (stacked.peek() != v)
+                        path.add(stacked.pop());
 
-            visited.add(vertex);
-        }
+                    Cycle<V> cycle = new Cycle<>(path);
+                    cycles.add(cycle);
+                }
+            }
+        );
 
         return cycles;
     }
 }
-
-
