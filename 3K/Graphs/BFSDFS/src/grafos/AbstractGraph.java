@@ -184,17 +184,6 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         return noUtilsSearchPath(start, goal, Stack::new, startLabeler);
     }
 
-    public class UpcomingVertex {
-        public final V sourceVertex;
-        public final E sourceEdge;
-        public final V upVertex;
-
-        public UpcomingVertex(V sourceVertex, E sourceEdge, V upVertex) {
-            this.sourceVertex = sourceVertex;
-            this.sourceEdge = sourceEdge;
-            this.upVertex = upVertex;
-        }
-    }
 
     /**
      * Base function for traversing the graph. It provides the logic behind
@@ -217,14 +206,15 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
      *                   found.
      * @return The traversal of reachable vertices from the starting vertex.
      */
-    protected Collection<V> traverse(
+    protected <R> R traverse(
             V start,
             Collection<UpcomingVertex> frontier,
-            Collection<V> traversal,
             Set<V> visited,
             TraverseFunction.Start<V, E> starting,
             TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle) {
+            Consumer<V> closedTrail,
+            Supplier<R> resultSupplier
+        ) {
         frontier.add(new UpcomingVertex(null, null, start));
 
         while (!frontier.isEmpty()) {
@@ -232,8 +222,10 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             UpcomingVertex v = it.next();
             it.remove();
 
+            frontier.spliterator()
+
             if (visited.contains(v.upVertex)) {
-                cycle.accept(v.upVertex);
+                closedTrail.accept(v.upVertex);
                 continue;
             }
 
@@ -249,8 +241,10 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             finalizing.end(v);
         }
 
-        return traversal;
+        return resultSupplier.get();
     }
+
+    public Stream<V> 
 
     /**
      * Traverses the entirity of the graph, essentially storing each component of
@@ -277,7 +271,8 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             Set<V> visited,
             TraverseFunction.Start<V, E> starting,
             TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle) {
+            Consumer<V> cycle
+    ) {
         return vertices().stream()
                 .reduce(
                         new HashSet<>(),
