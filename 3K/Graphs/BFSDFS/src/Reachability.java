@@ -39,7 +39,7 @@ public class Reachability {
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
 
-        System.out.println(graph.cycles());
+        System.out.println(graph.dfs(1, 3, v->0));
     }
 }
 

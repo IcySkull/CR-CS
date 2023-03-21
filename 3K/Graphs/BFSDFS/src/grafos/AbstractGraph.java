@@ -13,6 +13,7 @@ import grafos.function.SearchState;
 import grafos.function.SearchUtils;
 import grafos.function.TraverseFunction;
 import grafos.function.TraverseState;
+import grafos.function.TraverseState.Upcoming;
 
 /**
  * A graph is a set of vertices and a set of edges. Each edge connects two
@@ -183,274 +184,277 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         return noUtilsSearchPath(start, goal, Stack::new, startLabeler);
     }
 
+    public class UpcomingVertex {
+        public final V sourceVertex;
+        public final E sourceEdge;
+        public final V upVertex;
+
+        public UpcomingVertex(V sourceVertex, E sourceEdge, V upVertex) {
+            this.sourceVertex = sourceVertex;
+            this.sourceEdge = sourceEdge;
+            this.upVertex = upVertex;
+        }
+    }
+
     /**
-     * Base function for traversing the graph. It provides the logic behind performing any
+     * Base function for traversing the graph. It provides the logic behind
+     * performing any
      * traversal of a graph. It is used thorughout all the traversal functions.
-     * @param start     The starting vertex.
      * 
-     * @param traversal The collection that will store the traversal.
+     * @param start      The starting vertex.
      * 
-     * @param visited   The set of visited vertices.
+     * @param traversal  The collection that will store the traversal.
      * 
-     * @param starting  The function that will be called when a vertex is first visited.
+     * @param visited    The set of visited vertices.
      * 
-     * @param finalizing The function that will be called when a vertex is finished being visited.
+     * @param starting   The function that will be called when a vertex is first
+     *                   visited.
      * 
-     * @param cycle     The function that will be called when closed trail is found.
+     * @param finalizing The function that will be called when a vertex is finished
+     *                   being visited.
+     * 
+     * @param cycle      The function that will be called when closed trail is
+     *                   found.
      * @return The traversal of reachable vertices from the starting vertex.
      */
     protected Collection<V> traverse(
             V start,
+            Collection<UpcomingVertex> frontier,
             Collection<V> traversal,
             Set<V> visited,
             TraverseFunction.Start<V, E> starting,
             TraverseFunction.End<V, E> finalizing,
             Consumer<V> cycle) {
+        frontier.add(new UpcomingVertex(null, null, start));
 
-        TraverseFunction<V, E> traverseFunction = (self, from, adjEdge, fstart, fend, fcycle) -> {
-            V to = adjEdge.adj(from);
-            if (visited.contains(to)) {
-                fcycle.accept(to);
-                return;
+        while (!frontier.isEmpty()) {
+            Iterator<UpcomingVertex> it = frontier.iterator();
+            UpcomingVertex v = it.next();
+            it.remove();
+
+            if (visited.contains(v.upVertex)) {
+                cycle.accept(v.upVertex);
+                continue;
             }
 
-            fstart.start(to);
+            visited.add(v.upVertex);
 
-            for (E e : adjacentEdges(to)) {
-                self.traverse(self, to, e, fstart, fend, fcycle);
+            starting.start(v);
+
+            for (E adjE : adjacentEdges(v.upVertex)) {
+                V adjV = adjE.adj(v.upVertex);
+                frontier.add(new UpcomingVertex(v.upVertex, adjE, adjV));
             }
 
-            fend.end(to);
-        };
-
-        starting.start(start);
-
-        for (E adjEdge : adjacentEdges(start)) {
-            traverseFunction.traverse(traverseFunction, start, adjEdge, starting, finalizing, cycle);
+            finalizing.end(v);
         }
 
-        finalizing.end(start);
         return traversal;
     }
 
     /**
-     * Traverses the entirity of the graph, essentially storing each component of the graph in the set.
+     * Traverses the entirity of the graph, essentially storing each component of
+     * the graph in the set.
      * 
-     * @param traversal The collection that will store the traversal.
+     * @param traversal  The collection that will store the traversal.
      * 
-     * @param visited   The set of visited vertices.
+     * @param visited    The set of visited vertices.
      * 
-     * @param starting  The function that will be called when a vertex is first visited.
+     * @param starting   The function that will be called when a vertex is first
+     *                   visited.
      * 
-     * @param finalizing The function that will be called when a vertex is finished being visited.
+     * @param finalizing The function that will be called when a vertex is finished
+     *                   being visited.
      * 
-     * @param cycle      The function that will be called when closed trail is found.
+     * @param cycle      The function that will be called when closed trail is
+     *                   found.
      * 
-     * @return          The set of traversals of each component of the graph.
+     * @return The set of traversals of each component of the graph.
      */
     protected Set<Collection<V>> traverse(
-            Collection<V> traversal,
+            Supplier<Collection<UpcomingVertex>> frontierSupplier,
+            Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             TraverseFunction.Start<V, E> starting,
             TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return vertices().stream()
-                    .reduce(
-                            new HashSet<>(),
-                            (traversals, v) -> {
-                                if (visited.contains(v))
-                                    return traversals;
-                                
-                                traversals.add(traverse(
-                                            v, 
-                                            traversal, 
-                                            visited, 
-                                            starting, 
-                                            finalizing, 
-                                            cycle
-                                    )
-                                );    
-
+                .reduce(
+                        new HashSet<>(),
+                        (traversals, v) -> {
+                            if (visited.contains(v))
                                 return traversals;
-                            },
-                            (set1, set2) -> {
-                                set1.addAll(set2);
-                                return set1;
-                            }
-                    );
+
+                            traversals.add(traverse(
+                                    v,
+                                    frontierSupplier.get(),
+                                    traversalSupplier.get(),
+                                    visited,
+                                    starting,
+                                    finalizing,
+                                    cycle));
+
+                            return traversals;
+                        },
+                        (set1, set2) -> {
+                            set1.addAll(set2);
+                            return set1;
+                        });
     }
 
     /**
-     * Traverses all the rechable vertices from the given vertex of the graph in a pre-order fashion.
+     * Traverses all the rechable vertices from the given vertex of the graph in a
+     * pre-order fashion.
      */
     public Collection<V> traversePreOrder(
             V start,
-            Supplier<Collection<V>> frontierSupplier,
+            Supplier<Collection<UpcomingVertex>> frontierSupplier,
             Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> onVisit,
             Consumer<V> onExit,
-            Consumer<V> cycle
-    ) {
-        Collection<V> frontier = frontierSupplier.get();
+            Consumer<V> cycle) {
         Collection<V> traversal = traversalSupplier.get();
 
-        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
-            frontier.add(vertex);
-            traversal.add(vertex);
-            visited.add(vertex);
-            onVisit.accept(vertex);
+        TraverseFunction.Start<V, E> startFunction = v -> {
+            traversal.add(v.upVertex);
+            onVisit.accept(v.upVertex);
         };
 
-        TraverseFunction.End<V, E> endFunction = (vertex) -> {
-            onExit.accept(vertex);
+        TraverseFunction.End<V, E> endFunction = v -> {
+            onExit.accept(v.upVertex);
         };
 
         return traverse(
                 start,
+                frontierSupplier.get(),
                 traversal,
                 visited,
                 startFunction,
                 endFunction,
-                cycle
-        );
+                cycle);
     }
 
     /*
      * Traverses the entire graph in a pre-order fashion.
      */
     public Set<Collection<V>> traversePreOrder(
-            Supplier<Collection<V>> frontierSupplier,
+            Supplier<Collection<UpcomingVertex>> frontierSupplier,
             Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> onVisit,
             Consumer<V> onExit,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return vertices().stream()
-                    .reduce(
-                            new HashSet<>(),
-                            (traversals, vertex) -> {
-                                if (visited.contains(vertex))
-                                    return traversals;
-
-                                traversals.add(traversePreOrder(
-                                        vertex,
-                                        frontierSupplier,
-                                        traversalSupplier,
-                                        visited,
-                                        onVisit,
-                                        onExit,
-                                        cycle
-                                    )
-                                );
-
+                .reduce(
+                        new HashSet<>(),
+                        (traversals, vertex) -> {
+                            if (visited.contains(vertex))
                                 return traversals;
-                            },
-                            (traversals1, traversals2) -> {
-                                traversals1.addAll(traversals2);
-                                return traversals1;
-                            }
-                    );
+
+                            traversals.add(traversePreOrder(
+                                    vertex,
+                                    frontierSupplier,
+                                    traversalSupplier,
+                                    visited,
+                                    onVisit,
+                                    onExit,
+                                    cycle));
+
+                            return traversals;
+                        },
+                        (traversals1, traversals2) -> {
+                            traversals1.addAll(traversals2);
+                            return traversals1;
+                        });
     }
 
     /*
-     * Traverses all the reachable vertices from the given vertex of the graph in a post-order fashion.
+     * Traverses all the reachable vertices from the given vertex of the graph in a
+     * post-order fashion.
      */
     public Collection<V> traversePostOrder(
             V start,
-            Supplier<Collection<V>> frontierSupplier,
+            Supplier<Collection<UpcomingVertex>> frontierSupplier,
             Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> onVisit,
             Consumer<V> onExit,
-            Consumer<V> cycle
-    ) {
-        Collection<V> frontier = frontierSupplier.get();
+            Consumer<V> cycle) {
         Collection<V> traversal = traversalSupplier.get();
 
-        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
-            frontier.add(vertex);
-            visited.add(vertex);
-            onVisit.accept(vertex);
+        TraverseFunction.Start<V, E> startFunction = v -> {
+            onVisit.accept(v.upVertex);
         };
 
-        TraverseFunction.End<V, E> endFunction = (vertex) -> {
-            traversal.add(vertex);
-            onExit.accept(vertex);
+        TraverseFunction.End<V, E> endFunction = v -> {
+            traversal.add(v.upVertex);
+            onExit.accept(v.upVertex);
         };
 
         return traverse(
                 start,
+                frontierSupplier.get(),
                 traversal,
                 visited,
                 startFunction,
                 endFunction,
-                cycle
-        );
+                cycle);
     }
 
     /*
      * Traverses the entire graph in a post-order fashion.
      */
     public Set<Collection<V>> traversePostOrder(
-            Supplier<Collection<V>> frontierSupplier,
+            Supplier<Collection<UpcomingVertex>> frontierSupplier,
             Supplier<Collection<V>> traversalSupplier,
             Set<V> visited,
             Consumer<V> onVisit,
             Consumer<V> onExit,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return vertices().stream()
-                    .reduce(
-                            new HashSet<>(),
-                            (traversals, vertex) -> {
-                                if (visited.contains(vertex))
-                                    return traversals;
-
-                                traversals.add(traversePostOrder(
-                                        vertex,
-                                        frontierSupplier,
-                                        traversalSupplier,
-                                        visited,
-                                        onVisit,
-                                        onExit,
-                                        cycle
-                                    )
-                                );
-
+                .reduce(
+                        new HashSet<>(),
+                        (traversals, vertex) -> {
+                            if (visited.contains(vertex))
                                 return traversals;
-                            },
-                            (traversals1, traversals2) -> {
-                                traversals1.addAll(traversals2);
-                                return traversals1;
-                            }
-                    );
+
+                            traversals.add(traversePostOrder(
+                                    vertex,
+                                    frontierSupplier,
+                                    traversalSupplier,
+                                    visited,
+                                    onVisit,
+                                    onExit,
+                                    cycle));
+
+                            return traversals;
+                        },
+                        (traversals1, traversals2) -> {
+                            traversals1.addAll(traversals2);
+                            return traversals1;
+                        });
     }
 
     public Set<Collection<V>> dfsPreOrder(
             Set<V> visited,
             Consumer<V> onVisit,
             Consumer<V> onExit,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return traversePreOrder(
                 Stack::new,
                 LinkedList::new,
                 visited,
                 onVisit,
                 onExit,
-                cycle
-        );
+                cycle);
     }
 
     public Set<Collection<V>> dfsPostOrder(
             Set<V> visited,
             Consumer<V> starting,
             Consumer<V> ending,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return traversePostOrder(
                 Stack::new,
                 LinkedList::new,
@@ -464,16 +468,14 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             Set<V> visited,
             Consumer<V> starting,
             Consumer<V> ending,
-            Consumer<V> cycle
-    ) {
+            Consumer<V> cycle) {
         return traversePostOrder(
                 Stack::new,
                 Stack::new,
                 visited,
                 starting,
                 ending,
-                cycle
-        );
+                cycle);
     }
 
     /**
@@ -482,17 +484,19 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     public Collection<V> traverse() {
         return dfsPreOrder(
                 new HashSet<>(),
-                v -> {},
-                v -> {},
-                v -> {}
-            ).stream()
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList()
-        );
+                v -> {
+                },
+                v -> {
+                },
+                v -> {
+                }).stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     /*
-     * Traverses from the given vertex using Depth First Search in a pre-order as the default.
+     * Traverses from the given vertex using Depth First Search in a pre-order as
+     * the default.
      */
     public Collection<V> traverse(V start) {
         return traversePreOrder(
@@ -500,28 +504,36 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
                 Stack::new,
                 LinkedList::new,
                 new HashSet<>(),
-                v -> {},
-                v -> {},
-                v -> {}
-            );
+                v -> {
+                },
+                v -> {
+                },
+                v -> {
+                });
     }
 
     /**
-     * Traverses the entire graph using Depth First Search in a pre-order as the default.
+     * Traverses the entire graph using Depth First Search in a pre-order as the
+     * default.
+     * 
      * @return the set of connected components in the graph.
      */
     public Set<Collection<V>> connectedComponents() {
         return dfsPreOrder(
                 new HashSet<>(),
-                v -> {},
-                v -> {},
-                v -> {}
-        );
+                v -> {
+                },
+                v -> {
+                },
+                v -> {
+                });
     }
 
     /**
-     * Returns a set of cycles in the graph, not necessarily all cycles, but cycles from performing one
-     * simple traversal using Depth First Search. But it is guaranteed that some cycles will be found
+     * Returns a set of cycles in the graph, not necessarily all cycles, but cycles
+     * from performing one
+     * simple traversal using Depth First Search. But it is guaranteed that some
+     * cycles will be found
      * if there are any cycles.
      * 
      */
@@ -531,17 +543,16 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         Stack<V> stacked = new Stack<>();
 
         dfsPreOrder(
-            visited,
-            v -> stacked.push(v),
-            v -> stacked.pop(),
-            v -> {
-                int index = stacked.indexOf(v);
-                if (stacked.size() - index < 3 || index == -1)
-                    return;
-                
-                cycles.add(new Cycle<>(stacked.subList(index, stacked.size())));
-            }
-        );
+                visited,
+                v -> stacked.push(v),
+                v -> stacked.pop(),
+                v -> {
+                    System.out.println(stacked);
+                    int index = stacked.indexOf(v);
+                    if (stacked.size() - index < 3 || index == -1)
+                        return;
+                    cycles.add(new Cycle<>(stacked.subList(index, stacked.size())));
+                });
 
         return cycles;
     }

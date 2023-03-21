@@ -7,8 +7,6 @@ public class Cycle<V> {
     public Cycle(java.util.Collection<V> cycle) {
         this.cycle = new java.util.ArrayList<>(cycle);
         this.marked = new java.util.HashSet<>(this.cycle);
-        if (marked.size() < 3)
-            throw new IllegalArgumentException("Cycle must have at least 3 vertices");
     }
 
     @Override
