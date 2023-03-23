@@ -12,8 +12,7 @@ import java.util.function.Supplier;
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public abstract class TraversalSpliterator<V, E extends AbstractEdge<V>>
-        implements Spliterator<UpcomingVertex<V, E>> {
+public abstract class VertexTraversalSpliterator<V, E extends AbstractEdge<V>> implements Spliterator<UpcomingVertex<V, E>> {
     protected final AbstractGraph<V, E> graph;
     protected final CollectionVisitor<V, E> frontier;
     protected final Set<V> visited;
@@ -35,18 +34,19 @@ public abstract class TraversalSpliterator<V, E extends AbstractEdge<V>>
         POSTORDER;
     }
 
-    public TraversalSpliterator() {
+    public VertexTraversalSpliterator() {
         graph = null;
         frontier = null;
         visited = null;
     }
 
-    public TraversalSpliterator(
+    public VertexTraversalSpliterator(
             AbstractGraph<V, E> graph,
             V root,
             Supplier<Collection<UpcomingVertex<V, E>>> frontierSupplier,
             Set<V> visited,
-            boolean checkVisited) {
+            boolean checkVisited
+    ) {
         this.graph = graph;
         this.frontier = CollectionVisitor.of(frontierSupplier.get());
         this.visited = visited;
@@ -55,18 +55,7 @@ public abstract class TraversalSpliterator<V, E extends AbstractEdge<V>>
         this.frontier.add(new UpcomingVertex<>(null, null, root));
     }
 
-    public TraversalSpliterator(
-            AbstractGraph<V, E> graph,
-            Supplier<Collection<UpcomingVertex<V, E>>> frontierSupplier,
-            Set<V> visited,
-            boolean checkVisited) {
-        this.graph = graph;
-        this.frontier = CollectionVisitor.of(frontierSupplier.get());
-        this.visited = visited;
-        this.checkVisited = checkVisited;
-    }
-
-    public static <V, E extends AbstractEdge<V>> TraversalSpliterator<V, E> of(
+    public static <V, E extends AbstractEdge<V>> VertexTraversalSpliterator<V, E> of(
             AbstractGraph<V, E> graph,
             Scope scope,
             V root,

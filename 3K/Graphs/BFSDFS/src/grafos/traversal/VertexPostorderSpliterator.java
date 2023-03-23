@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public class VertexPostorderSpliterator<V, E extends AbstractEdge<V>> extends TraversalSpliterator<V, E> {
+public class VertexPostorderSpliterator<V, E extends AbstractEdge<V>> extends VertexTraversalSpliterator<V, E> {
 
     public VertexPostorderSpliterator() {
         super();

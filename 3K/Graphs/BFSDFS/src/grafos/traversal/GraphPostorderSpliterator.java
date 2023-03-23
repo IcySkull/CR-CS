@@ -9,11 +9,7 @@ import java.util.function.Supplier;
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public class GraphPostorderSpliterator<V, E extends AbstractEdge<V>> extends TraversalSpliterator<V, E> {
-
-    public GraphPostorderSpliterator() {
-        super();
-    }
+public class GraphPostorderSpliterator<V, E extends AbstractEdge<V>> extends GraphTraversalSpliterator<V, E> {
 
     public GraphPostorderSpliterator(
             AbstractGraph<V, E> graph,
@@ -25,13 +21,13 @@ public class GraphPostorderSpliterator<V, E extends AbstractEdge<V>> extends Tra
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super UpcomingVertex<V, E>> action) {
+    public boolean tryAdvance(Consumer<? super VertexTraversalSpliterator<V,E>> action) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'tryAdvance'");
     }
 
     @Override
-    public Spliterator<UpcomingVertex<V, E>> trySplit() {
+    public Spliterator<VertexTraversalSpliterator<V,E>> trySplit() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'trySplit'");
     }

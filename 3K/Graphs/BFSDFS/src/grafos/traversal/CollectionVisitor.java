@@ -14,6 +14,8 @@ public abstract class CollectionVisitor<V, E extends AbstractEdge<V>> {
 
     public abstract boolean isEmpty();
 
+    public abstract int size();
+
     public static <V, E extends AbstractEdge<V>> CollectionVisitor<V, E> of(
             Collection<UpcomingVertex<V, E>> collection) {
         if (collection instanceof Queue)
@@ -49,6 +51,11 @@ class QueueVisitor<V, E extends AbstractEdge<V>> extends CollectionVisitor<V, E>
     public boolean isEmpty() {
         return queue.isEmpty();
     }
+
+    @Override
+    public int size() {
+        return queue.size();
+    }
 }
 
 class StackVisitor<V, E extends AbstractEdge<V>> extends CollectionVisitor<V, E> {
@@ -72,6 +79,11 @@ class StackVisitor<V, E extends AbstractEdge<V>> extends CollectionVisitor<V, E>
     public boolean isEmpty() {
         return stack.isEmpty();
     }
+
+    @Override
+    public int size() {
+        return stack.size();
+    }
 }
 
 class PriorityQueueVisitor<V, E extends AbstractEdge<V>> extends CollectionVisitor<V, E> {
@@ -94,5 +106,10 @@ class PriorityQueueVisitor<V, E extends AbstractEdge<V>> extends CollectionVisit
     @Override
     public boolean isEmpty() {
         return priorityQueue.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return priorityQueue.size();
     }
 }

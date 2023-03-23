@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public class VertexPreorderSpliterator<V, E extends AbstractEdge<V>> extends TraversalSpliterator<V, E> {
+public class VertexPreorderSpliterator<V, E extends AbstractEdge<V>> extends VertexTraversalSpliterator<V, E> {
 
     public VertexPreorderSpliterator() {
         super();
@@ -59,7 +59,7 @@ public class VertexPreorderSpliterator<V, E extends AbstractEdge<V>> extends Tra
 
     @Override
     public long estimateSize() {
-        return Long.MAX_VALUE;
+        return frontier.size() + visited.size();
     }
 
     @Override

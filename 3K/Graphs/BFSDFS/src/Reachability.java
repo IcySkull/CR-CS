@@ -38,10 +38,6 @@ public class Reachability {
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
 
-        GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
-        viewer.run();
-
-
         System.out.println(graph.dfs());
     }
 }

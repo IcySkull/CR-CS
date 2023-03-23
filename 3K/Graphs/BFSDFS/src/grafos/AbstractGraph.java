@@ -11,7 +11,7 @@ import java.util.stream.StreamSupport;
 import grafos.edges.*;
 import grafos.function.*;
 import grafos.traversal.*;
-import grafos.traversal.TraversalSpliterator.*;
+import grafos.traversal.VertexTraversalSpliterator.*;
 
 /**
  * A graph is a set of vertices and a set of edges. Each edge connects two
@@ -177,7 +177,7 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
         Set<V> visited,
         boolean checkVisited
     ) {
-        return TraversalSpliterator.of(this, scope, root, frontier, order, visited, checkVisited);
+        return VertexTraversalSpliterator.of(this, scope, root, frontier, order, visited, checkVisited);
     }
 
     public Stream<UpcomingVertex<V, E>> stream(

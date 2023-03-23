@@ -10,60 +10,24 @@ import java.util.function.Supplier;
 import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public class GraphPreorderSpliterator<V, E extends AbstractEdge<V>> extends TraversalSpliterator<V, E> {
-    private Set<V> toExplore;
-
-    public GraphPreorderSpliterator() {
-        super();
-    }
+public class GraphPreorderSpliterator<V, E extends AbstractEdge<V>> extends GraphTraversalSpliterator<V, E> {
 
     public GraphPreorderSpliterator(
             AbstractGraph<V, E> graph,
             Supplier<Collection<UpcomingVertex<V, E>>> frontierSupplier,
             Set<V> visited,
             boolean checkVisited
-            ) {
+    ) {
         super(graph, frontierSupplier, visited, checkVisited);
-
-        toExplore = new HashSet<>(graph.vertices());
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super UpcomingVertex<V, E>> action) {
-        if (frontier.isEmpty() && toExplore.isEmpty())
-            return false;
+    public boolean tryAdvance(Consumer<? super VertexTraversalSpliterator<V,E>> action) {
         
-        if (frontier.isEmpty()) {
-            V v = toExplore.iterator().next();
-            frontier.add(new UpcomingVertex<>(null, null, v));
-            toExplore.remove(v);
-        }
-
-        UpcomingVertex<V, E> upcoming = frontier.consume();
-
-        if (!checkVisited)
-            action.accept(upcoming);
-
-        if (visited.contains(upcoming.v)) {
-            return true;
-        }
-
-        if (checkVisited)
-            action.accept(upcoming);
-
-        visited.add(upcoming.v);
-
-        for (E e : graph.adjacentEdges(upcoming.v)) {
-            V w = e.adj(upcoming.v);
-            frontier.add(new UpcomingVertex<>(upcoming.v, e, w));
-            toExplore.remove(w);
-        }
-
-        return true;
     }
 
     @Override
-    public Spliterator<UpcomingVertex<V, E>> trySplit() {
+    public Spliterator<VertexTraversalSpliterator<V,E>> trySplit() {
         return null;
     }
 
