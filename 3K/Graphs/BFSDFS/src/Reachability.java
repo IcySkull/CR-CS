@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
@@ -14,7 +16,7 @@ import grafos.visual.GraphViewer;
 
 public class Reachability {
     static  int reach(AdjacencyList<Integer> graph, int x, int y) {
-        return graph.dfs(x, y, v->0) != null ? 1 : 0;
+        return graph.reachable(x, y) ? 1 : 0;
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -32,14 +34,15 @@ public class Reachability {
             y = scanner.nextInt();
             adj[x].add(y);
             adj[y].add(x);
-        }
+        }   
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
 
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
 
-        System.out.println(graph.dfs(1, 3, v->0));
+
+        System.out.println(graph.dfs());
     }
 }
 

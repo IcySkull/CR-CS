@@ -82,10 +82,6 @@ public class AdjacencyList<V> extends Digraph<V> {
         return adjList.get(u);
     }
 
-    public <L> List<V> dfs(V start, V goal, Function<V, L> startLabeler) {
-        return super.dfs(start, goal, startLabeler);
-    }
-
     @Override
     public AdjacencyList<V> transposed() {
         AdjacencyList<V> transposed = new AdjacencyList<>();

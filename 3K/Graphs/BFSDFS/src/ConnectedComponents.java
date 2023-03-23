@@ -9,7 +9,7 @@ import grafos.visual.GraphViewer;
 
 public class ConnectedComponents {
     static int numberOfComponents(AdjacencyList<Integer> graph) {
-        return graph.connectedComponents().size();
+        return 0;
     }
 
 
@@ -33,8 +33,6 @@ public class ConnectedComponents {
 
         GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
         viewer.run();
-
-        System.out.println(graph.connectedComponents());
 
     }
 }

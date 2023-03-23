@@ -1,26 +1,46 @@
 package grafos.traversal;
 
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import grafos.AbstractGraph;
 import grafos.edges.AbstractEdge;
 
-public class PostorderSpliterator<V, E extends AbstractEdge<V>> extends TraverseSpliterator<V, E> {
+public class VertexPreorderSpliterator<V, E extends AbstractEdge<V>> extends TraversalSpliterator<V, E> {
+
+    public VertexPreorderSpliterator() {
+        super();
+    }
+
+    public VertexPreorderSpliterator(
+            AbstractGraph<V, E> graph,
+            V root,
+            Supplier<Collection<UpcomingVertex<V, E>>> frontierSupplier,
+            Set<V> visited,
+            boolean checkVisited
+    ) {
+        super(graph, root, frontierSupplier, visited, checkVisited);
+    }
 
     @Override
     public boolean tryAdvance(Consumer<? super UpcomingVertex<V, E>> action) {
         if (frontier.isEmpty())
             return false;
 
-        Iterator<UpcomingVertex<V, E>> it = frontier.iterator();
-        UpcomingVertex<V, E> upcoming = it.next();
-        it.remove();
+        UpcomingVertex<V, E> upcoming = frontier.consume();
+
+        if (!checkVisited)
+            action.accept(upcoming);
 
         if (visited.contains(upcoming.v)) {
-            closedTrail.accept(upcoming.v);
             return true;
         }
+
+        if (checkVisited)
+            action.accept(upcoming);
 
         visited.add(upcoming.v);
 
@@ -28,8 +48,6 @@ public class PostorderSpliterator<V, E extends AbstractEdge<V>> extends Traverse
             V w = e.adj(upcoming.v);
             frontier.add(new UpcomingVertex<>(upcoming.v, e, w));
         }
-
-        action.accept(upcoming);
 
         return true;
     }
@@ -48,4 +66,5 @@ public class PostorderSpliterator<V, E extends AbstractEdge<V>> extends Traverse
     public int characteristics() {
         return Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.IMMUTABLE;
     }
+    
 }
