@@ -55,7 +55,7 @@ public abstract class VertexTraversalSpliterator<V, E extends AbstractEdge<V>> i
         this.frontier.add(new UpcomingVertex<>(null, null, root));
     }
 
-    public static <V, E extends AbstractEdge<V>> VertexTraversalSpliterator<V, E> of(
+    public static <V, E extends AbstractEdge<V>> VertexTraversalSpliterator of(
             AbstractGraph<V, E> graph,
             Scope scope,
             V root,
@@ -69,7 +69,7 @@ public abstract class VertexTraversalSpliterator<V, E extends AbstractEdge<V>> i
             case PREORDER:
                 switch (scope) {
                     case GRAPH:
-                        return new GraphPreorderSpliterator<>(graph, frontierSupplier, visited, checkVisited);
+                        return new GraphPreorderSpliterator<V, E>(graph, frontierSupplier, visited, checkVisited);
                     case VERTEX:
                         return new VertexPreorderSpliterator<>(graph, root, frontierSupplier, visited, checkVisited);
                     default:

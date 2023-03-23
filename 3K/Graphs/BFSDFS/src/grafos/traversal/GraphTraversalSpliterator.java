@@ -18,6 +18,13 @@ public abstract class GraphTraversalSpliterator<V, E extends AbstractEdge<V>> im
     private final Set<V> toExplore;
     private final boolean checkVisited;
 
+    public GraphTraversalSpliterator() {
+        graph = null;
+        frontierSupplier = null;
+        visited = null;
+        toExplore = null;
+        checkVisited = false;
+    }
 
     public GraphTraversalSpliterator(
             AbstractGraph<V, E> graph,
