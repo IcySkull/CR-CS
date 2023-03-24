@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import grafos.AdjacencyList;
+import grafos.IntegerAdjList;
 import grafos.edges.Diedge;
 import grafos.visual.GraphViewer;
 
 public class ConnectedComponents {
-    static int numberOfComponents(AdjacencyList<Integer> graph) {
+    static int numberOfComponents(ArrayList<Integer>[] adjList) {
+        IntegerAdjList graph = new IntegerAdjList(adjList);
         return graph.components().size();
     }
 

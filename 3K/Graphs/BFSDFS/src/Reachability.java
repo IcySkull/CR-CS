@@ -1,26 +1,15 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Stack;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.io.*;
+import java.util.*;
 
-import grafos.AbstractGraph;
-import grafos.AdjacencyList;
-import grafos.edges.AbstractEdge;
-import grafos.edges.Diedge;
-import grafos.traversal.GraphTraversal;
-import grafos.traversal.UpcomingVertex;
+import grafos.*;
+import grafos.edges.*;
+import grafos.traversal.*;
 import grafos.traversal.GraphTraversal.*;
 import grafos.visual.GraphViewer;
 
 public class Reachability {
-    static  int reach(AdjacencyList<Integer> graph, int x, int y) {
+    static  int reach(List<Integer>[] adjList, int x, int y) {
+        IntegerAdjList graph = new IntegerAdjList(adjList);
         return graph.reachable(x, y) ? 1 : 0;
     }
 

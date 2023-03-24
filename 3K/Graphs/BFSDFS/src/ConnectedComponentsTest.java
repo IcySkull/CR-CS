@@ -24,14 +24,13 @@ import static org.junit.Assert.*;
 public class ConnectedComponentsTest {
     String workingDir = getClass().getResource(".").getPath() + "../";
 
-    AdjacencyList<Integer> graph;
+    ArrayList<Integer>[] adj;
 
     void loadFile(String name) {
         try {
             Scanner scanner = new Scanner(new File(workingDir + name));
             int n = scanner.nextInt();
             int m = scanner.nextInt();
-            List<Integer>[] adj = new List[n];
             adj = (ArrayList<Integer>[]) new ArrayList[n];
             for (int i = 0; i < n; i++) {
                 adj[i] = new ArrayList<Integer>();
@@ -43,9 +42,6 @@ public class ConnectedComponentsTest {
                 adj[x].add(y);
                 adj[y].add(x);
             }
-
-            graph = new AdjacencyList<>(adj);
-
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReachabilityTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -54,18 +50,18 @@ public class ConnectedComponentsTest {
     @Test
     public void testTiny() {
         loadFile("tinyG.txt");
-        assertEquals(3, ConnectedComponents.numberOfComponents(graph));
+        assertEquals(3, ConnectedComponents.numberOfComponents(adj));
     }
 
     @Test
     public void testMedium() {
         loadFile("mediumG.txt");
-        assertEquals(1, ConnectedComponents.numberOfComponents(graph));
+        assertEquals(1, ConnectedComponents.numberOfComponents(adj));
     }
 
     @Test
     public void testMedium2() {
         loadFile("mediumGG.txt");
-        assertEquals(6, ConnectedComponents.numberOfComponents(graph));
+        assertEquals(6, ConnectedComponents.numberOfComponents(adj));
     }
 }
