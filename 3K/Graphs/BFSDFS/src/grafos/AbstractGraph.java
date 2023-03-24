@@ -11,7 +11,7 @@ import java.util.stream.StreamSupport;
 import grafos.edges.*;
 import grafos.function.*;
 import grafos.traversal.*;
-import grafos.traversal.VertexTraversalSpliterator.*;
+import grafos.traversal.GraphTraversal.*;
 
 /**
  * A graph is a set of vertices and a set of edges. Each edge connects two
@@ -169,84 +169,138 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
                 new SearchUtils<>());
     }
 
-    public Spliterator<UpcomingVertex<V, E>> spliterator(
-        Scope scope,
+    public Spliterator<UpcomingVertex<V,E>> spliterator(
         V root,
         Frontier frontier, 
         Order order,
         Set<V> visited,
         boolean checkVisited
     ) {
-        return VertexTraversalSpliterator.of(this, scope, root, frontier, order, visited, checkVisited);
+        return ComponentSpliterator.of(this, root, frontier, order, visited, checkVisited);
+    }
+
+    public GlobalSpliterator<V,E> spliterator(
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
+    ) {
+        return GlobalSpliterator.of(this, frontier, order, visited, checkVisited);
     }
 
     public Stream<UpcomingVertex<V, E>> stream(
-        Scope scope,
         V root,
         Frontier frontier, 
         Order order,
         Set<V> visited,
         boolean checkVisited
     ) {
-        return StreamSupport.stream(spliterator(scope, root, frontier, order, visited, checkVisited), false);
+        return StreamSupport.stream(spliterator(root, frontier, order, visited, checkVisited), false);
     }
 
-    public List<V> dfs() {
-        return stream(
-            Scope.GRAPH, 
-            null, 
-            Frontier.DFS, 
-            Order.PREORDER, 
-            new HashSet<>(), 
-            true)
-            .map(up -> up.v)
-            .collect(Collectors.toList());
+    public Stream<Stream<UpcomingVertex<V, E>>> stream(
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
+    ) {
+        return StreamSupport.stream(spliterator(frontier, order, visited, checkVisited), false);
     }
 
     public List<V> dfs(V root) {
         return stream(
-            Scope.VERTEX, 
             root, 
             Frontier.DFS, 
             Order.PREORDER, 
             new HashSet<>(), 
             true)
-            .map(up -> up.v)
+            .map(UpcomingVertex::vertex)
             .collect(Collectors.toList());
     }
 
-    public List<V> bfs() {
+    public List<V> dfs() {
         return stream(
-            Scope.GRAPH, 
-            null, 
-            Frontier.BFS, 
+            Frontier.DFS, 
             Order.PREORDER, 
             new HashSet<>(), 
             true)
-            .map(up -> up.v)
+            .flatMap(componentStream -> componentStream)
+            .map(UpcomingVertex::vertex)
             .collect(Collectors.toList());
     }
 
     public List<V> bfs(V root) {
         return stream(
-            Scope.VERTEX, 
             root, 
             Frontier.BFS, 
             Order.PREORDER, 
             new HashSet<>(), 
             true)
-            .map(up -> up.v)
+            .map(UpcomingVertex::vertex)
+            .collect(Collectors.toList());
+    }
+
+    public List<V> bfs() {
+        return stream(
+            Frontier.BFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .flatMap(componentStream -> componentStream)
+            .map(UpcomingVertex::vertex)
             .collect(Collectors.toList());
     }
 
     public boolean reachable(V start, V end) {
         return stream(
-            Scope.VERTEX, 
             start, 
             Frontier.DFS, 
             Order.PREORDER, 
             new HashSet<>(), 
             true)
-            .anyMatch(up -> up.v.equals(end));
+            .anyMatch(up -> up.vertex.equals(end));
+    }
+
+    public Set<List<V>> components() {
+        return stream(
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .map(componentStream -> componentStream
+                .map(UpcomingVertex::vertex)
+                .collect(Collectors.toList()))
+            .collect(Collectors.toSet());
+    }
+
+    public boolean isConnected() {
+        return components().size() == 1;
+    }
+
+    public boolean isBipartite() {
+        Map<V, Boolean> colors = new HashMap<>();
+
+        return stream(
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            false)
+            .allMatch(componentStream -> componentStream
+                .allMatch(up -> {
+                    V parent = up.srcVertex;
+                    if (parent == null) {
+                        colors.put(up.vertex, true);
+                        return true;
+                    }
+
+                    boolean color = !colors.get(parent);
+                
+                    if (colors.containsKey(up.vertex))
+                        return colors.get(up.vertex) != colors.get(parent);
+                    
+                    colors.put(up.vertex, color);
+                    
+                    return true;
+                }));
     }
 }

@@ -24,8 +24,6 @@ public class Acyclicity {
         }
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
-
-        System.out.println(graph.cycles());
     }
 }
 

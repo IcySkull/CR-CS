@@ -2,16 +2,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import grafos.AbstractGraph;
 import grafos.AdjacencyList;
 import grafos.edges.AbstractEdge;
 import grafos.edges.Diedge;
+import grafos.traversal.GraphTraversal;
+import grafos.traversal.UpcomingVertex;
+import grafos.traversal.GraphTraversal.*;
 import grafos.visual.GraphViewer;
 
 public class Reachability {
@@ -38,7 +43,11 @@ public class Reachability {
 
         AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
 
-        System.out.println(graph.dfs());
+        GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
+        viewer.run();
+
+
+        System.out.println(graph.isBipartite());
     }
 }
 

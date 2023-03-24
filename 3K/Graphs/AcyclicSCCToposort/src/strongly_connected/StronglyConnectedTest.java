@@ -13,6 +13,9 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Test;
+
+import grafos.AdjacencyList;
+
 import static org.junit.Assert.*;
 
 /**
@@ -20,24 +23,29 @@ import static org.junit.Assert.*;
  * @author bryce
  */
 public class StronglyConnectedTest {
+    String workingDir = getClass().getResource(".").getPath() + "../../";
 
-    ArrayList<Integer>[] adj;
+    AdjacencyList<Integer> graph;
 
     void loadFile(String name) {
         try {
-            Scanner scanner = new Scanner(new File(name));
+            System.out.println(workingDir + name);
+            Scanner scanner = new Scanner(new File(workingDir + name));
             int n = scanner.nextInt();
             int m = scanner.nextInt();
-            adj = (ArrayList<Integer>[]) new ArrayList[n];
+            ArrayList<Integer>[] adjList = (ArrayList<Integer>[]) new ArrayList[n];
             for (int i = 0; i < n; i++) {
-                adj[i] = new ArrayList<>();
+                adjList[i] = new ArrayList<>();
             }
             for (int i = 0; i < m; i++) {
                 int x, y;
                 x = scanner.nextInt();
                 y = scanner.nextInt();
-                adj[x].add(y);
+                adjList[x].add(y);
             }
+
+            graph = new AdjacencyList<>(adjList);
+
         } catch (FileNotFoundException ex) {
         }
     }
@@ -45,24 +53,24 @@ public class StronglyConnectedTest {
     @Test
     public void testSmall() {
         loadFile("myDag.txt");
-        assertEquals(4, StronglyConnected.numberOfStronglyConnectedComponents(adj));
+        assertEquals(4, StronglyConnected.numberOfStronglyConnectedComponents(graph));
     }
 
     @Test
     public void testMedium() {
         loadFile("mediumG.txt");
-        assertEquals(250, StronglyConnected.numberOfStronglyConnectedComponents(adj));
+        assertEquals(250, StronglyConnected.numberOfStronglyConnectedComponents(graph));
     }
 
     @Test
     public void testMedium2() {
         loadFile("med2DG.txt");
-        assertEquals(60, StronglyConnected.numberOfStronglyConnectedComponents(adj));
+        assertEquals(60, StronglyConnected.numberOfStronglyConnectedComponents(graph));
     }
     
     @Test
     public void testMassive() {
         loadFile("sccStupendous.txt");
-        assertEquals(371762, StronglyConnected.numberOfStronglyConnectedComponents(adj));
+        assertEquals(371762, StronglyConnected.numberOfStronglyConnectedComponents(graph));
     }
 }

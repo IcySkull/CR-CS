@@ -9,7 +9,7 @@ import grafos.visual.GraphViewer;
 
 public class ConnectedComponents {
     static int numberOfComponents(AdjacencyList<Integer> graph) {
-        return 0;
+        return graph.components().size();
     }
 
 
