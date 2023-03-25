@@ -22,10 +22,6 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
 
     public abstract Collection<E> edges();
 
-    public abstract void addVertex(V v);
-
-    public abstract void addEdge(E e);
-
     /**
      * Returns the number of vertices in the graph.
      */

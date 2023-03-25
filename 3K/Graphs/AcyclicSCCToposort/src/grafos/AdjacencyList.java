@@ -49,13 +49,11 @@ public class AdjacencyList<V> extends Digraph<V, Diedge<V>> {
             .collect(Collectors.toSet());
     }
 
-    @Override
     public void addVertex(V v) {
         if (!adjList.containsKey(v))
             adjList.put(v, new HashSet<>());
     }
 
-    @Override
     public void addEdge(Diedge<V> e) {
         if (!adjList.containsKey(e.tail()))
             throw new IllegalArgumentException("Start vertex: " + e.tail() + ", is not in the graph");

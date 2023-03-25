@@ -1,17 +1,29 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
-import grafos.AdjacencyList;
-import grafos.IntegerAdjList;
-import grafos.edges.Diedge;
-import grafos.visual.GraphViewer;
 
 public class ConnectedComponents {
     static int numberOfComponents(ArrayList<Integer>[] adjList) {
-        IntegerAdjList graph = new IntegerAdjList(adjList);
-        return graph.components().size();
+        Set<Integer> visited = new HashSet<>();
+        int count = 0;
+
+        for (int i = 0; i < adjList.length; i++) {
+            if (!visited.contains(i)) {
+                count++;
+                explore(adjList, i, visited);
+            }
+        }
+
+        return count;
+    }
+
+    static void explore(ArrayList<Integer>[] adjList, int x, Set<Integer> visited) {
+        visited.add(x);
+        for (int v : adjList[x]) {
+            if (!visited.contains(v)) {
+                explore(adjList, v, visited);
+            }
+        }
     }
 
 
@@ -30,12 +42,6 @@ public class ConnectedComponents {
             adj[x].add(y);
             adj[y].add(x);
         }
-        
-        AdjacencyList<Integer> graph = new AdjacencyList<>(adj);
-
-        GraphViewer<Integer, Diedge<Integer>> viewer = new GraphViewer<>(graph);
-        viewer.run();
-
     }
 }
 
