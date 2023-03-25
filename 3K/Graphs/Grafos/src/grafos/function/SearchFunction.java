@@ -1,5 +1,10 @@
 package grafos.function;
 
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.*;
+
 import grafos.edges.AbstractEdge;
 
 /*

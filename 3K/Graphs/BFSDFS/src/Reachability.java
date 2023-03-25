@@ -4,17 +4,35 @@ import java.util.*;
 public class Reachability {
 
     static int reach(List<Integer>[] adjList, int x, int y) {
-        return reach(adjList, x, y, new HashSet<>()) ? 1 : 0;
+        boolean result = reach(adjList, x, y, new boolean[adjList.length], new Stack<Integer>());
+        return result ? 1 : 0;
     }
 
-    static boolean reach(List<Integer>[] adjList, int x, int y, Set<Integer> visited) {
-        if (visited.contains(x))
-            return false;
-        if (x == y)
-            return true;
-        visited.add(x);
+    static boolean reach(
+        List<Integer>[] adjList, 
+        int start, 
+        int goal, 
+        boolean[] visited,
+        Stack<Integer> frontier
+    ) {
+        Integer current = start;
+        frontier.push(current);
 
-        return adjList[x].stream().anyMatch(v -> reach(adjList, v, y, visited));
+        while (!frontier.isEmpty()) {
+            current = frontier.pop();
+            if (visited[current])
+                continue;
+
+            visited[current] = true;
+
+            if (current == goal)
+                return true;
+            
+            for (Integer neighbor : adjList[current])
+                frontier.push(neighbor);
+        }
+
+        return false;
     }
 
 

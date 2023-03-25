@@ -1,12 +1,11 @@
 package grafos;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import grafos.edges.Diedge;
 
-public class AdjacencyList<V> extends Digraph<V> {
+public class AdjacencyList<V> extends Digraph<V, Diedge<V>> {
     private Map<V, Set<Diedge<V>>> adjList;
 
     public AdjacencyList() {
@@ -17,7 +16,7 @@ public class AdjacencyList<V> extends Digraph<V> {
         this.adjList = new HashMap<>(adjList);
     }
 
-    public AdjacencyList(Digraph<V> graph) {
+    public AdjacencyList(Digraph<V, Diedge<V>> graph) {
         this();
         for (V v : graph.vertices()) {
             addVertex(v);
@@ -50,13 +49,11 @@ public class AdjacencyList<V> extends Digraph<V> {
             .collect(Collectors.toSet());
     }
 
-    @Override
     public void addVertex(V v) {
         if (!adjList.containsKey(v))
             adjList.put(v, new HashSet<>());
     }
 
-    @Override
     public void addEdge(Diedge<V> e) {
         if (!adjList.containsKey(e.tail()))
             throw new IllegalArgumentException("Start vertex: " + e.tail() + ", is not in the graph");
@@ -82,10 +79,6 @@ public class AdjacencyList<V> extends Digraph<V> {
         return adjList.get(u);
     }
 
-    public <L> List<V> dfs(V start, V goal, Function<V, L> startLabeler) {
-        return super.dfs(start, goal, startLabeler);
-    }
-
     @Override
     public AdjacencyList<V> transposed() {
         AdjacencyList<V> transposed = new AdjacencyList<>();
@@ -98,10 +91,5 @@ public class AdjacencyList<V> extends Digraph<V> {
 
         return transposed;
     }
-
-    @Override
-    public Set<Collection<V>> stronglyConnectedComponents() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'stronglyConnectedComponents'");
-    }
 }
+

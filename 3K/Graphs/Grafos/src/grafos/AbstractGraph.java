@@ -1,18 +1,15 @@
 package grafos;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import grafos.edges.*;
-import grafos.function.SearchFunction;
-import grafos.function.SearchResult;
-import grafos.function.SearchState;
-import grafos.function.SearchUtils;
-import grafos.function.TraverseFunction;
-import grafos.function.TraverseState;
+import grafos.function.*;
+import grafos.traversal.*;
+import grafos.traversal.GraphTraversal.*;
 
 /**
  * A graph is a set of vertices and a set of edges. Each edge connects two
@@ -24,10 +21,6 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
     public abstract Collection<V> vertices();
 
     public abstract Collection<E> edges();
-
-    public abstract void addVertex(V v);
-
-    public abstract void addEdge(E e);
 
     /**
      * Returns the number of vertices in the graph.
@@ -147,7 +140,8 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
             V start,
             V goal,
             Supplier<Collection<V>> frontierSupplier,
-            Function<V, L> startLabeler) {
+            Function<V, L> startLabeler
+    ) {
         return searchPath(
                 start,
                 goal,
@@ -169,267 +163,138 @@ public abstract class AbstractGraph<V, E extends AbstractEdge<V>> {
                 new SearchUtils<>());
     }
 
-    public <L> List<V> bfs(
-            V start,
-            V goal,
-            Function<V, L> startLabeler) {
-        return noUtilsSearchPath(start, goal, LinkedList::new, startLabeler);
-    }
-
-    public <L> List<V> dfs(
-            V start,
-            V goal,
-            Function<V, L> startLabeler) {
-        return noUtilsSearchPath(start, goal, Stack::new, startLabeler);
-    }
-
-    public Collection<V> traverse(
-            V start,
-            Collection<V> traversal,
-            Set<V> visited,
-            TraverseFunction.Start<V, E> starting,
-            TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle) {
-        starting.start(start);
-
-        TraverseFunction<V, E> traverseFunction = (self, from, adjEdge, fstart, fend, fcycle) -> {
-            V to = adjEdge.adj(from);
-            if (visited.contains(to)) {
-                fcycle.accept(to);
-                return;
-            }
-
-            fstart.start(to);
-
-            for (E e : adjacentEdges(to)) {
-                self.traverse(self, to, e, fstart, fend, fcycle);
-            }
-
-            fend.end(to);
-        };
-
-        starting.start(start);
-
-        for (E adjEdge : adjacentEdges(start)) {
-            traverseFunction.traverse(traverseFunction, start, adjEdge, starting, finalizing, cycle);
-        }
-
-        finalizing.end(start);
-        return traversal;
-    }
-
-    public Collection<V> traverse(
-            Collection<V> traversal,
-            Set<V> visited,
-            TraverseFunction.Start<V, E> starting,
-            TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle) {
-        for (V v : vertices()) {
-            if (visited.contains(v))
-                continue;
-
-            traversal.addAll(
-                    traverse(
-                            v,
-                            traversal,
-                            visited,
-                            starting,
-                            finalizing,
-                            cycle));
-        }
-        return traversal;
-    }
-
-    public Set<Set<V>> traverse(
-            Set<Set<V>> components,
-            Supplier<Set<V>> traversalSupplier,
-            Set<V> visited,
-            TraverseFunction.Start<V, E> starting,
-            TraverseFunction.End<V, E> finalizing,
-            Consumer<V> cycle) {
-        for (V v : vertices()) {
-            if (visited.contains(v))
-                continue;
-
-            Set<V> traversal = (Set<V>) traverse(
-                    v,
-                    traversalSupplier.get(),
-                    visited,
-                    starting,
-                    finalizing,
-                    cycle);
-            components.add(traversal);
-        }
-        return components;
-    }
-
-    public Collection<V> traversePreOrder(
-            Supplier<Collection<V>> frontierSupplier,
-            Supplier<Collection<V>> traversalSupplier,
-            Set<V> visited,
-            Consumer<V> starting,
-            Consumer<V> finalizing,
-            Consumer<V> cycle
+    public Spliterator<UpcomingVertex<V,E>> spliterator(
+        V root,
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
     ) {
-        Collection<V> frontier = frontierSupplier.get();
-        Collection<V> traversal = traversalSupplier.get();
-        
-        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
-            frontier.add(vertex);
-            traversal.add(vertex);
-            visited.add(vertex);
-            starting.accept(vertex);
-        };
-
-        TraverseFunction.End<V, E> endFunction = (vertex) -> {
-            finalizing.accept(vertex);
-        };
-
-        return traverse(
-                traversal,
-                visited,
-                startFunction,
-                endFunction,
-                cycle);
+        return ComponentSpliterator.of(this, root, frontier, order, visited, checkVisited);
     }
 
-    public Collection<V> traversePostOrder(
-            Supplier<Collection<V>> frontierSupplier,
-            Supplier<Collection<V>> traversalSupplier,
-            Set<V> visited,
-            Consumer<V> starting,
-            Consumer<V> ending,
-            Consumer<V> cycle
+    public GlobalSpliterator<V,E> spliterator(
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
     ) {
-        Collection<V> frontier = frontierSupplier.get();
-        Collection<V> traversal = traversalSupplier.get();
-
-        TraverseFunction.Start<V, E> startFunction = (vertex) -> {
-            frontier.add(vertex);
-            visited.add(vertex);
-            starting.accept(vertex);
-        };
-
-        TraverseFunction.End<V, E> endFunction = (vertex) -> {
-            traversal.add(vertex);
-            ending.accept(vertex);
-        };
-
-        return traverse(
-                traversal,
-                visited,
-                startFunction,
-                endFunction,
-                cycle);
+        return GlobalSpliterator.of(this, frontier, order, visited, checkVisited);
     }
 
-    public Collection<V> dfsPreOrder(
-            Set<V> visited,
-            Consumer<V> starting,
-            Consumer<V> ending,
-            Consumer<V> cycle) {
-        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
-        Supplier<Collection<V>> traversalSupplier = () -> (Queue)new LinkedList<>();
-
-        return traversePreOrder(
-                frontierSupplier,
-                traversalSupplier,
-                visited,
-                starting,
-                ending,
-                cycle);
+    public Stream<UpcomingVertex<V, E>> stream(
+        V root,
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
+    ) {
+        return StreamSupport.stream(spliterator(root, frontier, order, visited, checkVisited), false);
     }
 
-    public Collection<V> dfsPostOrder(
-            Set<V> visited,
-            Consumer<V> starting,
-            Consumer<V> ending,
-            Consumer<V> cycle) {
-        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
-        Supplier<Collection<V>> traversalSupplier = () -> (Queue) new LinkedList<>();
-
-        return traversePostOrder(
-                frontierSupplier,
-                traversalSupplier,
-                visited,
-                starting,
-                ending,
-                cycle);
+    public Stream<Stream<UpcomingVertex<V, E>>> stream(
+        Frontier frontier, 
+        Order order,
+        Set<V> visited,
+        boolean checkVisited
+    ) {
+        return StreamSupport.stream(spliterator(frontier, order, visited, checkVisited), false);
     }
 
-    public Collection<V> dfsReversePostOrder(
-            Set<V> visited,
-            Consumer<V> starting,
-            Consumer<V> ending,
-            Consumer<V> cycle) {
-        Supplier<Collection<V>> frontierSupplier = () -> new Stack<>();
-        Supplier<Collection<V>> traversalSupplier = () -> new Stack<>();
-
-        return traversePostOrder(
-                frontierSupplier,
-                traversalSupplier,
-                visited,
-                starting,
-                ending,
-                cycle);
+    public List<V> dfs(V root) {
+        return stream(
+            root, 
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .map(UpcomingVertex::vertex)
+            .collect(Collectors.toList());
     }
 
-    public Set<V> traverse() {
-        return (Set<V>) traverse(new HashSet<>(), new HashSet<>(), (v) -> {
-        }, (v) -> {
-        }, (v) -> {
-        });
+    public List<V> dfs() {
+        return stream(
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .flatMap(componentStream -> componentStream)
+            .map(UpcomingVertex::vertex)
+            .collect(Collectors.toList());
     }
 
-    /**
-     * Returns a set of connected components of the graph. A connected component is
-     * a set
-     * of vertices that are reachable from each other.
-     * 
-     * @return A set of connected components.
-     */
-    public Set<Set<V>> connectedComponents() {
-        Set<Set<V>> components = new HashSet<>();
-        Supplier<Set<V>> traversalSupplier = () -> new HashSet<>();
-
-        return (Set<Set<V>>) traverse(
-                components,
-                traversalSupplier,
-                new HashSet<>(),
-                (v) -> {
-                },
-                (v) -> {
-                },
-                (v) -> {
-                });
+    public List<V> bfs(V root) {
+        return stream(
+            root, 
+            Frontier.BFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .map(UpcomingVertex::vertex)
+            .collect(Collectors.toList());
     }
 
-    /**
-     * Returns a set of cycles in the graph. O((|V| + |E|)^2)
-     * 
-     * @return
-     */
-    public Set<Cycle<V>> cycles() {
-        Set<Cycle<V>> cycles = new HashSet<>();
-        Set<V> visited = new HashSet<>();
-        Stack<V> stacked = new Stack<>();
+    public List<V> bfs() {
+        return stream(
+            Frontier.BFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .flatMap(componentStream -> componentStream)
+            .map(UpcomingVertex::vertex)
+            .collect(Collectors.toList());
+    }
 
-        dfsPreOrder(
-            visited,
-            (v) -> stacked.push(v),
-            (v) -> stacked.pop(),
-            (v) -> {
-                if (stacked.peek() == v) {
-                    List<V> path = new ArrayList<>();
-                    while (stacked.peek() != v)
-                        path.add(stacked.pop());
+    public boolean reachable(V start, V end) {
+        return stream(
+            start, 
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .anyMatch(up -> up.vertex.equals(end));
+    }
 
-                    Cycle<V> cycle = new Cycle<>(path);
-                    cycles.add(cycle);
-                }
-            }
-        );
+    public Set<List<V>> components() {
+        return stream(
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            true)
+            .map(componentStream -> componentStream
+                .map(UpcomingVertex::vertex)
+                .collect(Collectors.toList()))
+            .collect(Collectors.toSet());
+    }
 
-        return cycles;
+    public boolean isConnected() {
+        return components().size() == 1;
+    }
+
+    public boolean isBipartite() {
+        Map<V, Boolean> colors = new HashMap<>();
+
+        return stream(
+            Frontier.DFS, 
+            Order.PREORDER, 
+            new HashSet<>(), 
+            false)
+            .allMatch(componentStream -> componentStream
+                .allMatch(up -> {
+                    V parent = up.srcVertex;
+                    if (parent == null) {
+                        colors.put(up.vertex, true);
+                        return true;
+                    }
+
+                    boolean color = !colors.get(parent);
+                
+                    if (colors.containsKey(up.vertex))
+                        return colors.get(up.vertex) != colors.get(parent);
+                    
+                    colors.put(up.vertex, color);
+                    
+                    return true;
+                }));
     }
 }

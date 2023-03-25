@@ -13,8 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Test;
 
-import grafos.AdjacencyList;
-
 import static org.junit.Assert.*;
 
 /**
