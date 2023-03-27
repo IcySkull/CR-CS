@@ -43,9 +43,10 @@ public class ComponentPostorderSpliterator<V, E extends AbstractEdge<V>> extends
             visited.add(upcoming.vertex);
             for (E e : graph.adjacentEdges(upcoming.vertex)) {
                 V w = e.adj(upcoming.vertex);
-                stack.push(new UpcomingVertex<>(upcoming.vertex, edge, target));
             }
         }
+
+        return false;
     }
 
 }

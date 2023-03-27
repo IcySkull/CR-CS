@@ -23,12 +23,13 @@ import static org.junit.Assert.*;
  * @author bryce
  */
 public class ToposortTest {
+    String workingDir = getClass().getResource(".").getPath() + "../../";
 
     ArrayList<Integer>[] adj;
 
     void loadFile(String name) {
         try {
-            Scanner scanner = new Scanner(new File(name));
+            Scanner scanner = new Scanner(new File(workingDir + name));
             int n = scanner.nextInt();
             int m = scanner.nextInt();
             adj = (ArrayList<Integer>[]) new ArrayList[n];
