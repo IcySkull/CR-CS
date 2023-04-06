@@ -8,17 +8,16 @@ public class NegativeCycle {
 
         Arrays.fill(dist, Integer.MAX_VALUE);
 
-        dist[0] = 0;
-
         List<Diedge> edges = getEdges(adj, cost);
 
-        for (int V = 0; V < adj.length; V++) {
-            for (Diedge edge : edges) {
-                if (relax(dist, edge))
-                    if (V == adj.length-1)
-                        return 1;
-            }
+        for (int i = 0; i < adj.length; i++) {
+            for (Diedge edge : edges)
+                relax(dist, edge);
         }
+
+        for (Diedge edge : edges)
+            if (relax(dist, edge))
+                return 1;
 
         return 0;
     }
@@ -35,10 +34,11 @@ public class NegativeCycle {
     }
 
     private static boolean relax(int[] dist, Diedge edge) {
-        if (dist[edge.from] == Integer.MAX_VALUE) {
-            return false;
+        if (dist[edge.to] == Integer.MAX_VALUE) {
+            dist[edge.to] = edge.weight;
+            return true;
         }
-        if (dist[edge.to] > dist[edge.from] + edge.weight) {
+        else if (dist[edge.from] != Integer.MAX_VALUE && dist[edge.to] > dist[edge.from] + edge.weight) {
             dist[edge.to] = dist[edge.from] + edge.weight;
             return true;
         }
@@ -76,8 +76,8 @@ public class NegativeCycle {
             x = scanner.nextInt();
             y = scanner.nextInt();
             w = scanner.nextInt();
-            adj[x - 1].add(y - 1);
-            cost[x - 1].add(w);
+            adj[x-1].add(y-1);
+            cost[x-1].add(w);
         }
         System.out.println(negativeCycle(adj, cost));
     }
