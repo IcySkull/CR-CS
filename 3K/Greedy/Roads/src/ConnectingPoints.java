@@ -4,28 +4,26 @@ import java.awt.geom.Point2D;
 
 public class ConnectingPoints {
     public static double minimumDistance(int[] x, int[] y) {
-        double result = 0.;
+        double result = 0d;
 
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         Set<Integer> visited = new HashSet<>();
-        int xIndex = 0;
 
-        do {
-            visited.add(xIndex);
-            for (int x2 = 0; x2 < x.length; x2++)
-                if (!visited.contains(x2))
-                    pq.add(new Edge(x[xIndex], y[xIndex], x[x2], y[x2]));
+        int curr = 0;
+        while (visited.size() < x.length) {
+            for (int adj = 0; adj < x.length; adj++)
+                pq.add(new Edge(x[curr], y[curr], x[adj], y[adj], adj));
 
-            Edge e = pq.poll();
-            result += e.dist;
+            Edge edge;
+            do
+                edge = pq.poll();
+            while (visited.contains(edge.adjIndex));
 
-            for (int i = 0; i < x.length; i++)
-                if (x[i] == e.x2 && y[i] == e.y2) {
-                    xIndex = i;
-                    break;
-                }
-            
-        } while (visited.size() < x.length);
+            result += edge.dist;
+            curr = edge.adjIndex;
+
+            visited.add(curr);
+        }
 
         return result;
     }
@@ -44,15 +42,11 @@ public class ConnectingPoints {
 }
 
 class Edge implements Comparable<Edge> {
-    int x1, y1;
-    int x2, y2;
+    int adjIndex;
     double dist;
 
-    public Edge(int x1, int y1, int x2, int y2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
+    public Edge(int x1, int y1, int x2, int y2, int adjIndex) {
+        this.adjIndex = adjIndex;
         this.dist = Point2D.distance(x1, y1, x2, y2);
     }
 
@@ -60,5 +54,4 @@ class Edge implements Comparable<Edge> {
     public int compareTo(Edge o) {
         return Double.compare(this.dist, o.dist);
     }
-
 }
