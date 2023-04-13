@@ -1,37 +1,33 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
+import java.awt.Point;
+import java.awt.geom.Point2D;
 
 public class ConnectingPoints {
     public static double minimumDistance(int[] x, int[] y) {
         double result = 0.;
-        PriorityQueue<Edge> edges = edges(x, y);
 
-        Set<int[]> visited = new HashSet<>();
-        while (visited.size() != x.length) {
-            Edge next = edges.poll();
-            result += next.dist;
-            visited.add(new int[]{next.x1, next.y1});
-            visited.add(new int[]{next.x2, next.y2});
-        }
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        Set<Integer> visited = new HashSet<>();
+        int xIndex = 0;
+
+        do {
+            visited.add(xIndex);
+            for (int x2 = 0; x2 < x.length; x2++)
+                if (!visited.contains(x2))
+                    pq.add(new Edge(x[xIndex], y[xIndex], x[x2], y[x2]));
+
+            Edge e = pq.poll();
+            result += e.dist;
+
+            for (int i = 0; i < x.length; i++)
+                if (x[i] == e.x2 && y[i] == e.y2) {
+                    xIndex = i;
+                    break;
+                }
+            
+        } while (visited.size() < x.length);
+
         return result;
-    }
-
-    private static List<Integer[]> graph(int[] x, int[] y) {
-        List<Point2d>[] graph = new List[x.length];
-        for (int x1 = 0; x1 < x.length; x1++)
-            for (int x2 = x1 + 1; x2 < x.length; x2++) {
-                List<Integer> vertex = new ArrayList<>();
-                vertex.add()
-                if (graph[x1] == null)
-                    graph.[x1] = 
-            }
-
-        return graph;
     }
 
     public static void main(String[] args) {
@@ -50,19 +46,19 @@ public class ConnectingPoints {
 class Edge implements Comparable<Edge> {
     int x1, y1;
     int x2, y2;
-    final double dist;
+    double dist;
 
     public Edge(int x1, int y1, int x2, int y2) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
-
-        dist = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        this.dist = Point2D.distance(x1, y1, x2, y2);
     }
 
     @Override
     public int compareTo(Edge o) {
         return Double.compare(this.dist, o.dist);
     }
+
 }
