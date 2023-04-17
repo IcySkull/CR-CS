@@ -6,15 +6,15 @@ public class ConnectingPoints {
     public static double minimumDistance(int[] x, int[] y) {
         double result = 0d;
 
-        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        PriorityQueue<EdgePoints> pq = new PriorityQueue<>();
         Set<Integer> visited = new HashSet<>();
 
         int curr = 0;
         while (visited.size() < x.length) {
             for (int adj = 0; adj < x.length; adj++)
-                pq.add(new Edge(x[curr], y[curr], x[adj], y[adj], adj));
+                pq.add(new EdgePoints(x[curr], y[curr], x[adj], y[adj], adj));
 
-            Edge edge;
+            EdgePoints edge;
             do
                 edge = pq.poll();
             while (visited.contains(edge.adjIndex));
@@ -41,17 +41,17 @@ public class ConnectingPoints {
     }
 }
 
-class Edge implements Comparable<Edge> {
+class EdgePoints implements Comparable<EdgePoints> {
     int adjIndex;
     double dist;
 
-    public Edge(int x1, int y1, int x2, int y2, int adjIndex) {
+    public EdgePoints(int x1, int y1, int x2, int y2, int adjIndex) {
         this.adjIndex = adjIndex;
         this.dist = Point2D.distance(x1, y1, x2, y2);
     }
 
     @Override
-    public int compareTo(Edge o) {
+    public int compareTo(EdgePoints o) {
         return Double.compare(this.dist, o.dist);
     }
 }
